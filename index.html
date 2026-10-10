@@ -2526,6 +2526,317 @@ html[data-phase="post"][data-theme="dark"]{--acc:#AC9FF6;--acc-hi:#C5BBFA;--acc-
 .rec.pnote .meta{cursor:default}
 #postAllBtn[aria-pressed="true"]{background:var(--sunk);border-color:var(--ctl)}
 </style>
+<style id="motion-css">
+/* ==================================================================
+   MOTION LAYER (V.3.2) — ชั้นการเคลื่อนไหวแบบสปริง
+   · ทุกกฎอยู่ใต้ html.m-on ซึ่งสคริปต์ motion เป็นผู้เติมให้
+     ถ้าสคริปต์ไม่ทำงาน หน้าจะกลับไปใช้ลักษณะเดิมของ V.3.1 ทั้งหมด
+   · ใช้สีจากตัวแปรเดิมเท่านั้น ไม่มีสีใหม่ · ไม่มีเสียง
+   · ไม่แตะพื้นที่กระดาษ (.paper / .slide / .sumpage) และงานพิมพ์
+   · ผู้ที่ตั้งค่า "ลดการเคลื่อนไหว" ในระบบ จะไม่เห็นการเคลื่อนไหวใด ๆ
+   ================================================================== */
+
+/* ---------- แตะ/กด: ใช้สปริงย่อ-คืนแทนการขยับ 1px และแถบเทาของมือถือ ---------- */
+html.m-on button,html.m-on .btn,html.m-on [role="tab"],html.m-on summary,html.m-on .chk{-webkit-tap-highlight-color:transparent}
+html.m-on .btn:active,html.m-on .iconbtn:active{transform:none}
+
+/* ---------- เปลี่ยนแท็บ: เนื้อหาใหม่เข้ามาด้วยสปริง + เบลอสั้น ๆ ---------- */
+html.m-on .view.on{animation:m-view var(--m-d-view,.32s) linear}
+
+/* ---------- ตัวชี้ตำแหน่งแบบของเหลว (แท็บ / รอบการตรวจ / ตัวเลือก / แผงนำทาง) ---------- */
+.m-liq{isolation:isolate}
+.m-ind{position:absolute;left:0;top:0;width:0;height:0;z-index:-1;margin:0;padding:0;border:0;
+  box-sizing:border-box;pointer-events:none}
+html.m-on .tabs.bottomnav.m-liq button::before{display:none}
+html.m-on .tabs.bottomnav>.m-ind{background:var(--acc);border-radius:2px}
+
+/* ---------- กล่องโต้ตอบ: ขยายออกมาจากปุ่มที่กด ---------- */
+html.m-on .dlg::backdrop,html.m-on .d-dlg::backdrop{background:transparent;
+  backdrop-filter:none;-webkit-backdrop-filter:none}
+html.m-on .d-dlg[open]{animation:none}
+.m-scrim{position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483000;background:rgba(12,17,17,.5);
+  opacity:0;display:none;pointer-events:none}
+.m-ghost{pointer-events:none!important;user-select:none;-webkit-user-select:none}
+
+/* ---------- แถบแจ้งเตือน: รูปทรงเดียว ยืดตามข้อความ ข้อความสลับด้วยเบลอ ---------- */
+html.m-on #toast{padding:0;max-width:none;overflow:hidden;box-sizing:border-box;transition:none;
+  text-align:left;visibility:hidden}
+html.m-on #toast .m-tx{position:absolute;left:50%;top:50%;display:block;width:max-content;
+  max-width:min(560px,calc(88vw - 62px));white-space:normal;text-align:center;opacity:0}
+html.m-on #toast .m-ti{position:absolute;left:50%;top:50%;width:16px;height:16px;display:block;opacity:0}
+html.m-on #toast .m-ti svg{position:absolute;left:0;top:0;width:16px;height:16px;display:block;fill:none;
+  stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+html.m-on #toast .m-ti .m-sp{animation:m-spin .8s linear infinite}
+@keyframes m-spin{to{transform:rotate(360deg)}}
+
+/* ---------- การ์ดพับ/กาง ---------- */
+html.m-on .card.collapsed>.body.m-folding{display:block!important}
+
+/* ---------- สวิตช์ (ช่องติ๊กในบรรทัดตั้งค่า) — ปุ่มกลมยืดตัวตอนเลื่อน ลากได้ ---------- */
+html.m-on{--m-knob-off:#FFFFFF}
+@media (prefers-color-scheme: dark){ html.m-on:not([data-theme="light"]){--m-knob-off:#E8EEED} }
+html.m-on[data-theme="dark"]{--m-knob-off:#E8EEED}
+html.m-on .chk input[type="checkbox"]{-webkit-appearance:none;appearance:none;flex:none;
+  width:38px;height:22px;margin:1px 0 0;padding:0;border:0;border-radius:999px;cursor:pointer;
+  --kl:2px;--kr:20px;--m-knob:var(--m-knob-off);
+  background-color:var(--ctl,var(--line));
+  background-image:
+    radial-gradient(circle at calc(var(--kl) + 9px) 50%,var(--m-knob) 8.6px,transparent 9.1px),
+    radial-gradient(circle at calc(var(--kr) - 9px) 50%,var(--m-knob) 8.6px,transparent 9.1px),
+    linear-gradient(var(--m-knob),var(--m-knob));
+  background-repeat:no-repeat;
+  background-size:100% 100%,100% 100%,max(0px,calc(var(--kr) - var(--kl) - 18px)) 17.7px;
+  background-position:0 0,0 0,calc(var(--kl) + 9px) 2.15px;
+  touch-action:pan-y}
+html.m-on .chk input[type="checkbox"]:checked{--kl:18px;--kr:36px;--m-knob:var(--acc-on);
+  background-color:var(--acc)}
+html.m-on .chk input[type="checkbox"]:disabled{opacity:.5;cursor:not-allowed}
+
+/* ---------- แผงลอย / เมนู / tooltip ---------- */
+html.m-on .bsug{animation:m-pop var(--m-d-pop,.3s) linear;transform-origin:0 0}
+html.m-on .d-pop{animation:m-pop var(--m-d-pop,.3s) linear;transform-origin:0 0}
+html.m-on .d-pop.r{transform-origin:100% 0}
+html.m-on .annmore{animation:m-pop var(--m-d-pop,.3s) linear;transform-origin:0 0}
+@media(max-width:900px){ html.m-on .annmore{animation-name:m-sheet;transform-origin:50% 100%} }
+html.m-on .d-tip{animation:m-tip var(--m-d-tip,.2s) linear}
+html.m-on .pstd{animation:m-pop var(--m-d-pop,.3s) linear;transform-origin:50% 0}
+html.m-on #themeBtn>svg{animation:m-ico var(--m-d-ico,.34s) linear}
+
+/* ---------- Dashboard: ช่องเครนทยอยปรากฏด้วยสปริง (แทนการเด้งจาก 35%) ---------- */
+html.m-on .dash.d-enter .d-tile{animation:m-tile var(--m-d-tile,.4s) linear both;
+  animation-delay:calc(var(--i)*7ms)}
+
+@media print{ .m-scrim,.m-ghost,.m-ind{display:none!important} }
+@media (prefers-reduced-motion:reduce){
+  html.m-on #toast .m-ti .m-sp{animation:m-spin 1.6s linear infinite!important}
+}
+</style>
+<style id="fill-css">
+/* ==================================================================
+   FILL MODE (V.3.3) — โหมดกรอกแบบฟอร์มของหน้า Data Collection
+   · มือถือ = ฟอร์มเสมอ · แท็บเล็ต = เลือกได้ (กระดาษ / ฟอร์ม) · คอมพิวเตอร์ = กระดาษเหมือนเดิม
+   · ใช้ DOM ชุดเดียวกับกระดาษ A4 (ช่อง data-k / ป้าย data-dd / ช่องรูป data-i ฯลฯ เดิมทุกตัว)
+     จึงใช้ตัวจับเหตุการณ์ รายการมาตรฐาน เครื่องมือวาด และการบันทึกของเดิมทั้งหมด
+     ต่างกันแค่ "หน้าตา": ตารางถูกจัดใหม่เป็นการ์ด 1 ใบต่อ 1 จุดตรวจ
+   · ทุกกฎอยู่ใต้ html[data-fill="form"] ซึ่งสคริปต์เป็นผู้ตั้ง — ถ้าสคริปต์ไม่ทำงานจะเป็นกระดาษตามเดิม
+   · กระดาษที่ใช้วัดล้นหน้า / พรีวิว / พิมพ์ / ส่งออก ไม่ถูกแตะ (กฎผูกกับ #formPaper เท่านั้น)
+   · § = html[data-fill="form"] #formPaper (ตัวสร้างไฟล์แทนให้)
+   ================================================================== */
+
+/* ---------- สวิตช์เลือกวิธีกรอก (เห็นเฉพาะแท็บเล็ต) ---------- */
+.fillseg{display:none}
+html[data-dev="tablet"] .fillseg{display:inline-flex}
+.fillseg button{display:inline-flex;align-items:center;gap:6px}
+.fillseg button .ico{width:15px;height:15px}
+
+/* ---------- พื้นที่รอบฟอร์ม ---------- */
+html[data-fill="form"] #fbar{display:none}
+html[data-fill="form"] #paperTools .zoomer{display:none}
+html[data-fill="form"] .formstage .paperwrap{background:none;border:0;border-radius:0;padding:0;overflow:visible;align-self:stretch;width:100%}
+html[data-fill="form"] #formPaper{max-width:780px;margin:0 auto}
+
+/* มือถือ: ปุ่มคำสั่งของหน้าอยู่แถวเดียว ปัดซ้าย-ขวาได้ (คืนพื้นที่แนวตั้งให้ฟอร์ม) */
+html[data-fill="form"][data-dev="phone"] .pagebar .acts{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html[data-fill="form"][data-dev="phone"] .pagebar .acts::-webkit-scrollbar{display:none}
+html[data-fill="form"][data-dev="phone"] .pagebar .acts .btn{flex:none;white-space:nowrap}
+
+/* ---------- ตาราง → บล็อก ---------- */
+html[data-fill="form"] #formPaper .paper{width:auto;min-height:0;padding:0;margin:0;background:none;color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.5;box-shadow:none;zoom:1!important}
+html[data-fill="form"] #formPaper .paper .probe{display:none}
+html[data-fill="form"] #formPaper .paper .sheetin{zoom:1!important}
+html[data-fill="form"] #formPaper .paper table{display:block;width:auto!important;margin:0;border-collapse:separate;border-spacing:0}
+html[data-fill="form"] #formPaper .paper colgroup{display:none}
+html[data-fill="form"] #formPaper .paper tbody{display:block}
+html[data-fill="form"] #formPaper .paper tr{display:block;position:relative}
+html[data-fill="form"] #formPaper .paper td{display:block;border:0;padding:0;height:auto;text-align:left;vertical-align:baseline;font-weight:400;
+  background:none;color:inherit;overflow-wrap:anywhere}
+html[data-fill="form"] #formPaper .paper .fm-hide,html[data-fill="form"] #formPaper .paper .bmark,html[data-fill="form"] #formPaper .paper tr.spc{display:none}
+
+/* ---------- การ์ด ---------- */
+html[data-fill="form"] #formPaper tbody.fmc{--fp:1;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:2px 14px 14px;
+  margin:0 0 12px;overflow:hidden}
+html[data-fill="form"] #formPaper tbody.fmc.fm-closed{--fp:0;padding-bottom:2px}
+html[data-fill="form"] #formPaper tbody.fmc.fm-closed>tr:not(.fmh){display:none}
+html[data-fill="form"] #formPaper tbody.fmc.fm-anim>tr:not(.fmh){display:block;opacity:var(--fp)}
+html[data-fill="form"] #formPaper .paper.fm-enter tbody.fmc{animation:m-rise var(--m-d-pop,.3s) linear backwards;animation-delay:calc(var(--i,0)*36ms)}
+
+/* หัวการ์ด */
+html[data-fill="form"] #formPaper tr.fmh>td{display:flex;flex-wrap:wrap;align-items:center;gap:6px 9px;min-height:48px;padding:7px 0}
+html[data-fill="form"] #formPaper tr.fmh[data-fmfold]>td{cursor:pointer;flex-wrap:nowrap}
+html[data-fill="form"] #formPaper .fmt{font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap}
+html[data-fill="form"] #formPaper .fms{flex:1;min-width:0;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-fill="form"] #formPaper .fms.warn{color:var(--danger);font-weight:600}
+html[data-fill="form"] #formPaper .fmtog{flex:none;margin-left:auto;width:36px;height:36px;border:1px solid var(--line);border-radius:10px;background:transparent;
+  color:var(--ink-2);display:grid;place-items:center;cursor:pointer;padding:0}
+html[data-fill="form"] #formPaper .fmtog .ico{width:17px;height:17px;transform:rotate(calc(var(--fp)*180deg))}
+
+/* ---------- ป้ายช่อง ---------- */
+html[data-fill="form"] #formPaper td.fml{display:flex;align-items:center;gap:6px;margin:12px 0 6px;min-height:22px;font-size:12.5px;font-weight:600;
+  color:var(--ink-2);letter-spacing:.01em}
+html[data-fill="form"] #formPaper td.fml.ddl{cursor:pointer;min-height:32px;margin:8px 0 2px;-webkit-tap-highlight-color:transparent}
+html[data-fill="form"] #formPaper td.fml.ddl .ddc{position:static;color:var(--acc);font:400 13px/1 var(--sans)}
+html[data-fill="form"] #formPaper td.fml.ddl::after{content:"เลือกจากรายการ";margin-left:auto;font-size:12px;font-weight:500;color:var(--acc);
+  background:var(--acc-soft2);border-radius:999px;padding:4px 11px}
+html[data-fill="form"] #formPaper td.fml.ddl[data-eqdd]::after{content:"เลือกจาก Work List"}
+
+/* ---------- ช่องกรอก (ตัวอักษร 16px — iOS ไม่ซูมหน้าเองตอนแตะช่อง) ---------- */
+html[data-fill="form"] #formPaper .paper .fld{display:block;width:100%;box-sizing:border-box;min-height:46px;margin:0;padding:11px 12px;
+  border:1px solid var(--ctl,var(--line));border-radius:10px;background:var(--panel);color:var(--ink);
+  font:400 16px/1.45 var(--sans);text-align:left;box-shadow:none;resize:none;overflow:hidden;
+  -webkit-appearance:none;appearance:none;transition:border-color .15s,box-shadow .15s}
+html[data-fill="form"] #formPaper .paper .fld:hover{background:var(--panel)}
+html[data-fill="form"] #formPaper .paper .fld:focus{outline:none;background:var(--panel);border-color:var(--acc);box-shadow:var(--ring)}
+html[data-fill="form"] #formPaper .paper .fld.need{border-color:var(--danger);background:var(--danger-soft);box-shadow:none}
+html[data-fill="form"] #formPaper .paper .fld::placeholder{color:var(--muted);font-style:normal;font-weight:400;opacity:.85}
+html[data-fill="form"] #formPaper .paper .ce{white-space:pre-wrap;overflow-wrap:anywhere;cursor:text}
+html[data-fill="form"] #formPaper .paper .ce.ph::before{content:attr(data-ph);color:var(--muted);font-style:normal;font-weight:400;opacity:.85}
+html[data-fill="form"] #formPaper .paper .datefld{display:flex;align-items:center;min-height:46px;box-sizing:border-box;padding:11px 12px;
+  border:1px solid var(--ctl,var(--line));border-radius:10px;background:var(--panel);font-size:16px;line-height:1.45;
+  box-shadow:none;cursor:pointer}
+html[data-fill="form"] #formPaper .paper .datefld:hover{background:var(--panel)}
+html[data-fill="form"] #formPaper .paper .datefld .dtxt.empty{color:var(--muted);font-style:normal}
+html[data-fill="form"] #formPaper .paper td.fmv{position:relative}
+html[data-fill="form"] #formPaper .paper .rst{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:8px;border:0;
+  background:var(--acc-soft);color:var(--acc);font:600 15px/1 var(--sans);display:grid;place-items:center;z-index:4}
+
+/* ---------- การ์ดหัวกระดาษ ---------- */
+html[data-fill="form"] #formPaper tr.fm-bldg>td::before{content:"ชื่ออาคาร / อุปกรณ์ (Building Name) — จำเป็น";display:block;margin:4px 0 6px;
+  font-size:12.5px;font-weight:600;color:var(--ink-2)}
+html[data-fill="form"] #formPaper tr.fm-bldg .fld{font-weight:600}
+html[data-fill="form"] #formPaper tr.fm-hr{display:grid;grid-template-columns:minmax(0,1fr);column-gap:12px}
+@media(min-width:520px){
+  html[data-fill="form"] #formPaper tr.fm-hr{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto;grid-auto-flow:column}
+}
+
+/* ---------- การ์ดจุดตรวจ ---------- */
+html[data-fill="form"] #formPaper tr.fmx>td{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+html[data-fill="form"] #formPaper tr.fmx[hidden]{display:none}
+html[data-fill="form"] #formPaper .fno{display:inline-grid;place-items:center;flex:none;min-width:28px;height:28px;border-radius:8px;padding:0 7px;
+  color:#fff;font:700 13px/1 var(--sans);font-variant-numeric:tabular-nums}
+html[data-fill="form"] #formPaper tr.fmh>td>b{font-size:15px;font-weight:600;white-space:nowrap}
+html[data-fill="form"] #formPaper .lbl{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+html[data-fill="form"] #formPaper .fmlab{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+html[data-fill="form"] #formPaper tr.fmh select{flex:1 1 100%;min-width:0;height:46px;padding:0 12px;border:1px solid var(--ctl,var(--line));
+  border-radius:10px;background:var(--panel);color:var(--ink);font:500 16px var(--sans)}
+html[data-fill="form"] #formPaper tr.fmh select:focus{outline:none;border-color:var(--acc);box-shadow:var(--ring)}
+html[data-fill="form"] #formPaper tr.fmh select.need{border-color:var(--danger);background:var(--danger-soft);color:var(--danger)}
+
+/* รูปถ่าย */
+html[data-fill="form"] #formPaper tr.fm-pbar>td{margin-top:6px}
+html[data-fill="form"] #formPaper tr.fm-pbar .lbl.pc{margin-left:auto;font-weight:500;color:var(--muted)}
+html[data-fill="form"] #formPaper .phpick{display:inline-flex;flex:none;gap:2px;background:var(--sunk);border-radius:10px;padding:3px}
+html[data-fill="form"] #formPaper .phb{min-width:46px;height:36px;border-radius:8px;font-size:14px}
+html[data-fill="form"] #formPaper tr.ph{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:8px 0 0}
+html[data-fill="form"] #formPaper .paper tr.ph>td{height:auto;padding:0}
+html[data-fill="form"] #formPaper .paper .pcell{width:100%;height:auto;aspect-ratio:4/3;margin:0;border-radius:10px;
+  border:1.5px dashed var(--ctl,var(--line));background:var(--panel-2)}
+html[data-fill="form"] #formPaper .paper .pcell.has{border-style:solid;border-color:transparent}
+html[data-fill="form"] #formPaper .paper .pcell:hover{border-color:var(--acc);background:var(--acc-soft2)}
+html[data-fill="form"] #formPaper .paper .pcell.drop{border-color:var(--acc);background:var(--acc-soft)}
+html[data-fill="form"] #formPaper .paper .pcell .none{font-size:12.5px;line-height:1.45;color:var(--muted);padding:0 8px;text-align:center}
+html[data-fill="form"] #formPaper .paper .pcell .none b{font-size:26px;font-weight:300;color:var(--acc);line-height:1.1}
+html[data-fill="form"] #formPaper .paper .pcell .none em{font-style:normal}
+html[data-fill="form"] #formPaper .paper .pcell .kill{right:6px;top:6px;width:34px;height:34px;border-radius:10px}
+html[data-fill="form"] #formPaper .paper .pcell .kill .ico{width:16px;height:16px}
+html[data-fill="form"] #formPaper .paper .pcell .tag{left:6px;top:6px;font-size:11px;line-height:1.7;padding:0 8px;border-radius:8px}
+
+/* Severity: แถวของตัวเองใต้ Problem · ช่องบนกระดาษเหลือเป็นจุดยึดของกล่องเลือก (มองไม่เห็น) */
+html[data-fill="form"] #formPaper .paper td.sevv,html[data-fill="form"] #formPaper .paper .csev{position:absolute;right:0;bottom:0;width:1px;height:1px;min-height:0;padding:0;margin:0;
+  border:0;left:auto;transform:none;opacity:0;overflow:hidden;pointer-events:none}
+html[data-fill="form"] #formPaper tr.fm-sev>td{margin-top:12px}
+html[data-fill="form"] #formPaper tr.fm-sev .lbl.sv{flex:1 1 100%}
+html[data-fill="form"] #formPaper tr.fm-sev .sevpick{display:flex;flex:1 1 100%;border:1px solid var(--ctl,var(--line));border-radius:10px;
+  overflow:hidden;background:var(--panel)}
+html[data-fill="form"] #formPaper tr.fm-sev .sevpick.need{border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-soft)}
+html[data-fill="form"] #formPaper tr.fm-sev .sevb{flex:1 1 0;min-width:0;height:46px;font-size:16px}
+html[data-fill="form"] #formPaper tr.fm-sev .lbl.lvn{flex:1 1 100%;font-weight:500;color:var(--muted);min-height:0}
+html[data-fill="form"] #formPaper tr.fm-sev .lbl.lvn:empty{display:none}
+html[data-fill="form"] #formPaper tr.fm-sev .lbl.chn{flex:1 1 100%;font-weight:400;color:var(--muted);line-height:1.5}
+html[data-fill="form"] #formPaper tr.fm-dmg>td{margin-top:12px}
+html[data-fill="form"] #formPaper tr.fm-dmg .lbl.dg{flex:1 1 100%}
+html[data-fill="form"] #formPaper .dmgpick{display:flex;flex-wrap:wrap;gap:6px}
+html[data-fill="form"] #formPaper .dmgb{min-height:38px;padding:7px 13px;border:1px solid var(--ctl,var(--line));border-radius:999px;background:var(--panel);
+  color:var(--ink-2);font:500 13.5px var(--sans);cursor:pointer}
+html[data-fill="form"] #formPaper .dmgb.on{background:var(--l4-bg);border-color:var(--l4);color:var(--l4);font-weight:600}
+html[data-fill="form"] #formPaper .paper .dmgpick.need{background:none;box-shadow:none}
+html[data-fill="form"] #formPaper .dmgpick.need .dmgb{border-color:var(--danger)}
+
+/* แถวคำสั่งท้ายการ์ด */
+html[data-fill="form"] #formPaper tr.fm-act>td{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft);gap:6px 8px}
+html[data-fill="form"] #formPaper .fmv{display:inline-flex;flex:none;gap:2px;background:var(--sunk);border-radius:10px;padding:3px}
+html[data-fill="form"] #formPaper .fmvb{width:40px;height:34px;border-radius:8px}
+html[data-fill="form"] #formPaper .fact{min-height:38px;padding:6px 12px;border:1px solid var(--line);border-radius:10px;font-size:13.5px}
+html[data-fill="form"] #formPaper .fact .sm{display:none}
+html[data-fill="form"] #formPaper .fact.dang{margin-left:auto;color:var(--danger)}
+
+/* แถวสถานะหลังซ่อม */
+html[data-fill="form"] #formPaper tr.fm-post>td{display:block}
+html[data-fill="form"] #formPaper .pst{display:flex;flex-wrap:wrap;align-items:center;gap:6px 9px;margin:2px 0 4px;padding:8px 9px 8px 11px;border-radius:10px;
+  background:var(--panel-2);box-shadow:inset 3px 0 0 var(--ctl,var(--line));min-width:0}
+html[data-fill="form"] #formPaper .pst.pend{background:var(--acc-soft2);box-shadow:inset 3px 0 0 var(--acc)}
+html[data-fill="form"] #formPaper .pst.done,html[data-fill="form"] #formPaper .pst.same{box-shadow:inset 3px 0 0 var(--s1,var(--l1))}
+html[data-fill="form"] #formPaper .pst .pbtn .fact,html[data-fill="form"] #formPaper .pst .pok{min-height:36px}
+
+/* ---------- แบบฟอร์ม Coating ---------- */
+html[data-fill="form"] #formPaper tr.fm-coat td.fml{flex-wrap:wrap}
+
+/* ---------- หน้าปก ---------- */
+html[data-fill="form"] #formPaper tr.fm-pt>td{min-height:48px;display:flex;align-items:center;font-size:15px;font-weight:600;color:var(--ink)}
+html[data-fill="form"] #formPaper tr.fm-ckr{display:grid;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr);gap:8px;padding:12px 0;
+  border-top:1px solid var(--line-soft)}
+html[data-fill="form"] #formPaper tr.fm-ckr.prer{box-shadow:inset 3px 0 0 var(--l2);padding-left:9px}
+html[data-fill="form"] #formPaper tr.fm-ckr>td.fm-n{grid-column:1;grid-row:1;font-weight:600;color:var(--muted);font-size:14px}
+html[data-fill="form"] #formPaper tr.fm-ckr>td.fm-tx{grid-column:2/-1;grid-row:1;font-size:14.5px;line-height:1.5;color:var(--ink)}
+html[data-fill="form"] #formPaper .paper td.ck{grid-row:2;display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:0 8px;
+  border:1px solid var(--ctl,var(--line));border-radius:10px;background:var(--panel);color:var(--ink-2);
+  font:600 14px var(--sans);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+html[data-fill="form"] #formPaper .paper td.ck[data-ck$=":acc"]{grid-column:2}
+html[data-fill="form"] #formPaper .paper td.ck[data-ck$=":def"]{grid-column:3}
+html[data-fill="form"] #formPaper .paper td.ck[data-ck$=":acc"]::after{content:"Acceptable"}
+html[data-fill="form"] #formPaper .paper td.ck[data-ck$=":def"]::after{content:"Defect"}
+html[data-fill="form"] #formPaper .paper td.ck.acc{background:var(--l1-bg);border-color:var(--l1);color:var(--l1)}
+html[data-fill="form"] #formPaper .paper td.ck.def{background:var(--l4-bg);border-color:var(--l4);color:var(--l4)}
+html[data-fill="form"] #formPaper .paper td.ck:hover{box-shadow:none}
+html[data-fill="form"] #formPaper .paper td.ck .mk{font-size:15px;line-height:1}
+html[data-fill="form"] #formPaper .paper td.ck .atag{position:absolute;left:auto;right:6px;top:3px;bottom:auto;font:500 9.5px/1.2 var(--sans);color:inherit;opacity:.7}
+html[data-fill="form"] #formPaper .paper td.ck .rst{right:5px;top:5px;width:24px;height:24px;border-radius:7px;font-size:13px;background:var(--panel)}
+html[data-fill="form"] #formPaper .paper td.rmk{grid-column:2/-1;grid-row:3;text-align:left}
+html[data-fill="form"] #formPaper .paper td.rmk::before{content:"Remark";display:block;margin:2px 0 5px;font-size:12px;font-weight:600;color:var(--muted)}
+
+/* ---------- การ์ดลายเซ็น ---------- */
+html[data-fill="form"] #formPaper tr.fm-sg{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media(min-width:640px){ html[data-fill="form"] #formPaper tr.fm-sg{grid-template-columns:repeat(3,minmax(0,1fr))} }
+html[data-fill="form"] #formPaper .paper td.sign{text-align:left;font-weight:400}
+html[data-fill="form"] #formPaper .paper td.sign .sl{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px;white-space:normal;overflow:visible}
+html[data-fill="form"] #formPaper .paper td.sign img.sigimg{display:inline-block;vertical-align:middle;max-height:40px;max-width:150px;margin:0 0 0 6px;
+  background:#fff;border-radius:6px}
+html[data-fill="form"] #formPaper .paper td.sign>div:nth-child(2){font-size:0}
+html[data-fill="form"] #formPaper .paper td.sign .dt{text-align:left;font-size:12px;color:var(--muted);margin-top:6px}
+html[data-fill="form"] #formPaper .paper .sigbtn{position:static;opacity:1;margin-top:8px;min-height:36px;padding:6px 12px;border:1px solid var(--line);
+  border-radius:10px;background:var(--panel);color:var(--ink-2);font:500 13px var(--sans)}
+
+/* ---------- เครื่องมือวาด: แถบลอยด้านล่าง เอื้อมถึงด้วยนิ้วโป้ง ไม่ต้องเลื่อนกลับขึ้นไปหา ---------- */
+@media(max-width:900px){
+  html[data-fill="form"] .formstage{flex-direction:column}
+  html[data-fill="form"] #annBar{order:2;position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:30;
+    flex:none;width:auto;max-width:100%;align-self:center;margin-top:4px;transition:opacity .15s}
+  html[data-fill="form"] #annBar .arail{flex-direction:row;flex-wrap:nowrap;max-height:none;overflow-x:auto;overflow-y:hidden;
+    border-radius:14px;box-shadow:var(--sh-3);scrollbar-width:none}
+  html[data-fill="form"] #annBar .arail::-webkit-scrollbar{display:none}
+  html[data-fill="form"] #annBar .arail .adiv{width:1px;height:auto;align-self:stretch;margin:3px 4px;flex:none}
+  html[data-fill="form"] #annBar .atool{width:38px;height:38px}
+  html[data-fill="form"].fm-typing #annBar{opacity:0;pointer-events:none}
+  html[data-fill="form"].fm-ann #toast{bottom:136px}
+}
+
+/* ---------- รายการให้เลือก: แถวสูงพอสำหรับนิ้ว ---------- */
+@media (pointer:coarse){
+  html[data-fill="form"] .bsug button{min-height:44px;align-items:center}
+}
+
+@media print{ .fillseg{display:none!important} }
+</style>
 </head>
 <body>
 <div class="app">
@@ -2604,6 +2915,10 @@ html[data-phase="post"][data-theme="dark"]{--acc:#AC9FF6;--acc-hi:#C5BBFA;--acc-
     <div id="paperArea" hidden>
       <div class="papertools noprint" id="paperTools">
         <span class="reccode" id="recCode"></span>
+        <div class="seg fillseg" id="fillSeg" role="group" aria-label="วิธีกรอกข้อมูล">
+          <button type="button" data-fillset="paper" aria-pressed="true" title="กรอกลงบนหน้ากระดาษ A4 เหมือนไฟล์ที่ส่งออก"><span data-ico="fileDoc"></span>กระดาษ</button>
+          <button type="button" data-fillset="form" aria-pressed="false" title="กรอกเป็นแบบฟอร์ม ช่องใหญ่ แตะง่าย"><span data-ico="list"></span>ฟอร์ม</button>
+        </div>
         <div class="zoomer">
           <button type="button" id="zOut" title="ย่อ" aria-label="ย่อ" data-ico="minus"></button>
           <span id="zVal">100%</span>
@@ -2819,7 +3134,8 @@ const nl2br=s=>hesc(s).replace(/\n/g,'<br>');
 const uid=p=>(p||'x')+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const clone=o=>JSON.parse(JSON.stringify(o));
 let toastT;
-function toast(msg,ms){const t=$('#toast');t.textContent=msg;t.classList.add('on');
+function toast(msg,ms){ if(window.Motion&&Motion.on&&Motion.toast(msg,ms)) return;
+  const t=$('#toast');t.textContent=msg;t.classList.add('on');
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms||2600);}
 
 /* =============== IndexedDB =============== */
@@ -4691,6 +5007,7 @@ function setFld(el,v){ if(!el) return; v=String(v==null?'':v);
   if(el.isContentEditable){ if(el.textContent!==v) el.textContent=v; el.classList.toggle('ph',!v); } else el.value=v; }
 const READ_ZOOM=0.92;
 function zoomToField(el){
+  if(window.FillMode&&FillMode.isForm()) return;      /* โหมดฟอร์ม: ช่องอ่านง่ายอยู่แล้ว ไม่ต้องขยายกระดาษ */
   if(!el||!el.classList||!el.classList.contains('fld')) return;
   const z=userZoom||fitTo($('#formWrap'),A4_PX);
   if(z<0.62){ userZoom=READ_ZOOM; applyZoom(); autosizeAll('#formPaper');
@@ -4705,7 +5022,7 @@ function checkOverflow(){
     const sq=(PAGE.k==='sheet'&&cur&&cur.id)?seqById(cur.seqId):null;
     /* แถวว่างท้ายหน้าของกระดาษที่กำลังกรอก ย่อ/ขยายตามข้อความทันที (เท่ากับที่ไฟล์ Word จะทำ) */
     if(sq){ const sp=pa.querySelector('tr.spc>td'); if(sp) sp.style.height=TWMM(spacerTw(sq,cur)); }
-    const o=sq?sheetOverflows(sq,cur):paperOverflows(pa);      /* Sheet: วัดจากกระดาษแบบผลลัพธ์จริง (ไม่ใช่โหมดแก้ไขที่สูงกว่าเล็กน้อย) */
+    const o=sq?sheetOverflows(sq,cur):((window.FillMode&&FillMode.isForm())?FillMode.overflows():paperOverflows(pa));      /* Sheet: วัดจากกระดาษแบบผลลัพธ์จริง (ไม่ใช่โหมดแก้ไขที่สูงกว่าเล็กน้อย) */
     const chip=$('#ovfChip'); if(chip) chip.hidden=!o;
     /* หน้าที่มีหลายจุดตรวจ: เสนอย้ายจุดตรวจสุดท้ายไปหน้าใหม่ */
     const fx=$('#ovfFix'); if(fx){ const n=(o&&PAGE.k==='sheet'&&cur&&cur.id)?fmtOf(cur.fmt).blocks.length:0;
@@ -4831,6 +5148,7 @@ async function openPage(p,opts){
   else if(!opts.keepScroll){ const m=$('#mainPane'); if(m&&m.getBoundingClientRect().top<0) window.scrollTo({top:0,behavior:'smooth'}); }
 }
 function focusField(f){
+  if(window.FillMode&&FillMode.focus(f)) return;
   let el=null;
   if(f.startsWith('pst:')){      /* V.2.5 แถวสถานะหลังซ่อมของจุดตรวจ */
     el=$('#fbar [data-pst="'+f.slice(4)+'"]'); if(!el) return;
@@ -10365,6 +10683,1045 @@ function xlCategorySheets(seqList){
   remeasure();
 })();
 
+</script>
+<script id="motion-js">
+/* ==================================================================
+   MOTION LAYER (V.3.2) — การเคลื่อนไหวแบบสปริงของทั้งแอป
+   หลักการ
+   · สปริงทุกตัวเป็นสูตรปิด (closed-form step response) ไม่มีการสะสมสถานะทีละเฟรม
+     ค่าที่เปลี่ยนเป้าหมายหลายครั้ง = ผลรวมของสปริงหนึ่งตัวต่อการเปลี่ยนหนึ่งครั้ง
+     จึงเป็นฟังก์ชันของเวลาล้วน ๆ — เปลี่ยนใจกลางทางได้โดยไม่กระตุก และไม่ขึ้นกับอัตรารีเฟรชของจอ
+   · ตัวชี้ตำแหน่งของแท็บ: ขอบหน้ากับขอบหลังใช้สปริงคนละตัว ขอบหน้าจึงยืดนำไปก่อน
+   · กล่องโต้ตอบ: รูปทรงเดียวขยายออกจากปุ่มที่กด (ขนาด + ความโค้ง + สี) เนื้อหาตามเข้ามาด้วยเบลอสั้น ๆ
+   · สวิตช์: ระหว่างลาก ค่าคำนวณจากตำแหน่งนิ้ว/เมาส์โดยตรง ปล่อยแล้วสปริงกลับจากจุดที่อยู่
+   · ไม่มีเสียง · ใช้สีจากตัวแปรเดิม · ไม่แตะกระดาษ A4 และงานพิมพ์
+   · ระบบตั้ง "ลดการเคลื่อนไหว" ไว้ → ทุกอย่างกระโดดไปค่าปลายทางทันที
+   รองรับ Windows (Chrome/Edge/Firefox) · Safari (macOS/iOS) · Android (Chrome/WebView)
+   ================================================================== */
+(function(){
+'use strict';
+if(window.Motion) return;
+var doc=document, root=doc.documentElement;
+if(!window.requestAnimationFrame||!window.MutationObserver||!window.WeakMap||!window.performance||!root.classList) return;
+
+var mq=function(q){ try{ return window.matchMedia(q); }catch(e){ return {matches:false}; } };
+var RM=mq('(prefers-reduced-motion: reduce)'), FINE=mq('(hover:hover) and (pointer:fine)');
+var still=function(){ return !!RM.matches; };
+var now=function(){ return performance.now()/1000; };
+var clamp=function(v,a,b){ return v<a?a:v>b?b:v; };
+var lerp=function(a,b,t){ return a+(b-a)*t; };
+var ON=true;
+
+/* ---------------- สปริง ---------------- */
+/* ผลตอบสนองต่อ step ของ x'' + 2ζω x' + ω² x = ω²  (เริ่มนิ่งที่ 0 → ลู่เข้า 1) */
+function step(t,w,z){
+  if(t<=0) return 0;
+  if(z>=1){ var e1=Math.exp(-w*t); return 1-e1*(1+w*t); }
+  var wd=w*Math.sqrt(1-z*z), e=Math.exp(-z*w*t);
+  return 1-e*(Math.cos(wd*t)+(z*w/wd)*Math.sin(wd*t));
+}
+function settle(sp){ return (sp.z>=1?9.2:7.6/sp.z)/sp.w; }
+var SP={
+  press:{w:44,z:1},      /* กดลง — เร็ว ไม่เด้ง */
+  release:{w:25,z:.62},  /* ปล่อย — เด้งเกินนิดเดียว (ไม่ถึง 0.5px) */
+  lead:{w:31,z:.9},      /* ขอบหน้าของตัวชี้ */
+  trail:{w:17,z:.8},     /* ขอบหลัง — ช้ากว่า จึงเห็นการยืด */
+  morph:{w:19,z:.82},    /* รูปทรงของกล่องโต้ตอบ */
+  content:{w:26,z:1},    /* เนื้อหาเข้า */
+  out:{w:34,z:1},        /* เนื้อหาออก */
+  exit:{w:26,z:1},       /* กล่องโต้ตอบปิด */
+  scrim:{w:16,z:1},
+  island:{w:21,z:.78},   /* แถบแจ้งเตือน */
+  fold:{w:20,z:.86},
+  view:{w:17,z:.92},
+  pop:{w:24,z:.8},
+  tile:{w:26,z:.72}
+};
+/* ค่าหนึ่งค่า = ฐาน + ผลรวมของสปริงที่ยังไม่นิ่ง (สปริงที่นิ่งแล้วถูกพับรวมเข้าฐาน) */
+function Track(v){ this.base=v; this.target=v; this.s=[]; }
+Track.prototype.to=function(v,sp,delay){
+  if(still()) return this.set(v);
+  var d=v-this.target; if(!d) return this;
+  var t0=now()+(delay||0);
+  this.s.push({t0:t0,d:d,w:sp.w,z:sp.z,end:t0+settle(sp)});
+  this.target=v; return this;
+};
+Track.prototype.set=function(v){ this.base=v; this.target=v; this.s.length=0; return this; };
+Track.prototype.shift=function(d){ this.base+=d; this.target+=d; return this; };
+Track.prototype.at=function(t){
+  var s=this.s, v=this.base;
+  for(var i=s.length-1;i>=0;i--){ var a=s[i];
+    if(t>=a.end){ this.base+=a.d; v+=a.d; s.splice(i,1); }
+    else v+=a.d*step(t-a.t0,a.w,a.z);
+  }
+  return v;
+};
+Track.prototype.idle=function(){ return !this.s.length; };
+
+/* ลูปเดียวของทั้งระบบ — หยุดเองเมื่อไม่มีอะไรเคลื่อนไหว */
+var rigs=new Set(), raf=0;
+function tick(){
+  raf=0; var t=now();
+  rigs.forEach(function(r){ var live=false; try{ live=r(t); }catch(e){ console.warn('[motion]',e); } if(!live) rigs.delete(r); });
+  if(rigs.size) raf=requestAnimationFrame(tick);
+}
+function run(r){ rigs.add(r); if(!raf) raf=requestAnimationFrame(tick); }
+function fail(e){
+  console.warn('[motion] ปิดชั้นการเคลื่อนไหว:',e);
+  ON=false; M.on=false; root.classList.remove('m-on'); rigs.clear();
+  try{ if(scrimEl) scrimEl.style.display='none';
+    doc.querySelectorAll('.m-ghost').forEach(function(g){ g.remove(); });
+    doc.querySelectorAll('.m-ind').forEach(function(g){ g.remove(); });
+    doc.querySelectorAll('.m-liq').forEach(function(g){ g.classList.remove('m-liq'); });
+    var t=doc.getElementById('toast'); if(t){ t.removeAttribute('style'); t.textContent=''; t.classList.remove('on'); }
+  }catch(_){}
+}
+
+/* ---------------- สี ---------------- */
+function parseColor(s){
+  if(!s) return null; var m, p;
+  if((m=/^rgba?\(([^)]+)\)/.exec(s))){ p=m[1].split(/[\s,\/]+/).filter(Boolean).map(parseFloat);
+    return [p[0],p[1],p[2],p.length>3&&!isNaN(p[3])?p[3]:1]; }
+  if((m=/^color\(srgb\s+([^)]+)\)/.exec(s))){ p=m[1].split(/[\s\/]+/).filter(Boolean).map(parseFloat);
+    return [p[0]*255,p[1]*255,p[2]*255,p.length>3&&!isNaN(p[3])?p[3]:1]; }
+  return null;
+}
+function mix(a,b,t){
+  return 'rgba('+Math.round(lerp(a[0],b[0],t))+','+Math.round(lerp(a[1],b[1],t))+','+Math.round(lerp(a[2],b[2],t))+','
+    +lerp(a[3],b[3],t).toFixed(3)+')';
+}
+var probe=null;
+function resolveColor(css){
+  if(!probe){ probe=doc.createElement('i'); probe.style.cssText='position:absolute;width:0;height:0;visibility:hidden;pointer-events:none'; probe.setAttribute('aria-hidden','true'); doc.body.appendChild(probe); }
+  probe.style.color=''; probe.style.color=css;
+  return parseColor(getComputedStyle(probe).color);
+}
+
+/* ---------------- keyframes ที่อบจากสปริงตัวเดียวกัน (สำหรับสิ่งที่ "ปรากฏครั้งเดียว") ---------------- */
+function bake(name,sp,fn,n){
+  n=n||24; var T=settle(sp), s='@keyframes '+name+'{';
+  for(var i=0;i<=n;i++){ var v=i===n?1:step(i/n*T,sp.w,sp.z); s+=(i/n*100).toFixed(2)+'%{'+fn(v)+'}'; }
+  return {css:s+'}',dur:T};
+}
+var f2=function(v){ return (Math.round(v*100)/100).toString(); };
+var o1=function(v){ return f2(clamp(v,0,1)); };
+function bakeAll(){
+  var css='', k;
+  var add=function(vr,name,sp,fn){ k=bake(name,sp,fn); css+=k.css+'\n'; if(vr) root.style.setProperty(vr,k.dur.toFixed(3)+'s'); };
+  add('--m-d-view','m-view',SP.view,function(v){ return 'opacity:'+o1(v*1.3)+';transform:translate3d(0,'+f2((1-v)*10)+'px,0)'; });
+  k=bake('m-view',SP.view,function(v){ return 'opacity:'+o1(v*1.3)+';transform:translate3d(0,'+f2((1-v)*10)+'px,0);filter:blur('+f2(Math.max(0,1-v)*6)+'px)'; });
+  css+='@media (hover:hover) and (pointer:fine){'+k.css+'}\n';
+  add(null,'m-rise',SP.pop,function(v){ return 'opacity:'+o1(v*1.5)+';transform:translate3d(0,'+f2((1-v)*14)+'px,0)'; });
+  add('--m-d-pop','m-pop',SP.pop,function(v){ return 'opacity:'+o1(v*1.6)+';transform:translate3d(0,'+f2((1-v)*-6)+'px,0) scale('+f2(lerp(.94,1,v))+');filter:blur('+f2(Math.max(0,1-v)*4)+'px)'; });
+  add(null,'m-sheet',SP.pop,function(v){ return 'opacity:'+o1(v*1.6)+';transform:translate3d(0,'+f2((1-v)*26)+'px,0)'; });
+  add('--m-d-tip','m-tip',SP.content,function(v){ return 'opacity:'+o1(v)+';filter:blur('+f2(Math.max(0,1-v)*3)+'px)'; });
+  add('--m-d-ico','m-ico',SP.pop,function(v){ return 'opacity:'+o1(v*1.4)+';transform:rotate('+f2((1-v)*-50)+'deg) scale('+f2(lerp(.55,1,v))+');filter:blur('+f2(Math.max(0,1-v)*2.5)+'px)'; });
+  add('--m-d-tile','m-tile',SP.tile,function(v){ return 'opacity:'+o1(v*1.8)+';transform:scale('+f2(lerp(.72,1,v))+')'; });
+  LIQ.forEach(function(c){
+    css+=c.on.split(',').map(function(p){ return c.root+'.m-liq '+p.trim(); }).join(',')
+      +'{background-color:transparent!important;background-image:none!important;box-shadow:none!important}\n';
+  });
+  var st=doc.createElement('style'); st.id='motion-baked'; st.textContent=css; doc.head.appendChild(st);
+}
+
+/* ==================================================================
+   1) กด — ปุ่มย่อลงตามนิ้ว/เมาส์ ปล่อยแล้วสปริงคืน
+   ================================================================== */
+var HAS_SCALE=!!(window.CSS&&CSS.supports&&CSS.supports('scale','1'));
+var PRESS_SEL='button,.btn,[role="button"],[role="tab"],summary';
+var PRESS_NOT='.paper,.slide,.sumpage,#printRoot,.m-ghost,.annsvg';
+var pressMap=new WeakMap(), pressing=new Set();
+function pressable(t){
+  if(!HAS_SCALE||still()||!t||!t.closest) return null;
+  var el=t.closest(PRESS_SEL);
+  if(!el||el.disabled||el.getAttribute('aria-disabled')==='true'||el.closest(PRESS_NOT)) return null;
+  return el;
+}
+function pressState(el){
+  var st=pressMap.get(el); if(st) return st;
+  st={tr:new Track(1),v:1,rig:null};
+  st.rig=function(t){
+    if(!el.isConnected) return false;
+    var v=st.tr.at(t); st.v=v;
+    if(st.tr.idle()&&st.tr.target===1){ el.style.scale=''; st.v=1; return false; }
+    el.style.scale=v.toFixed(4); return true;
+  };
+  pressMap.set(el,st); return st;
+}
+function pressDown(el){
+  var r=el.getBoundingClientRect(), m=Math.max(r.width,r.height)||40;
+  var st=pressState(el);
+  st.tr.to(clamp(1-4/m,.93,.985),SP.press); pressing.add(st); run(st.rig);
+}
+function pressUp(delay){
+  pressing.forEach(function(st){ st.tr.to(1,SP.release,delay||0); run(st.rig); });
+  pressing.clear();
+}
+
+/* ==================================================================
+   2) ตัวชี้ตำแหน่งแบบของเหลว
+   ================================================================== */
+var LIQ=[
+  {root:'.tabs.topnav',on:'button[aria-selected="true"]'},
+  {root:'.tabs.bottomnav',on:'button[aria-selected="true"]',bar:1},
+  {root:'.phasebar',on:'button[aria-selected="true"]'},
+  {root:'.seg',on:'button[aria-pressed="true"]'},
+  {root:'#nav .navbody',on:'.sh.on,.pgbtn.on'},
+  {root:'#annBar .arail',on:'.atool[data-tool].on'},
+  {root:'.sevpick',on:'.sevb.on',end:1},      /* end: วางตัวชี้ไว้ท้ายสุด — ปุ่มข้างในใช้ :nth-child กำหนดสี จึงห้ามแทรกข้างหน้า */
+  {root:'.phpick',on:'.phb.on',end:1}
+];
+var liqMap=new WeakMap(), liqMem=new Map(), liqRestyle=false, syncQ=0;
+function scheduleSync(){
+  if(syncQ||!ON) return;
+  syncQ=requestAnimationFrame(function(){ syncQ=0; if(!ON) return; try{ liqSync(); dlgAudit(); }catch(e){ fail(e); } });
+}
+function liqGeom(rootEl,sel,cfg){
+  var a=rootEl.getBoundingClientRect(), b=sel.getBoundingClientRect();
+  var ps=pressMap.get(sel), k=ps&&ps.v?ps.v:1;          /* หักการย่อจากการกดออก */
+  var w=b.width/k, h=b.height/k, cx=b.left+b.width/2, cy=b.top+b.height/2;
+  var ox=a.left+rootEl.clientLeft-rootEl.scrollLeft, oy=a.top+rootEl.clientTop-rootEl.scrollTop;
+  var g={l:cx-w/2-ox,r:cx+w/2-ox,t:cy-h/2-oy,b:cy+h/2-oy};
+  if(cfg.bar){ var mx=(g.l+g.r)/2; g={l:mx-14,r:mx+14,t:g.t-1,b:g.t+1}; }
+  return g;
+}
+var same=function(a,b){ return Math.abs(a.l-b.l)<.3&&Math.abs(a.r-b.r)<.3&&Math.abs(a.t-b.t)<.3&&Math.abs(a.b-b.b)<.3; };
+function liqCreate(el,cfg){
+  var ind=doc.createElement('span'); ind.className='m-ind'; ind.setAttribute('aria-hidden','true');
+  if(getComputedStyle(el).position==='static') el.style.position='relative';
+  var st={root:el,cfg:cfg,ind:ind,L:new Track(0),R:new Track(0),T:new Track(0),B:new Track(0),C:new Track(1),c0:null,c1:null,cur:null,g:null,has:false,rig:null};
+  st.rig=function(t){
+    if(!el.isConnected) return false;
+    var l=st.L.at(t), r=st.R.at(t), tp=st.T.at(t), b=st.B.at(t), s=ind.style;
+    s.transform='translate3d('+l.toFixed(2)+'px,'+tp.toFixed(2)+'px,0)';
+    s.width=Math.max(4,r-l).toFixed(2)+'px'; s.height=Math.max(2,b-tp).toFixed(2)+'px';
+    if(st.c1){      /* สีของตัวชี้ค่อย ๆ เปลี่ยนตามตัวเลือกใหม่ (เช่น ระดับ Severity) */
+      var cv=clamp(st.C.at(t),0,1); s.backgroundColor=mix(st.c0,st.c1,cv);
+      if(st.C.idle()){ s.backgroundColor=mix(st.c1,st.c1,1); st.c1=null; }
+    }
+    return !(st.L.idle()&&st.R.idle()&&st.T.idle()&&st.B.idle()&&!st.c1);
+  };
+  liqMap.set(el,st); return st;
+}
+/* สี/เงา/ความโค้งของตัวชี้ = ของปุ่มที่ถูกเลือกตามดีไซน์เดิม (อ่านค่าจริง จึงตามธีมสว่าง/มืดเอง) */
+function liqStyle(st,sel){
+  var r=st.root; if(st.cfg.bar){ r.classList.add('m-liq'); return; }
+  var tr=sel.style.transition; sel.style.transition='none';
+  r.classList.remove('m-liq');
+  var cs=getComputedStyle(sel), bg=cs.backgroundColor, bi=cs.backgroundImage, sh=cs.boxShadow,
+      rad=cs.borderTopLeftRadius+' '+cs.borderTopRightRadius+' '+cs.borderBottomRightRadius+' '+cs.borderBottomLeftRadius;
+  r.classList.add('m-liq');
+  void sel.offsetWidth; sel.style.transition=tr;
+  var s=st.ind.style;
+  s.backgroundColor=bg; s.backgroundImage=bi==='none'?'':bi; s.boxShadow=sh==='none'?'':sh; s.borderRadius=rad;
+}
+function liqTint(st,from){
+  var a=parseColor(from), b=parseColor(st.ind.style.backgroundColor);
+  if(!a||!b||still()||(a[0]===b[0]&&a[1]===b[1]&&a[2]===b[2]&&a[3]===b[3])) return;
+  st.c0=a; st.c1=b; st.C.set(0).to(1,SP.content);
+}
+function liqSet(st,g){ st.L.set(g.l); st.R.set(g.r); st.T.set(g.t); st.B.set(g.b); }
+function liqGo(st,a,g){
+  var dx=(g.l+g.r)-(a.l+a.r), dy=(g.t+g.b)-(a.t+a.b);
+  st.L.to(g.l,dx>1?SP.trail:SP.lead); st.R.to(g.r,dx<-1?SP.trail:SP.lead);
+  st.T.to(g.t,dy>1?SP.trail:SP.lead); st.B.to(g.b,dy<-1?SP.trail:SP.lead);
+}
+function liqSync(){
+  var restyle=liqRestyle; liqRestyle=false;
+  for(var ci=0;ci<LIQ.length;ci++){
+    var cfg=LIQ[ci], roots=doc.querySelectorAll(cfg.root);
+    for(var ri=0;ri<roots.length;ri++){
+      var el=roots[ri], key=ci+':'+(el.id||ri), st=liqMap.get(el);
+      var sel=el.querySelector(cfg.on);
+      if(!sel||!el.getClientRects().length||!sel.getClientRects().length){
+        if(st){ st.ind.style.display='none'; st.has=false; st.cur=null; }
+        liqMem.delete(key); continue;
+      }
+      if(!st) st=liqCreate(el,cfg);
+      if(st.ind.parentNode!==el){ if(cfg.end) el.appendChild(st.ind); else el.insertBefore(st.ind,el.firstChild); }
+      st.ind.style.display='';
+      var moved=st.has&&st.cur!==sel, was=st.ind.style.backgroundColor;
+      if(st.cur!==sel||restyle||!st.has) liqStyle(st,sel);
+      if(moved) liqTint(st,was);
+      var g=liqGeom(el,sel,cfg);
+      if(!st.has){
+        var m=liqMem.get(key);
+        if(m&&!same(m,g)&&!still()){ liqSet(st,m); liqGo(st,m,g); if(m.bg) liqTint(st,m.bg); } else liqSet(st,g);
+        st.has=true;
+      }else if(!same(st.g,g)){
+        var idle=st.L.idle()&&st.R.idle()&&st.T.idle()&&st.B.idle();
+        if(st.cur!==sel&&!still()) liqGo(st,st.g,g);          /* เลือกอันใหม่ → เลื่อนแบบของเหลว */
+        else if(idle||still()) liqSet(st,g);                   /* เลย์เอาต์ขยับ (ย่อ-ขยายจอ) → ตามทันที */
+        else{ st.L.shift(g.l-st.g.l); st.R.shift(g.r-st.g.r); st.T.shift(g.t-st.g.t); st.B.shift(g.b-st.g.b); }
+      }
+      st.cur=sel; st.g=g; g.bg=st.c1?mix(st.c1,st.c1,1):st.ind.style.backgroundColor; liqMem.set(key,g);
+      st.rig(now()); run(st.rig);
+    }
+  }
+}
+
+/* ==================================================================
+   3) กล่องโต้ตอบ — รูปทรงเดียวขยายออกจากปุ่มที่กด แล้วหดกลับ
+   ================================================================== */
+var DLG_SEL='.dlg,.d-dlg';
+var dlgMap=new WeakMap(), openSet=new Set(), lastClick=null;
+var scrimEl=null, scrimTr=new Track(0);
+function scrimRig(t){
+  var v=clamp(scrimTr.at(t),0,1), idle=scrimTr.idle();
+  scrimEl.style.opacity=v.toFixed(3);
+  scrimEl.style.display=(idle&&v<.002)?'none':'block';
+  return !idle;
+}
+function scrimSync(){
+  if(!scrimEl){ scrimEl=doc.createElement('div'); scrimEl.className='m-scrim'; scrimEl.setAttribute('aria-hidden','true'); doc.body.appendChild(scrimEl); }
+  scrimTr.to(openSet.size?1:0,SP.scrim); scrimRig(now()); run(scrimRig);
+}
+function dlgAudit(){
+  var ch=false;
+  openSet.forEach(function(d){ if(!d.open||!d.isConnected){ openSet.delete(d); ch=true; } });
+  if(ch) scrimSync();
+}
+function originFrom(e){
+  var t=e.target; if(!t||!t.closest) return null;
+  var el=t.closest('button,a[href],[role="button"],[role="tab"],summary,label,select,.fmtcard,.pk,[data-go],[data-act]')||t;
+  var r=el.getBoundingClientRect(), kb=!e.detail&&!e.clientX&&!e.clientY, o;
+  if(!r.width||!r.height||r.width>440||r.height>170){
+    if(kb) return null;
+    o={el:null,cx:e.clientX,cy:e.clientY,w:16,h:16,rad:8,bg:null};
+  }else{
+    var cs=getComputedStyle(el), bg=parseColor(cs.backgroundColor);
+    o={el:el,cx:r.left+r.width/2,cy:r.top+r.height/2,w:r.width,h:r.height,
+       rad:Math.min(parseFloat(cs.borderTopLeftRadius)||0,Math.min(r.width,r.height)/2),bg:bg&&bg[3]>.6?bg:null};
+  }
+  o.t=now(); return o;
+}
+function dlgClear(d,st){
+  var s=d.style; s.transform=''; s.borderRadius=''; s.backgroundColor=''; s.opacity='';
+  st.kids.forEach(function(k){ k.style.opacity=''; k.style.filter=''; });
+}
+function dlgOpen(d){
+  openSet.add(d); scrimSync();
+  var old=dlgMap.get(d); if(old){ old.dead=true; dlgClear(d,old); }
+  if(still()) return;
+  var F=d.getBoundingClientRect(); if(!F.width||!F.height) return;
+  var cs=getComputedStyle(d), Fbg=parseColor(cs.backgroundColor)||[255,255,255,1], Frad=parseFloat(cs.borderTopLeftRadius)||0;
+  var Fcx=F.left+F.width/2, Fcy=F.top+F.height/2;
+  var O=lastClick&&now()-lastClick.t<1.2?lastClick:null;
+  if(O&&O.w*O.h>F.width*F.height*.6) O=null;
+  var src=O;
+  if(!O) O={cx:Fcx,cy:Fcy+10,w:F.width*.94,h:F.height*.94,rad:Frad,bg:null,pop:true};
+  var blur=F.width*F.height<520000||FINE.matches;      /* จอมือถือเต็มจอ: ไม่เบลอ (ประหยัดแรงเครื่อง) */
+  var st={p:new Track(0),c:new Track(0),kids:Array.prototype.slice.call(d.children),O:src,dead:false,rig:null};
+  st.p.to(1,SP.morph); st.c.to(1,SP.content,O.pop?.03:.07);
+  st.rig=function(t){
+    if(st.dead||!d.isConnected||!d.open) return false;
+    var pv=st.p.at(t), cv=clamp(st.c.at(t),0,1);
+    if(st.p.idle()&&st.c.idle()){ dlgClear(d,st); return false; }
+    var sx=lerp(O.w/F.width,1,pv), sy=lerp(O.h/F.height,1,pv), pc=clamp(pv,0,1), s=d.style;
+    s.transform='translate('+lerp(O.cx-Fcx,0,pv).toFixed(2)+'px,'+lerp(O.cy-Fcy,0,pv).toFixed(2)+'px) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')';
+    var rr=lerp(O.rad,Frad,pc);
+    s.borderRadius=(rr/sx).toFixed(2)+'px / '+(rr/sy).toFixed(2)+'px';
+    if(O.bg) s.backgroundColor=mix(O.bg,Fbg,clamp(pc*1.6,0,1)); else s.opacity=clamp(pv*3.2,0,1).toFixed(3);
+    for(var i=0;i<st.kids.length;i++){ var k=st.kids[i].style; k.opacity=cv.toFixed(3); k.filter=(blur&&cv<.99)?'blur('+((1-cv)*7).toFixed(2)+'px)':''; }
+    return true;
+  };
+  dlgMap.set(d,st); st.rig(now()); run(st.rig);
+}
+function dlgSnap(d){
+  var st=dlgMap.get(d); if(st){ st.dead=true; dlgClear(d,st); }
+  if(still()) return {skip:true};
+  var r=d.getBoundingClientRect(); if(!r.width||!r.height) return {skip:true};
+  var cs=getComputedStyle(d);
+  var snap={r:r,display:cs.display==='none'?'block':cs.display,fdir:cs.flexDirection,rad:parseFloat(cs.borderTopLeftRadius)||0,
+            O:st&&st.O,top:d.scrollTop,sc:[],n:0,vals:null};
+  var all=d.querySelectorAll('*'); snap.n=all.length;
+  if(all.length<5000) for(var i=0;i<all.length;i++){ var e=all[i]; if(e.scrollTop>0||e.scrollLeft>0) snap.sc.push([i,e.scrollTop,e.scrollLeft]); }
+  return snap;
+}
+function dlgExit(d,snap){
+  openSet.delete(d); scrimSync();
+  if(!snap||snap.skip) return;
+  var F=snap.r, big=d.matches('.d-dlg'), g=doc.createElement('div');
+  g.className=d.className+' m-ghost'; g.setAttribute('aria-hidden','true');
+  if(big){ while(d.firstChild) g.appendChild(d.firstChild); }       /* แผงใหญ่: ย้ายเนื้อหามา (ไม่คัดลอกรูป) — แอปล้างแผงเองอยู่แล้ว */
+  else{
+    var src=d.querySelectorAll('input,textarea,select');
+    for(var n=d.firstChild;n;n=n.nextSibling) g.appendChild(n.cloneNode(true));
+    var dst=g.querySelectorAll('input,textarea,select');
+    if(src.length===dst.length) for(var i=0;i<src.length;i++){ try{ if(src[i].type==='checkbox'||src[i].type==='radio') dst[i].checked=src[i].checked; else if(src[i].type!=='file') dst[i].value=src[i].value; }catch(_){} }
+    g.querySelectorAll('[id]').forEach(function(e){ e.removeAttribute('id'); });
+    g.querySelectorAll('[name]').forEach(function(e){ e.removeAttribute('name'); });
+  }
+  g.style.cssText='position:fixed;left:'+F.left+'px;top:'+F.top+'px;right:auto;bottom:auto;width:'+F.width+'px;height:'+F.height+'px;'
+    +'margin:0;max-width:none;max-height:none;min-width:0;min-height:0;overflow:hidden;z-index:2147483001;animation:none;'
+    +'display:'+snap.display+';flex-direction:'+snap.fdir+';transform-origin:50% 50%';
+  doc.body.appendChild(g);
+  try{ g.scrollTop=snap.top; var all=g.querySelectorAll('*');
+    if(all.length===snap.n) snap.sc.forEach(function(a){ all[a[0]].scrollTop=a[1]; all[a[0]].scrollLeft=a[2]; }); }catch(_){}
+  var O=null, oe=snap.O&&snap.O.el;
+  if(oe&&oe.isConnected){ var or=oe.getBoundingClientRect();
+    if(or.width&&or.height&&or.bottom>0&&or.top<innerHeight&&or.right>0&&or.left<innerWidth)
+      O={cx:or.left+or.width/2,cy:or.top+or.height/2,w:or.width,h:or.height,rad:snap.O.rad}; }
+  var Fcx=F.left+F.width/2, Fcy=F.top+F.height/2, q=new Track(1), kids=Array.prototype.slice.call(g.children);
+  q.to(0,SP.exit);
+  var rig=function(t){
+    var v=q.at(t), s=g.style;
+    if(q.idle()||!g.isConnected){ g.remove(); return false; }
+    if(O){
+      var sx=lerp(O.w/F.width,1,v), sy=lerp(O.h/F.height,1,v), rr=lerp(O.rad,snap.rad,clamp(v,0,1));
+      s.transform='translate('+lerp(O.cx-Fcx,0,v).toFixed(2)+'px,'+lerp(O.cy-Fcy,0,v).toFixed(2)+'px) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')';
+      s.borderRadius=(rr/sx).toFixed(2)+'px / '+(rr/sy).toFixed(2)+'px';
+      s.opacity=clamp((v-.04)/.5,0,1).toFixed(3);
+    }else{
+      s.transform='translate(0,'+((1-v)*8).toFixed(2)+'px) scale('+lerp(.955,1,v).toFixed(4)+')';
+      s.opacity=clamp(v*1.15,0,1).toFixed(3);
+    }
+    var kv=clamp((v-.5)/.5,0,1).toFixed(3);
+    for(var i=0;i<kids.length;i++) kids[i].style.opacity=kv;
+    return true;
+  };
+  rig(now()); run(rig);
+}
+function hookDialogs(){
+  if(!window.HTMLDialogElement) return;
+  var P=HTMLDialogElement.prototype, show=P.showModal, close=P.close;
+  if(typeof show!=='function'||typeof close!=='function') return;
+  P.showModal=function(){
+    var was=this.open, r=show.apply(this,arguments);
+    if(ON&&!was&&this.open){ try{ if(this.matches(DLG_SEL)) dlgOpen(this); }catch(e){ fail(e); } }
+    return r;
+  };
+  P.close=function(){
+    var snap=null;
+    if(ON&&this.open&&openSet.has(this)){ try{ snap=dlgSnap(this); }catch(e){ snap=null; } }
+    var r=close.apply(this,arguments);
+    if(ON&&openSet.has(this)&&!this.open){ try{ dlgExit(this,snap); }catch(e){ fail(e); } }
+    return r;
+  };
+  /* Esc บนแผงรายละเอียด: ปิดผ่านทางเดียวกัน เพื่อให้มีจังหวะปิดเหมือนกดปุ่ม */
+  doc.addEventListener('cancel',function(e){
+    var d=e.target;
+    if(ON&&d&&d.matches&&d.matches('.d-dlg')&&openSet.has(d)&&d.open){ e.preventDefault(); try{ d.close(); }catch(_){} }
+  },true);
+  doc.addEventListener('close',function(){ if(ON) scheduleSync(); },true);
+}
+
+/* ==================================================================
+   4) แถบแจ้งเตือน — รูปทรงเดียวที่ยืด/หดตามข้อความ มีตัวหมุนตอนกำลังทำงาน และเครื่องหมายถูกเมื่อเสร็จ
+   ================================================================== */
+var TPX=16, TPY=10, TIC=24;
+var TS={el:null,ti:null,sp:null,ck:null,W:new Track(0),H:new Track(0),X:new Track(0),Y:new Track(0),A:new Track(0),
+        I:new Track(0),K:new Track(0),spans:[],shown:false,kind:'',text:'',timer:0};
+var SVGNS='http://www.w3.org/2000/svg';
+function toastBuild(){
+  var el=TS.el;
+  if(TS.ti&&TS.ti.parentNode===el) return;
+  el.textContent=''; TS.spans=[];
+  var ti=doc.createElement('i'); ti.className='m-ti'; ti.setAttribute('aria-hidden','true');
+  var mk=function(cls,d){ var s=doc.createElementNS(SVGNS,'svg'); s.setAttribute('viewBox','0 0 16 16'); s.setAttribute('class',cls);
+    var p=doc.createElementNS(SVGNS,'path'); p.setAttribute('d',d); s.appendChild(p); ti.appendChild(s); return s; };
+  TS.sp=mk('m-sp','M8 1.8a6.2 6.2 0 1 1-6.2 6.2');
+  TS.ck=mk('m-ck','M3.2 8.4l3.1 3.1 6.5-6.7');
+  var p=TS.ck.firstChild; p.setAttribute('pathLength','1'); p.style.strokeDasharray='1'; p.style.strokeDashoffset='1';
+  el.appendChild(ti); TS.ti=ti;
+}
+function toastRig(t){
+  var el=TS.el, s=el.style;
+  var w=TS.W.at(t), h=TS.H.at(t), x=TS.X.at(t), y=TS.Y.at(t), a=clamp(TS.A.at(t),0,1), iv=clamp(TS.I.at(t),0,1), k=clamp(TS.K.at(t),0,1);
+  s.width=Math.max(0,w).toFixed(2)+'px'; s.height=Math.max(0,h).toFixed(2)+'px';
+  s.opacity=a.toFixed(3); s.visibility=a<.004?'hidden':'visible';
+  var live=!(TS.W.idle()&&TS.H.idle()&&TS.X.idle()&&TS.Y.idle()&&TS.A.idle()&&TS.I.idle()&&TS.K.idle());
+  /* นิ่งแล้วใช้การเลื่อน 2 มิติ — ตัวอักษรคมบน Safari/จอความละเอียดต่ำ */
+  s.transform=(live||Math.abs(y)>.01)?'translate3d(-50%,'+y.toFixed(2)+'px,0)':'translateX(-50%)';
+  /* ไอคอนอยู่ชิดซ้ายของกลุ่ม [ไอคอน + ข้อความ] ซึ่งจัดกึ่งกลางแถบเสมอ */
+  var is=TS.ti.style;
+  is.opacity=iv.toFixed(3);
+  is.transform='translate3d('+(-(TIC*iv+x)/2).toFixed(2)+'px,-50%,0) scale('+lerp(.5,1,iv).toFixed(3)+')';
+  TS.sp.style.opacity=(1-k).toFixed(3); TS.sp.style.display=k>.995||TS.kind!=='load'&&k<.005&&iv<.005?'none':'';
+  TS.ck.firstChild.style.strokeDashoffset=(1-k).toFixed(3); TS.ck.style.opacity=k<.01?'0':'1';
+  var tx=(TIC*iv/2).toFixed(2);
+  for(var i=TS.spans.length-1;i>=0;i--){
+    var sp=TS.spans[i], v=clamp(sp.tr.at(t),0,1), ss=sp.el.style;
+    if(sp.out&&sp.tr.idle()){ sp.el.remove(); TS.spans.splice(i,1); continue; }
+    if(!sp.tr.idle()) live=true;
+    ss.opacity=v.toFixed(3);
+    ss.filter=v<.99?'blur('+((1-v)*5).toFixed(2)+'px)':'';
+    ss.transform='translate3d(calc(-50% + '+tx+'px),calc(-50% + '+((1-v)*(sp.out?-5:6)).toFixed(2)+'px),0)';
+  }
+  if(!live&&!TS.shown){ TS.spans.forEach(function(sp){ sp.el.remove(); }); TS.spans=[]; TS.text=''; TS.kind=''; TS.I.set(0); TS.K.set(0); }
+  return live;
+}
+function toastHide(){
+  if(!TS.shown) return;
+  TS.shown=false; TS.el.classList.remove('on');
+  TS.A.to(0,SP.content); TS.Y.to(12,SP.content);
+  TS.spans.forEach(function(sp){ sp.el.setAttribute('aria-hidden','true'); });
+  toastRig(now()); run(toastRig);
+}
+function toast(msg,ms){
+  if(!ON) return false;
+  var el=TS.el||(TS.el=doc.getElementById('toast')); if(!el) return false;
+  try{
+    msg=String(msg==null?'':msg);
+    toastBuild();
+    clearTimeout(TS.timer); TS.timer=setTimeout(toastHide,ms||2600);
+    var bad=/ไม่สำเร็จ|ไม่ได้|ยกเลิก|ผิดพลาด|ล้มเหลว|ไม่พบ|ไม่มี|ยังไม่|ไม่ถูก|ไม่รองรับ/;
+    var kind=/^\s*กำลัง/.test(msg)?'load':(TS.shown&&(TS.kind==='load'||TS.kind==='done'&&msg===TS.text)&&!bad.test(msg))?'done':'';
+    if(TS.shown&&msg===TS.text&&kind===TS.kind) return true;
+    var tNow=now(), was=TS.shown||clamp(TS.A.at(tNow),0,1)>.05;   /* กำลังจางออกอยู่ → นับเป็นการสลับข้อความ */
+    /* ข้อความเก่าออก (เบลอ+จาง) ข้อความใหม่เข้าช้ากว่าเล็กน้อย — ไม่ซ้อนกัน */
+    TS.spans.forEach(function(sp){ if(!sp.out){ sp.out=true; sp.el.setAttribute('aria-hidden','true'); sp.tr.set(clamp(sp.tr.at(tNow),0,1)).to(0,SP.out); } });
+    var e=doc.createElement('span'); e.className='m-tx'; e.textContent=msg; el.appendChild(e);
+    var r=e.getBoundingClientRect(), tw=Math.ceil(r.width)+1, th=Math.ceil(r.height);
+    var ic=kind?1:0, Wt=2*Math.ceil((TPX*2+tw+TIC*ic)/2), Ht=TPY*2+Math.max(th,20);
+    var sp={el:e,tr:new Track(0),out:false}; sp.tr.to(1,SP.content,was?.08:.06); TS.spans.push(sp);
+    if(!was){
+      TS.W.set(Math.max(Ht*1.25,Wt*.62)); TS.H.set(Ht); TS.X.set(tw); TS.Y.set(16); TS.A.set(0);
+      TS.I.set(ic); TS.K.set(kind==='done'?1:0);
+      TS.Y.to(0,SP.island); TS.A.to(1,SP.content);
+    }else{
+      TS.A.to(1,SP.content); TS.Y.to(0,SP.island);
+      TS.I.to(ic,SP.island); TS.K.to(kind==='done'?1:0,SP.scrim,kind==='done'?.05:0);
+    }
+    TS.W.to(Wt,SP.island); TS.H.to(Ht,SP.island); TS.X.to(tw,SP.island);
+    TS.shown=true; TS.kind=kind; TS.text=msg; el.classList.add('on');
+    toastRig(tNow); run(toastRig);
+    return true;
+  }catch(err){ fail(err); return false; }
+}
+
+/* ==================================================================
+   5) การ์ดพับ/กาง — ความสูงเป็นสปริง (ขยับเฉพาะขอบล่าง เนื้อในไม่ถูกจัดเรียงใหม่)
+   ================================================================== */
+var foldMap=new WeakMap();
+function foldGo(card,open){
+  var body=null, c=card.children;
+  for(var i=0;i<c.length;i++) if(c[i].classList&&c[i].classList.contains('body')){ body=c[i]; break; }
+  if(!body||still()||card.closest('.paper,#printRoot')) return;
+  var st=foldMap.get(body);
+  if(!st){
+    st={p:new Track(open?0:1),h:0,rig:null};
+    st.rig=function(t){
+      if(!body.isConnected) return false;
+      var v=st.p.at(t), s=body.style;
+      if(st.p.idle()){ s.marginBottom=''; s.opacity=''; s.filter=''; body.classList.remove('m-folding'); return false; }
+      s.marginBottom=(-(1-v)*st.h).toFixed(2)+'px';
+      var o=clamp(v*1.5-.2,0,1); s.opacity=o.toFixed(3);
+      s.filter=(FINE.matches&&o<.99)?'blur('+((1-o)*4).toFixed(2)+'px)':'';
+      return true;
+    };
+    foldMap.set(body,st);
+  }
+  body.classList.add('m-folding');
+  body.style.marginBottom='';
+  st.h=body.offsetHeight;
+  st.p.to(open?1:0,SP.fold);
+  st.rig(now()); run(st.rig);
+}
+
+/* ==================================================================
+   6) สวิตช์ — ขอบซ้าย/ขวาของปุ่มกลมใช้สปริงคนละตัว · ลากได้ · ลากเกินสุดแล้วยืด
+   ================================================================== */
+var SW_SEL='.chk input[type="checkbox"]';
+var swMap=new WeakMap(), swDrag=null;
+function swState(inp,on){
+  var st=swMap.get(inp); if(st) return st;
+  st={kl:new Track(on?18:2),kr:new Track(on?36:20),m:new Track(on?1:0),c0:null,c1:null,pos:on?18:2,swallow:0,rig:null};
+  st.rig=function(t){
+    if(!inp.isConnected) return false;
+    var kl=st.kl.at(t), kr=st.kr.at(t), m=clamp(st.m.at(t),0,1), s=inp.style;
+    if(st.kl.idle()&&st.kr.idle()&&st.m.idle()&&!(swDrag&&swDrag.inp===inp)){
+      s.removeProperty('--kl'); s.removeProperty('--kr'); s.backgroundColor=''; return false; }
+    s.setProperty('--kl',kl.toFixed(2)+'px'); s.setProperty('--kr',Math.max(kl+18,kr).toFixed(2)+'px');
+    if(st.c0&&st.c1) s.backgroundColor=mix(st.c0,st.c1,m);
+    return true;
+  };
+  swMap.set(inp,st); return st;
+}
+function swColors(st){ st.c0=resolveColor('var(--ctl,var(--line))'); st.c1=resolveColor('var(--acc)'); }
+function swGo(inp,on){
+  var st=swState(inp,on);
+  if(on){ st.kr.to(36,SP.lead); st.kl.to(18,SP.trail); } else { st.kl.to(2,SP.lead); st.kr.to(20,SP.trail); }
+  st.m.to(on?1:0,SP.content); st.pos=on?18:2;
+  st.rig(now()); run(st.rig);
+}
+function swDown(inp,e){
+  if(inp.disabled||still()) return;
+  var st=swState(inp,inp.checked); swColors(st);
+  swDrag={inp:inp,st:st,id:e.pointerId,x0:e.clientX,base:inp.checked?18:2,moved:false};
+  if(inp.checked) st.kl.to(14,SP.press); else st.kr.to(24,SP.press);    /* กดค้าง: ปุ่มกลมยืดไปทางที่จะไป */
+  run(st.rig);
+}
+function swMove(e){
+  var d=swDrag; if(!d||e.pointerId!==d.id) return;
+  var dx=e.clientX-d.x0, st=d.st;
+  if(!d.moved){ if(Math.abs(dx)<4) return; d.moved=true; try{ d.inp.setPointerCapture(d.id); }catch(_){} }
+  var pos=d.base+dx, kl, kr, o;
+  if(pos>18){ o=6*(1-Math.exp(-(pos-18)/40)); kl=18-o; kr=36; }
+  else if(pos<2){ o=6*(1-Math.exp(-(2-pos)/40)); kl=2; kr=20+o; }
+  else{ kl=pos; kr=pos+18; }
+  st.kl.set(kl); st.kr.set(kr); st.m.set(clamp((pos-2)/16,0,1)); st.pos=pos;      /* ค่ามาจากตำแหน่งนิ้วโดยตรง */
+  run(st.rig);
+}
+function swUp(e){
+  var d=swDrag; if(!d||(e&&e.pointerId!==undefined&&e.pointerId!==d.id)) return;
+  swDrag=null;
+  var inp=d.inp, st=d.st;
+  if(d.moved){
+    var want=(e&&e.type==='pointerup')?clamp(st.pos,2,18)>10:inp.checked;
+    st.swallow=now();
+    if(want!==inp.checked){
+      inp.checked=want;
+      inp.dispatchEvent(new Event('input',{bubbles:true}));
+      inp.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  }
+  swGo(inp,inp.checked);                                                        /* ปล่อย → สปริงจากจุดที่อยู่ */
+}
+
+/* ==================================================================
+   ต่อสาย
+   ================================================================== */
+function wire(){
+  var cap={capture:true,passive:true};
+  doc.addEventListener('pointerdown',function(e){
+    if(!ON||e.button>0) return;
+    var t=e.target;
+    if(t&&t.matches&&t.matches(SW_SEL)){ swDown(t,e); return; }
+    var el=pressable(t); if(el) pressDown(el);
+  },cap);
+  doc.addEventListener('pointermove',function(e){ if(swDrag) swMove(e); },cap);
+  var up=function(e){ if(pressing.size) pressUp(); if(swDrag) swUp(e); };
+  window.addEventListener('pointerup',up,cap);
+  window.addEventListener('pointercancel',up,cap);
+  window.addEventListener('blur',function(){ if(pressing.size) pressUp(); if(swDrag) swUp(null); });
+  doc.addEventListener('dragstart',function(){ if(pressing.size) pressUp(); },cap);
+  doc.addEventListener('keydown',function(e){
+    if(!ON||e.repeat||(e.key!=='Enter'&&e.key!==' ')) return;
+    var el=pressable(e.target); if(!el||el!==e.target) return;
+    pressDown(el); pressUp(.08);
+  },cap);
+  doc.addEventListener('click',function(e){
+    if(!ON) return;
+    var t=e.target;
+    if(t&&t.matches&&t.matches(SW_SEL)){
+      var st=swMap.get(t);
+      if(st&&st.swallow&&now()-st.swallow<.6){ st.swallow=0; e.preventDefault(); e.stopPropagation(); return; }
+    }
+    try{ lastClick=originFrom(e); }catch(_){ lastClick=null; }
+  },true);
+  doc.addEventListener('change',function(e){
+    var t=e.target;
+    if(ON&&t&&t.matches&&t.matches(SW_SEL)&&!still()){ var st=swState(t,!t.checked); swColors(st); swGo(t,t.checked); }
+  },true);
+
+  new MutationObserver(function(recs){
+    if(!ON) return;
+    for(var i=0;i<recs.length;i++){ var r=recs[i];
+      if(r.type==='attributes'&&r.attributeName==='class'&&r.target.classList.contains('card')){
+        var was=/(^|\s)collapsed(\s|$)/.test(r.oldValue||''), isNow=r.target.classList.contains('collapsed');
+        if(was!==isNow){ try{ foldGo(r.target,!isNow); }catch(e){ console.warn('[motion]',e); } }
+      }
+    }
+    scheduleSync();
+  }).observe(doc.body,{subtree:true,childList:true,attributes:true,attributeOldValue:true,
+                       attributeFilter:['aria-selected','aria-pressed','class','hidden']});
+  /* เปลี่ยนธีม/รอบการตรวจ → อ่านสีของตัวชี้ใหม่ · เปลี่ยนรอบ → เนื้อหาเข้ามาใหม่อีกครั้ง */
+  new MutationObserver(function(recs){
+    if(!ON) return;
+    liqRestyle=true; scheduleSync();
+    for(var i=0;i<recs.length;i++) if(recs[i].attributeName==='data-phase'&&recs[i].oldValue!==root.getAttribute('data-phase')&&recs[i].oldValue!=null&&!still()){
+      var v=doc.querySelector('.view.on');
+      if(v){ v.style.animation='none'; void v.offsetWidth; v.style.animation=''; }
+      break;
+    }
+  }).observe(root,{attributes:true,attributeOldValue:true,attributeFilter:['data-theme','data-phase']});
+  var onMq=function(){ liqRestyle=true; scheduleSync(); };
+  [mq('(prefers-color-scheme: dark)'),RM].forEach(function(m){ try{ m.addEventListener('change',onMq); }catch(e){ try{ m.addListener(onMq); }catch(_){} } });
+  window.addEventListener('resize',scheduleSync,{passive:true});
+  window.addEventListener('orientationchange',scheduleSync,{passive:true});
+  window.addEventListener('pageshow',scheduleSync);
+  doc.addEventListener('visibilitychange',scheduleSync);
+  try{ if(doc.fonts&&doc.fonts.ready) doc.fonts.ready.then(scheduleSync); }catch(e){}
+  if(window.ResizeObserver){ try{ var ro=new ResizeObserver(scheduleSync);
+    doc.querySelectorAll('.topbar,.tabs.bottomnav,#nav,main').forEach(function(el){ ro.observe(el); }); }catch(e){} }
+}
+
+var M=window.Motion={on:true,toast:toast,step:step,Track:Track,sync:scheduleSync,springs:SP,run:run,now:now,still:still};
+try{
+  bakeAll(); hookDialogs(); wire();
+  root.classList.add('m-on');
+  scheduleSync();
+}catch(e){ fail(e); }
+})();
+</script>
+<script id="fill-js">
+/* ==================================================================
+   FILL MODE (V.3.3) — โหมดกรอกแบบฟอร์มของหน้า Data Collection
+   · มือถือ = ฟอร์มเสมอ · แท็บเล็ต = เลือกได้ (จำค่าไว้ในเครื่อง) · คอมพิวเตอร์ = กระดาษเหมือนเดิม
+   · ไม่สร้างช่องกรอกชุดใหม่: หยิบแถวของกระดาษ A4 ที่แอปวาดไว้ (ช่อง/ป้าย/ช่องรูปเดิมทุกตัว)
+     มาจัดกลุ่มเป็นการ์ด — 1 การ์ดต่อ 1 จุดตรวจ — ข้อมูลจึงถูกเขียนผ่านทางเดิมของแอปทั้งหมด
+   · แถบจุดตรวจด้านบน (หัวข้อ / Severity / จำนวนรูป / ประเภทความเสียหาย / แยก-ลบ / สถานะหลังซ่อม)
+     ถูกซ่อน แล้ว "ฉายสำเนา" ลงไปในการ์ดของจุดตรวจนั้น · แตะสำเนา = สั่งตัวจริง
+   · การเคลื่อนไหวใช้สปริงชุดเดียวกับชั้น motion (Motion.Track / Motion.run)
+   ================================================================== */
+(function(){
+'use strict';
+if(window.FillMode) return;
+var doc=document, root=doc.documentElement, M=window.Motion||null;
+var q=function(s,r){ return (r||doc).querySelector(s); };
+var qa=function(s,r){ return Array.prototype.slice.call((r||doc).querySelectorAll(s)); };
+var mq=function(s){ try{ return window.matchMedia(s); }catch(e){ return {matches:false}; } };
+var COARSE=mq('(pointer:coarse)');
+var LS='ci_fill';
+var INTER='button,select,input,textarea,a[href],[role="button"]';
+var paper=null, lastKey='', foldMem={};
+
+/* ---------------- ชนิดอุปกรณ์ → โหมด ---------------- */
+/* จอสัมผัส: ดูด้านสั้นของจอ (หมุนเครื่องหรือเปิดคีย์บอร์ดแล้วไม่เปลี่ยนโหมด) · เมาส์: ดูความกว้างหน้าต่าง */
+function dev(){
+  var w=window.innerWidth||root.clientWidth||1280;
+  if(COARSE.matches){ var s=Math.min(screen.width||w,screen.height||w)||w; return s<600?'phone':'tablet'; }
+  return w<640?'phone':(w<=1180?'tablet':'desktop');
+}
+function pref(){ try{ return localStorage.getItem(LS); }catch(e){ return null; } }
+function modeOf(d){ return d==='phone'?'form':(d==='tablet'&&pref()==='form'?'form':'paper'); }
+function isForm(){ return root.getAttribute('data-fill')==='form'; }
+function paperPage(){ try{ return ['sheet','cover','head'].indexOf(PAGE.k)>=0; }catch(e){ return false; } }
+function apply(first){
+  var d=dev(), m=modeOf(d), ch=root.getAttribute('data-fill')!==m;
+  root.setAttribute('data-dev',d);
+  if(ch) root.setAttribute('data-fill',m);
+  qa('#fillSeg [data-fillset]').forEach(function(b){ b.setAttribute('aria-pressed',String(b.getAttribute('data-fillset')===m)); });
+  if(ch&&!first&&paperPage()){
+    lastKey='';
+    try{ if(typeof closeSug==='function') closeSug(); Promise.resolve(renderPage()).catch(function(e){ console.warn('[fill]',e); }); }
+    catch(e){ console.warn('[fill]',e); }
+  }
+}
+
+/* ---------------- ตัวช่วยสร้างโครงการ์ด ---------------- */
+function mkBody(table,cls){ var b=doc.createElement('tbody'); b.className='fmc '+cls; table.appendChild(b); return b; }
+function mkRow(cls,html){
+  var tr=doc.createElement('tr'); tr.className=cls;
+  var td=doc.createElement('td'); td.colSpan=20; if(html) td.innerHTML=html; tr.appendChild(td); return tr;
+}
+function chev(){ try{ return ico('chevronDown'); }catch(e){ return '▾'; } }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function foldHead(title,name){
+  var tr=mkRow('fmh','<span class="fmt">'+title+'</span><span class="fms"></span>'
+    +'<button type="button" class="fmtog" aria-label="กาง / พับ '+title+'" aria-expanded="true">'+chev()+'</button>');
+  tr.setAttribute('data-fmfold',name); return tr;
+}
+function pageKey(){ try{ return PAGE.k+':'+PAGE.id; }catch(e){ return ''; } }
+function curSeq(){ try{ return seqById(PAGE.k==='sheet'?cur.seqId:PAGE.id)||seqById(CUR_SEQ); }catch(e){ return null; } }
+
+/* ---- การ์ดหัวกระดาษ ---- */
+function buildHead(table,rows,foldable){
+  var tb=mkBody(table,'fm-head');
+  tb.appendChild(foldable?foldHead('หัวกระดาษ','head'):mkRow('fmh','<span class="fmt">ข้อมูลหัวกระดาษ</span>'));
+  var bl=rows[4]; if(bl){ bl.classList.add('fm-bldg'); tb.appendChild(bl); }      /* ชื่ออาคาร (จำเป็น) ขึ้นก่อน */
+  for(var i=0;i<4&&i<rows.length;i++){
+    var r=rows[i], lab=null; r.classList.add('fm-hr');
+    Array.prototype.forEach.call(r.cells,function(td){
+      var c=td.classList;
+      if(c.contains('logo')||c.contains('c')){ c.add('fm-hide'); return; }
+      if(c.contains('nr')){ lab=td; return; }
+      if(c.contains('nl')){
+        if(td.querySelector('[data-k]')){ if(lab) lab.classList.add('fml'); c.add('fmv'); }
+        else { if(lab) lab.classList.add('fm-hide'); c.add('fm-hide'); }      /* PAGE: ระบบคำนวณเอง — ดูได้ที่หัวหน้า */
+        lab=null;
+      }
+    });
+    tb.appendChild(r);
+  }
+  return tb;
+}
+/* ---- การ์ดลายเซ็น ---- */
+function buildSign(table,row,spc){
+  if(!row) return null;
+  var tb=mkBody(table,'fm-sign');
+  tb.appendChild(foldHead('ลายเซ็นท้ายกระดาษ','sign'));
+  if(spc) tb.appendChild(spc);
+  row.classList.add('fm-sg');
+  qa('td.sign .sl',row).forEach(function(sl){      /* เส้น ____ ของกระดาษ ไม่ต้องแสดงในฟอร์ม */
+    var n=sl.lastChild;
+    if(n&&n.nodeType===3&&/_{4,}/.test(n.nodeValue)){ n.nodeValue=n.nodeValue.replace(/\s*_{4,}\s*$/,''); }
+  });
+  tb.appendChild(row); return tb;
+}
+function tagField(r){
+  var l=r.querySelector('td.ddl'); if(!l) return;
+  l.classList.add('fml'); var v=l.nextElementSibling; if(v) v.classList.add('fmv');
+  qa('br',l).forEach(function(br){ br.parentNode.replaceChild(doc.createTextNode(' '),br); });      /* ป้าย 2 บรรทัดของกระดาษ → บรรทัดเดียว */
+}
+
+/* ---- หน้า Inspection Sheet: 1 การ์ด = 1 จุดตรวจ ---- */
+function buildSheet(pa){
+  var table=q('table',pa); if(!table||!table.tBodies.length) return;
+  var rows=Array.prototype.slice.call(table.tBodies[0].rows);
+  buildHead(table,rows.slice(0,5),true);
+  var pend=[], cards=[], sign=null, spc=null;
+  var card=function(b){
+    if(cards[b]) return cards[b];
+    var tb=mkBody(table,'fm-find'); tb.setAttribute('data-b',b);
+    var s={head:mkRow('fmh'),post:mkRow('fmx fm-post'),pbar:mkRow('fmx fm-pbar'),sev:mkRow('fmx fm-sev'),
+           dmg:mkRow('fmx fm-dmg'),act:mkRow('fmx fm-act')};
+    tb.appendChild(s.head); tb.appendChild(s.post); tb.appendChild(s.pbar);
+    tb._s=s; tb._sig=''; return (cards[b]=tb);
+  };
+  for(var i=5;i<rows.length;i++){
+    var r=rows[i];
+    if(r.classList.contains('ph')){ pend.push(r); continue; }
+    if(r.classList.contains('spc')){ spc=r; continue; }
+    if(r.querySelector('td.sign')){ sign=r; continue; }
+    var m=r.querySelector('[data-dd]'); if(!m) continue;
+    var a=m.getAttribute('data-dd').split(':'), b=+a[1], k=a[2], tb=card(b), coat=r.classList.contains('ctg');
+    pend.forEach(function(x){ tb.appendChild(x); }); pend=[];
+    r.classList.add('fm-fr'); r.classList.add(coat?'fm-coat':'fm-'+k); tagField(r);
+    if(k==='problem'&&!coat){ var st=r.cells[2]; if(st&&!st.classList.contains('sevv')) st.classList.add('fm-hide'); }
+    tb.appendChild(r);
+    if(k==='problem'){ tb.appendChild(tb._s.sev); tb.appendChild(tb._s.dmg); }
+  }
+  cards.forEach(function(tb,n){ if(!tb) return; tb.appendChild(tb._s.act); tb.style.setProperty('--i',n+1); });
+  var sg=buildSign(table,sign,spc); if(sg) sg.style.setProperty('--i',cards.length+1);
+}
+/* สำเนาแถบจุดตรวจ → กระจายลงช่องของการ์ด (แตะสำเนา = สั่งตัวจริงใน #fbar ผ่านหมายเลข data-fmi) */
+function syncFinds(pa){
+  var frs=qa('#fbar>.fr');
+  qa('tbody.fm-find',pa).forEach(function(tb){
+    var b=+tb.getAttribute('data-b'), src=frs[b], s=tb._s; if(!src||!s) return;
+    var sig=src.outerHTML; if(tb._sig===sig) return; tb._sig=sig;
+    var cl=src.cloneNode(true);
+    Array.prototype.forEach.call(cl.querySelectorAll(INTER),function(el,i){ el.setAttribute('data-fmi',i); });
+    var bk={head:[],post:[],pbar:[],sev:[],dmg:[],act:[]};
+    Array.prototype.slice.call(cl.children).forEach(function(el){
+      var c=el.classList;
+      if(c.contains('brk')||c.contains('fsp')||c.contains('tp')||(c.contains('fmv')&&c.contains('p1'))) return;
+      if(c.contains('pst')) bk.post.push(el);
+      else if(c.contains('pc')||c.contains('phpick')) bk.pbar.push(el);
+      else if(c.contains('sv')||c.contains('sevpick')||c.contains('lvn')||c.contains('chn')) bk.sev.push(el);
+      else if(c.contains('dg')||c.contains('dmgpick')) bk.dmg.push(el);
+      else if(c.contains('fmv')||c.contains('fact')) bk.act.push(el);
+      else bk.head.push(el);
+    });
+    Object.keys(bk).forEach(function(k){
+      var td=s[k].cells[0]; td.textContent='';
+      if(k==='pbar'){ var l=doc.createElement('span'); l.className='fmlab'; l.textContent='รูปถ่าย'; td.appendChild(l); }
+      bk[k].forEach(function(el){ td.appendChild(el); });
+      s[k].hidden=(k!=='head'&&k!=='pbar'&&!bk[k].length);
+    });
+  });
+}
+
+/* ---- หน้าปก ---- */
+function buildCover(pa){
+  var table=q('table',pa); if(!table||!table.tBodies.length) return;
+  var rows=Array.prototype.slice.call(table.tBodies[0].rows), n=1;
+  buildHead(table,rows.slice(0,5),true);
+  var ph=null, part=null, sign=null;
+  for(var i=5;i<rows.length;i++){
+    var r=rows[i];
+    if(r.classList.contains('ph')){
+      if(!ph){ ph=mkBody(table,'fm-cph'); ph.style.setProperty('--i',n++); ph.appendChild(mkRow('fmh','<span class="fmt">รูปหน้าปก</span><span class="fms">แตะรูปเพื่อเลือกรูปอื่น</span>')); }
+      ph.appendChild(r); continue;
+    }
+    if(r.querySelector('td.sign')){ sign=r; continue; }
+    if(r.querySelector('td.ck')){
+      if(!part){ part=mkBody(table,'fm-ck'); part.style.setProperty('--i',n++); }
+      r.classList.add('fm-ckr');
+      if(r.cells[0]) r.cells[0].classList.add('fm-n');
+      if(r.cells[1]) r.cells[1].classList.add('fm-tx');
+      part.appendChild(r); continue;
+    }
+    if(r.cells.length===1&&r.cells[0].classList.contains('shd')){      /* ชื่อส่วน (Overall / Runway / Hoist) = หัวการ์ด */
+      part=mkBody(table,'fm-ck'); part.style.setProperty('--i',n++);
+      r.classList.add('fmh'); r.classList.add('fm-pt'); part.appendChild(r); continue;
+    }
+    r.classList.add('fm-hide');      /* แถวหัวตาราง CHECKLIST / Acceptable / Defect / Remark */
+  }
+  var sg=buildSign(table,sign,null); if(sg) sg.style.setProperty('--i',n);
+}
+
+/* ---------------- พับ / กาง การ์ด ---------------- */
+function summary(tb){
+  var el=q('.fms',tb); if(!el) return;
+  var seq=curSeq(), name=tb.classList.contains('fm-head')?'head':'sign', t='', warn=false;
+  try{
+    if(name==='head'){
+      var h=(seq&&seq.head)||{}, bn=String((seq&&seq.building)||'').trim();
+      if(!bn){ t='ยังไม่ได้กรอกชื่ออาคาร / อุปกรณ์'; warn=true; }
+      else{ var d=fmtDate(pageDate(seq,PAGE.k==='sheet'?cur:null)); t=[bn,h.eqCode,d].filter(Boolean).join(' · '); }
+    }else{
+      var ns=SIG_ROLES.map(function(r){ return String((SIG[r.key]||{}).name||'').trim(); }).filter(Boolean);
+      t=ns.length?ns.join(' · '):'ยังไม่ได้ใส่ชื่อ — แตะเพื่อกรอก';
+    }
+  }catch(e){}
+  el.textContent=t; el.classList.toggle('warn',warn);
+}
+function setFold(tb,open,animate){
+  var was=!tb.classList.contains('fm-closed'), btn=q('.fmtog',tb), name=tb.classList.contains('fm-head')?'head':'sign';
+  if(btn) btn.setAttribute('aria-expanded',String(open));
+  foldMem[pageKey()+':'+name]=open;
+  summary(tb);
+  if(was===open) return;
+  var can=animate&&M&&M.on&&M.run&&!M.still();
+  var h0=can?tb.getBoundingClientRect().height:0;
+  tb.classList.toggle('fm-closed',!open);
+  if(open){ try{ autosizeAll('#formPaper'); }catch(e){} }
+  if(!can){ tb.style.height=''; tb.style.removeProperty('--fp'); tb.classList.remove('fm-anim'); return; }
+  tb.style.height=''; tb.classList.remove('fm-anim');
+  var h1=tb.getBoundingClientRect().height;      /* ความสูงปลายทางจริง (วัดจากเลย์เอาต์) */
+  tb.style.height=h0+'px'; tb.classList.add('fm-anim');
+  var st=tb._fold;
+  if(!st){
+    st=tb._fold={h:new M.Track(h0),lo:0,hi:1,rig:null};
+    st.rig=function(t){
+      if(!tb.isConnected) return false;
+      var v=st.h.at(t);
+      if(st.h.idle()){ tb.style.height=''; tb.style.removeProperty('--fp'); tb.classList.remove('fm-anim'); return false; }
+      tb.style.height=Math.max(0,v).toFixed(2)+'px';
+      tb.style.setProperty('--fp',Math.max(0,Math.min(1,(v-st.lo)/Math.max(1,st.hi-st.lo))).toFixed(3));
+      return true;
+    };
+  }
+  var flying=!st.h.idle();
+  if(!flying) st.h.set(h0);
+  if(open){ st.hi=h1; if(!flying) st.lo=h0; } else { st.lo=h1; if(!flying) st.hi=h0; }
+  st.h.to(h1,M.springs.fold);      /* กดซ้ำกลางทาง = บวกสปริงอีกตัว ไม่กระตุก */
+  st.rig(M.now()); M.run(st.rig);
+}
+function initFolds(pa){
+  qa('tbody.fmc>tr.fmh[data-fmfold]',pa).forEach(function(hr){
+    var tb=hr.parentNode, name=hr.getAttribute('data-fmfold'), mem=foldMem[pageKey()+':'+name], open;
+    if(mem!=null) open=mem;
+    else if(name==='head'){ var s=curSeq(); open=!(s&&String(s.building||'').trim()); }      /* ยังไม่มีชื่ออาคาร → กางไว้ให้กรอก */
+    else open=false;
+    tb.classList.toggle('fm-closed',!open);
+    var btn=q('.fmtog',tb); if(btn) btn.setAttribute('aria-expanded',String(open));
+    summary(tb);
+  });
+}
+
+/* ---------------- จัดหน้า (เรียกทุกครั้งที่แอปวาดกระดาษหรือแถบจุดตรวจใหม่) ---------------- */
+function headTexts(){
+  try{
+    if(PAGE.k!=='head') return;
+    var s=q('#pageTop .ptitle span');
+    if(s&&s.textContent.indexOf('หน้าตาเหมือนไฟล์ Word')>=0) s.textContent='กรอกครั้งเดียว — ข้อมูลชุดนี้ใช้กับหน้าปกและทุก Inspection Sheet ในลำดับนี้';
+    var ib=q('#pageTop .infobar span');
+    if(ib&&ib.innerHTML.indexOf('แถวสีเทา')>=0)
+      ib.innerHTML=ib.innerHTML.replace(/<b>แตะช่องว่างข้างป้ายเพื่อพิมพ์<\/b>\s*·\s*แถวสีเทา\s*=\s*ชื่ออาคาร \/ อุปกรณ์ \(จำเป็น\)/,'<b>ชื่ออาคาร / อุปกรณ์ จำเป็นต้องกรอก</b>');
+  }catch(e){}
+}
+function decorate(){
+  try{ var ab=q('#annBar'); root.classList.toggle('fm-ann',isForm()&&!!ab&&!ab.hidden&&PAGE.k==='sheet'); }catch(e){}
+  if(!isForm()||!paper) return;
+  var pa=q('.paper.edit',paper); if(!pa) return;
+  try{
+    if(!pa.hasAttribute('data-fm')){
+      pa.setAttribute('data-fm','1');
+      var key=pageKey();
+      if(key!==lastKey){ lastKey=key; if(M&&M.on&&!M.still()) pa.classList.add('fm-enter'); }      /* เปิดหน้าใหม่เท่านั้นจึงทยอยปรากฏ */
+      if(pa.hasAttribute('data-sheet')) buildSheet(pa);
+      else if(pa.hasAttribute('data-cover')) buildCover(pa);
+      else { var t=q('table',pa); if(t&&t.tBodies.length) buildHead(t,Array.prototype.slice.call(t.tBodies[0].rows),false); }
+      initFolds(pa); headTexts();
+      try{ autosizeAll('#formPaper'); }catch(e){}
+    }
+    if(pa.hasAttribute('data-sheet')) syncFinds(pa);
+  }catch(e){ console.warn('[fill]',e); }
+}
+
+/* ---------------- เหตุการณ์ ---------------- */
+function origOf(t){
+  var tb=t.closest('tbody.fm-find'); if(!tb) return null;
+  var fr=qa('#fbar>.fr')[+tb.getAttribute('data-b')]; if(!fr) return null;
+  return fr.querySelectorAll(INTER)[+t.getAttribute('data-fmi')]||null;
+}
+function wire(){
+  paper=q('#formPaper'); if(!paper) return;
+  paper.addEventListener('click',function(e){
+    if(!isForm()) return;
+    var t=e.target.closest&&e.target.closest('[data-fmi]');
+    if(t&&paper.contains(t)){
+      if(/^(SELECT|INPUT|TEXTAREA)$/.test(t.tagName)) return;
+      var o=origOf(t); if(o){ e.preventDefault(); o.click(); }
+      return;
+    }
+    var hr=e.target.closest&&e.target.closest('tr.fmh[data-fmfold]');
+    if(hr&&paper.contains(hr)){ var tb=hr.parentNode; setFold(tb,tb.classList.contains('fm-closed'),true); }
+  });
+  paper.addEventListener('change',function(e){
+    if(!isForm()) return;
+    var t=e.target; if(!t||!t.hasAttribute||!t.hasAttribute('data-fmi')) return;
+    var o=origOf(t); if(!o) return;
+    if(t.type==='checkbox'||t.type==='radio') o.checked=t.checked; else o.value=t.value;
+    o.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  /* กำลังพิมพ์ → ซ่อนแถบเครื่องมือวาดชั่วคราว (ไม่ให้ทับช่องเหนือคีย์บอร์ด) */
+  paper.addEventListener('focusin',function(e){ var t=e.target; if(t&&t.matches&&t.matches('.fld,select,input')) root.classList.add('fm-typing'); });
+  paper.addEventListener('focusout',function(){ root.classList.remove('fm-typing'); });
+  /* ชื่ออาคาร / ชื่อผู้ลงนามเปลี่ยน → อัปเดตบรรทัดสรุปของการ์ดที่พับอยู่ */
+  paper.addEventListener('input',function(){ if(isForm()) qa('tbody.fmc>tr.fmh[data-fmfold]',paper).forEach(function(hr){ summary(hr.parentNode); }); });
+
+  var seg=q('#fillSeg');
+  if(seg) seg.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-fillset]'); if(!b) return;
+    try{ localStorage.setItem(LS,b.getAttribute('data-fillset')); }catch(err){}
+    apply(false);
+  });
+
+  var mo=new MutationObserver(function(){ decorate(); });
+  mo.observe(paper,{childList:true});
+  var top=q('#pageTop'); if(top) mo.observe(top,{childList:true,subtree:true});
+
+  var rz=0, onRz=function(){ clearTimeout(rz); rz=setTimeout(function(){ apply(false); },160); };
+  window.addEventListener('resize',onRz,{passive:true});
+  window.addEventListener('orientationchange',onRz,{passive:true});
+  try{ COARSE.addEventListener('change',onRz); }catch(e){ try{ COARSE.addListener(onRz); }catch(_){} }
+}
+
+/* ---------------- จุดเชื่อมที่แอปเรียก ---------------- */
+/* หน้าปก: วัด "ยาวเกิน 1 หน้า" จากกระดาษจริงนอกจอ (ฟอร์มบนจอไม่ใช่ขนาด A4) — วิธีเดียวกับที่แอปใช้กับ Inspection Sheet */
+function overflows(){
+  try{
+    if(PAGE.k!=='cover') return false;
+    var seq=seqById(PAGE.id); if(!seq) return false;
+    var host=q('#fitProbe');
+    if(!host){ host=doc.createElement('div'); host.id='fitProbe'; host.setAttribute('aria-hidden','true');
+      host.style.cssText='position:absolute;left:-99999px;top:0;visibility:hidden;pointer-events:none'; doc.body.appendChild(host); }
+    host.innerHTML=coverPaperHtml(seq,coverPhotoPlan(seq),[],false);
+    qa('td.sign',host).forEach(function(td,i){
+      var im=td.querySelector('img.sigimg'), g=((SIG[(SIG_ROLES[i]||{}).key]||{}).img)||null; if(!im) return;
+      var cs=getComputedStyle(im), mw=parseFloat(cs.maxWidth)||1e9, mh=parseFloat(cs.maxHeight)||1e9;
+      var w=(g&&g.w)||mw, h=(g&&g.h)||mh, k=Math.min(1,mw/w,mh/h);
+      im.style.width=(w*k).toFixed(2)+'px'; im.style.height=(h*k).toFixed(2)+'px'; });
+    var o=paperOverflows(host.querySelector('.paper')); host.innerHTML=''; return o;
+  }catch(e){ return false; }
+}
+/* "ไปแก้" จากหน้าตรวจสอบ: พาไปยังตัวควบคุมในการ์ด (คืน true = จัดการแล้ว) */
+function focus(f){
+  if(!isForm()||!paper) return false;
+  var el=null;
+  if(f.indexOf('pst:')===0) el=q('[data-pst="'+f.slice(4)+'"]',paper);
+  else if(f.indexOf('item:')===0) el=q('select[data-item="'+f.slice(5)+'"]',paper);
+  else if(f.indexOf('sev:')===0) el=q('tbody.fm-find[data-b="'+f.slice(4)+'"] .sevpick',paper);
+  else{
+    var k=q('[data-k="'+f+'"]',paper), tb=k&&k.closest('tbody.fm-closed');
+    if(tb) setFold(tb,true,false);      /* ช่องอยู่ในการ์ดที่พับ → กางก่อน แล้วให้แอปโฟกัสตามปกติ */
+    return false;
+  }
+  if(!el) return false;
+  try{ el.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){}
+  var row=el.closest('tr'); if(row){ row.classList.add('flash'); setTimeout(function(){ row.classList.remove('flash'); },1900); }
+  var fb=el.matches(INTER)?el:el.querySelector(INTER); if(fb){ try{ fb.focus({preventScroll:true}); }catch(e){} }
+  return true;
+}
+
+window.FillMode={isForm:isForm,overflows:overflows,focus:focus,apply:apply,decorate:decorate,device:dev};
+try{ apply(true); wire(); apply(true); decorate(); }catch(e){ console.warn('[fill]',e); root.removeAttribute('data-fill'); }
+})();
 </script>
 </body>
 </html>
