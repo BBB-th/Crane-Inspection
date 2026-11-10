@@ -1176,6 +1176,14 @@ body.fb .paper.cv td.s12,body.fb .paper .s12{font-size:9pt}
 .thumbs .th .fixed{font-size:10.5px;color:var(--muted)}
 
 .paper td.sign .sl .sigimg{display:inline-block;vertical-align:middle;max-height:9mm;max-width:26mm;margin:0}
+/* V.4.5 ลายเซ็นอยู่ในกล่องขนาดคงที่ 26 × 6.5 มม. (ชิดเส้นบรรทัด) — รูปย่อลงให้อยู่ในกล่องเท่านั้น ไม่ล้นกรอบตาราง
+   ขนาดกล่องรู้ล่วงหน้า ความสูงแถวลงนามจึงเท่ากันทั้งบนจอ หน้าสั่งพิมพ์ และไฟล์ PDF (ไม่ต้องรอรูปโหลด) */
+.paper td.sign .sl .sigbox{display:inline-block;position:relative;width:26mm;height:6.5mm;vertical-align:-1.2mm;overflow:hidden;line-height:0}
+/* เว้นระยะเหนือลายเซ็น 1.5 มม. — ลายเซ็นไม่ชิด/ทับเส้นขอบบนของแถว */
+.paper td.sign .sl{padding-top:1.5mm}
+html[data-fill="form"] #formPaper .paper td.sign .sl{padding-top:0}
+.paper td.sign .sl .sigbox img.sigimg{position:absolute;left:0;top:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;
+  object-fit:contain;object-position:left bottom}
 .rec[data-sid] .handle{align-self:center}
 .rb[disabled]{opacity:.35;cursor:not-allowed}
 
@@ -2811,6 +2819,8 @@ html[data-fill="form"] #formPaper .paper td.sign{text-align:left;font-weight:400
 html[data-fill="form"] #formPaper .paper td.sign .sl{font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px;white-space:normal;overflow:visible}
 html[data-fill="form"] #formPaper .paper td.sign img.sigimg{display:inline-block;vertical-align:middle;max-height:40px;max-width:150px;margin:0 0 0 6px;
   background:#fff;border-radius:6px}
+html[data-fill="form"] #formPaper .paper td.sign .sl .sigbox{width:150px;height:40px;vertical-align:middle;margin-left:6px;background:#fff;border-radius:6px}
+html[data-fill="form"] #formPaper .paper td.sign .sl .sigbox img.sigimg{margin:0;max-width:none;max-height:none;border-radius:0}
 html[data-fill="form"] #formPaper .paper td.sign>div:nth-child(2){font-size:0}
 html[data-fill="form"] #formPaper .paper td.sign .dt{text-align:left;font-size:12px;color:var(--muted);margin-top:6px}
 html[data-fill="form"] #formPaper .paper .sigbtn{position:static;opacity:1;margin-top:8px;min-height:36px;padding:6px 12px;border:1px solid var(--line);
@@ -4202,7 +4212,7 @@ function signRow(spans,e,small,date){
     const s=SIG[r.key]||{};
     const nm=e?fTxt('sig:'+r.key+':name',s.name,'ชื่อ-นามสกุล','inl'):hesc(s.name||'\u00A0'.repeat(26));
     return '<td class="sign'+(small?' s12':'')+'" colspan="'+spans[i]+'">'
-      +'<div class="sl">'+r.label+': '+(s.img?('<img class="sigimg" src="'+s.img.dataUrl+'" alt="">'):SIGN_LINE)+'</div>'
+      +'<div class="sl">'+r.label+': '+(s.img?('<span class="sigbox"><img class="sigimg" src="'+s.img.dataUrl+'" alt=""></span>'):SIGN_LINE)+'</div>'
       +'<div>('+nm+')</div>'
       +'<div class="dt">Date '+hesc(fmtDate(date))+'</div>'
       +(e?'<button type="button" class="sigbtn" data-gosign="1" title="ใส่รูปลายเซ็น">✍ ลายเซ็น</button>':'')
@@ -4392,8 +4402,9 @@ function wTbl(grid,rows){
     +'<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr>'
     +'<w:tblGrid>'+grid.map(g=>'<w:gridCol w:w="'+g+'"/>').join('')+'</w:tblGrid>'+rows+'</w:tbl>';
 }
-const DOCX_PB='<w:p><w:pPr><w:spacing w:after="0" w:line="20" w:lineRule="exact"/><w:rPr><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr></w:pPr>'
-  +'<w:r><w:rPr><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr><w:br w:type="page"/></w:r></w:p>';
+/* V.4.5 ตัวคั่นหน้า = ย่อหน้า 1pt ที่ตั้ง "ขึ้นหน้าใหม่ก่อน" (pageBreakBefore) แทนตัวแบ่งหน้า (w:br page)
+   ตารางที่เต็มหน้าพอดีจนย่อหน้าคั่นล้นไปหน้าถัดไป จะไม่เกิดหน้าว่างแทรก (เดิมหน้าปกตามด้วยหน้าว่าง 1 หน้า) */
+const DOCX_PB='<w:p><w:pPr><w:pageBreakBefore/><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/><w:rPr><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr></w:pPr></w:p>';
 const DOCX_END='<w:p><w:pPr><w:spacing w:after="0" w:line="20" w:lineRule="exact"/><w:rPr><w:sz w:val="2"/><w:szCs w:val="2"/></w:rPr></w:pPr></w:p>';
 
 /* ครอบตัดรูปให้เต็มกล่อง 4:3 แบบเดียวกับที่หน้าจอแสดง (object-fit:cover) */
@@ -4473,7 +4484,32 @@ function dHead(ctx,G,L,seq,pg,tot,date){
       +wTc(W(L.civ),L.civ[1],wT('INSPECTION SHEET',{b:1,jc:'center'}),{vm:'restart',bd:BD.R,va:'center'})
       +lab(L.l1,'EQ.CODE:')+val(L.v1,hv('eqCode'))+lab(L.l2,'DATE ISSUE:')+val(L.v2,hv('dateIssue')))
     +wTr(lc('cont')+wTc(W(L.civ),L.civ[1],wP('',B),{vm:'cont',bd:BD.R})
-      +lab(L.l1,'EQ.NAME:')+val(L.v1,hv('eqName'))+lab(L.l2,'PM ORDER:')+val(L.v2,hv('pmOrder')),60);
+      +dEqName(W(L.l1),L.l1[1],W(L.v1),L.v1[1],hv('eqName'))+lab(L.l2,'PM ORDER:')+val(L.v2,hv('pmOrder')),60);
+}
+/* V.4.5 ช่อง EQ.NAME — ชื่อยาวเกิน 1 บรรทัดทำให้หน้าปกเกิน 1 หน้า:
+   1) พอดีช่องค่า → แบบเดิม (ป้าย | ค่า)
+   2) ไม่พอ → รวมเป็นช่องเดียว "EQ.NAME: ชื่อ" (เว้น 1 ช่องว่าง) ได้ความกว้างของช่องป้ายเพิ่ม
+   3) ยังไม่พอ → ลดขนาดเฉพาะชื่อทีละ 0.5pt จาก 14pt จนอยู่ 1 บรรทัด (ป้ายคง 14pt)
+   4) ชื่อที่ 11pt ยังไม่พอ → ลดทั้งบรรทัด (ป้าย+ชื่อ) — ต่ำสุด 11pt (EQ_MIN_SZ) */
+const EQ_MIN_SZ=22;
+function dEqName(lw,ls,vw,vs,name){
+  const B={b:1}, fit=(t,w,pt)=>textLines(t,w-60,pt,true)<=1;
+  name=String(name||'');
+  if(!name||fit(name,vw,14))
+    return wTc(lw,ls,wT('EQ.NAME:',B),{bd:BD.T+BD.L+BD.B+BD.nR})+wTc(vw,vs,wT(name,B),{bd:BD.T+BD.nL+BD.B+BD.R});
+  /* ป้าย "EQ.NAME: " คงขนาด 14pt — ลดขนาดเฉพาะชื่อ (ความกว้างที่เหลือ = ช่องรวม − ความกว้างป้าย) */
+  /* ถ้าชื่อที่ 11pt ยังไม่พอ ลดทั้งบรรทัด (ป้าย+ชื่อ) ลงพร้อมกันจนพอดี — ต่ำสุด 11pt เช่นกัน */
+  const w=lw+vw, nw=w-textTw('EQ.NAME: ',14,true);
+  let sz=28, lsz=28; while(sz>EQ_MIN_SZ&&!fit(name,nw,sz/2)) sz--;
+  if(!fit(name,nw,sz/2)){ lsz=28; while(lsz>EQ_MIN_SZ&&!fit('EQ.NAME: '+name,w,lsz/2)) lsz--; sz=lsz; }
+  return wTc(w,ls+vs,wP(wRuns('EQ.NAME: ',{b:1,sz:lsz})+wRuns(name,{b:1,sz:sz}),B),{bd:BD.T+BD.L+BD.B+BD.R});
+}
+/* ความกว้างข้อความ (twip) ด้วยฟอนต์/สเกลเดียวกับ textLines() */
+function textTw(text,sizePt,bold){
+  textLines('x',1000,sizePt,bold);
+  const fb=document.body.classList.contains('fb'), px=(sizePt||14)*(fb?0.75:1)*96/72;
+  _mctx.font=(bold?'700 ':'400 ')+px.toFixed(2)+'px '+(fb?'Sarabun':'"TH SarabunPSK","TH Sarabun New",Sarabun')+',sans-serif';
+  return _mctx.measureText(String(text||'')).width*15;
 }
 const dBldg=(seq,W,span)=>wTr(wTc(W,span,wT(seq.building||'',{b:1,jc:'center'}),{fill:'F2F2F2'}));
 /* แถวลงนาม — ส่วนลงนาม 2 บรรทัดเท่ากันทุกช่อง: "ตำแหน่ง: ____" (หรือรูปลายเซ็นต่อท้ายในบรรทัดเดียวกัน) / (ชื่อ)
@@ -4525,8 +4561,9 @@ function dSheet(ctx,seq,sh,photos,pg,tot){
 function dCover(ctx,seq,photos,tot){
   const G=CG, R=coverRows(seq), s12={sz:24,style:'NoSpacing'};
   let rows=dHead(ctx,G,{logo:[0,2],civ:[2,2],l1:[4,1],v1:[5,5],l2:[10,2],v2:[12,1]},seq,1,tot||pageTotal(seq),pageDate(seq,null))+dBldg(seq,9923,13);
+  /* V.4.5 แถวรูปหน้าปกสูง 2900 tw (เดิม 2960 — รูปขนาดเท่าเดิม 2835 tw) เผื่อพื้นที่ไม่ให้หน้าปกเกิน 1 หน้า */
   for(let r=0;r<3;r++) rows+=wTr(wTc(4959,6,dPhoto(ctx,photos[r*2]),{va:'center'})
-                               +wTc(4964,7,dPhoto(ctx,photos[r*2+1]),{va:'center'}),2960);
+                               +wTc(4964,7,dPhoto(ctx,photos[r*2+1]),{va:'center'}),2900);
   const H=Object.assign({b:1,jc:'center'},s12), sh='F2F2F2';
   rows+=wTr(wTc(5104,7,wT('CHECKLIST (CAUSE)',H),{fill:sh})+wTc(1134,1,wT('Acceptable',H),{fill:sh})
            +wTc(850,3,wT('Defect',H),{fill:sh})+wTc(2835,2,wT('Remark',H),{fill:sh}));
@@ -4601,6 +4638,10 @@ async function renderDocx(seqList,progress){
   }
   let doc=td.decode(files.get('word/document.xml'));
   doc=doc.replace('@@BODY@@',bodies.join(DOCX_PB)+DOCX_END);
+  /* V.4.5 ขอบกระดาษบน/ล่าง 680 → 454 tw (1.2 → 0.8 ซม.) และระยะหัว/ท้ายกระดาษ 709 → 170 tw (0.3 ซม.)
+     เผื่อพื้นที่ให้หน้าปกไม่เกิน 1 หน้าในทุกเครื่อง (ฟอนต์/ระยะบรรทัดของแต่ละเครื่องต่างกันเล็กน้อย) */
+  doc=doc.replace(/(<w:pgMar[^>]*?)w:top="\d+"/,'$1w:top="454"').replace(/(<w:pgMar[^>]*?)w:bottom="\d+"/,'$1w:bottom="454"')
+    .replace(/w:header="\d+" w:footer="\d+"/,'w:header="170" w:footer="170"');
   let rels=td.decode(files.get('word/_rels/document.xml.rels'));
   rels=rels.replace('</Relationships>',ctx.rels+'</Relationships>');
   files.set('word/document.xml',te.encode(doc));
@@ -6315,6 +6356,8 @@ async function doPrint(){
   toast('กำลังจัดหน้า…',6000);
   const r=await pagesHtml(list,0);
   $('#printRoot').innerHTML=r.html;
+  /* V.4.5 รอรูป (รวมลายเซ็น) โหลดครบก่อนวัด/ย่อหน้า — ไม่งั้นหน้าสั่งพิมพ์กับไฟล์ PDF อาจจัดหน้าไม่ตรงกัน */
+  await Promise.all($$('#printRoot img').map(im=>(im.decode?im.decode():Promise.resolve()).catch(()=>{})));
   $('#printRoot').style.display='block'; fitPapers('#printRoot'); $('#printRoot').style.display='';
   setTimeout(()=>{ try{ window.print(); }catch(e){ toast('เบราว์เซอร์นี้สั่งพิมพ์ไม่ได้ — ใช้ปุ่ม Word แล้ว Save as PDF แทน'); } },400);
 }
@@ -7600,12 +7643,7 @@ function sheetOverflows(seq,sh,over){
   if(!host){ host=document.createElement('div'); host.id='fitProbe'; host.setAttribute('aria-hidden','true');
     host.style.cssText='position:absolute;left:-99999px;top:0;visibility:hidden;pointer-events:none'; document.body.appendChild(host); }
   host.innerHTML=sheetPaperHtml(seq,over?Object.assign({},sh,over):sh,[],false,2,pageTotal(seq));
-  /* รูปลายเซ็นทำให้แถวลงนามสูงขึ้น — กำหนดขนาดที่จะแสดงจริงให้เลย (ไม่ต้องรอเบราว์เซอร์โหลดรูป) */
-  host.querySelectorAll('td.sign').forEach((td,i)=>{
-    const im=td.querySelector('img.sigimg'), g=((SIG[(SIG_ROLES[i]||{}).key]||{}).img)||null; if(!im) return;
-    const cs=getComputedStyle(im), mw=parseFloat(cs.maxWidth)||1e9, mh=parseFloat(cs.maxHeight)||1e9;
-    const w=(g&&g.w)||mw, h=(g&&g.h)||mh, k=Math.min(1,mw/w,mh/h);
-    im.style.width=(w*k).toFixed(2)+'px'; im.style.height=(h*k).toFixed(2)+'px'; });
+  /* V.4.5 ลายเซ็นอยู่ในกล่องขนาดคงที่ (.sigbox) — ความสูงแถวลงนามไม่ขึ้นกับรูป ไม่ต้องกำหนดขนาดรูปเอง */
   const o=paperOverflows(host.querySelector('.paper')); host.innerHTML='';
   return o;
 }
@@ -11820,11 +11858,6 @@ function overflows(){
     if(!host){ host=doc.createElement('div'); host.id='fitProbe'; host.setAttribute('aria-hidden','true');
       host.style.cssText='position:absolute;left:-99999px;top:0;visibility:hidden;pointer-events:none'; doc.body.appendChild(host); }
     host.innerHTML=coverPaperHtml(seq,coverPhotoPlan(seq),[],false);
-    qa('td.sign',host).forEach(function(td,i){
-      var im=td.querySelector('img.sigimg'), g=((SIG[(SIG_ROLES[i]||{}).key]||{}).img)||null; if(!im) return;
-      var cs=getComputedStyle(im), mw=parseFloat(cs.maxWidth)||1e9, mh=parseFloat(cs.maxHeight)||1e9;
-      var w=(g&&g.w)||mw, h=(g&&g.h)||mh, k=Math.min(1,mw/w,mh/h);
-      im.style.width=(w*k).toFixed(2)+'px'; im.style.height=(h*k).toFixed(2)+'px'; });
     var o=paperOverflows(host.querySelector('.paper')); host.innerHTML=''; return o;
   }catch(e){ return false; }
 }
@@ -12095,13 +12128,24 @@ button{font:inherit;color:inherit;cursor:pointer}
 #ov{position:fixed;inset:0;background:#0B0F10;z-index:30;overflow:auto;padding:28px 34px 80px;color:#E8EEED}
 #ov h2{margin:0 0 16px;font-size:20px;font-weight:600;display:flex;align-items:center;gap:12px}
 #ov h2 span{font-size:14px;color:#8B9D9E;font-weight:400}
-#ov .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+/* V.4.5 ปุ่มปิดหน้า Slide overview — ตรึงมุมขวาบน เลื่อนตามเมื่อเลื่อนหน้า (ออกได้โดยไม่ต้องกด Esc ซึ่งจะออกจากโหมดเต็มจอด้วย) */
+#ov .ovx{position:fixed;top:16px;right:30px;z-index:31;display:inline-flex;align-items:center;gap:8px;border:1px solid #3A4748;background:rgba(22,28,29,.94);color:#E8EEED;
+  border-radius:99px;padding:8px 16px 8px 12px;font-size:15px;box-shadow:0 8px 24px -8px rgba(0,0,0,.8);backdrop-filter:blur(6px)}
+#ov .ovx:hover{border-color:#F5B301;background:#22292A}
+#ov .ovx svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+#ov .ovx kbd{font:inherit;font-size:12px;color:#8B9D9E;border:1px solid #3A4748;border-radius:5px;padding:0 5px}
+#ov .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 #ov .grp{grid-column:1/-1;font-size:14px;color:#8B9D9E;margin:10px 0 -4px;border-top:1px solid #2C3637;padding-top:10px}
 .th{border:1px solid #2C3637;background:#161C1D;border-radius:12px;overflow:hidden;text-align:left;padding:0;display:flex;flex-direction:column;color:#E8EEED}
 .th:hover{border-color:#5CC3CA}
 .th.cur{border-color:#F5B301;box-shadow:0 0 0 2px #F5B301}
 .th .im{aspect-ratio:16/9;background:#0F1516;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .th .im img{width:100%;height:100%;object-fit:cover;opacity:.92}
+/* V.4.5 ภาพย่อทั้งหน้าสไลด์ — โคลนสไลด์จริงแล้วย่อ (--k = ความกว้างภาพย่อ / 1600) */
+.th .im.full{display:block;background:#fff}
+.th .im .mini{position:absolute;left:0;top:0;width:1600px;height:900px;transform:scale(var(--k,.16));transform-origin:0 0;pointer-events:none}
+.th .im .mini .slide{display:block!important;animation:none!important}
+.th .im .ld{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8B9D9E;background:#0F1516}
 .th .im .ic{font-size:13px;color:#8B9D9E;padding:10px;text-align:center}
 .th .im .sev{position:absolute;right:8px;top:8px}
 .th .tx{padding:8px 10px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -12660,9 +12704,9 @@ function lbStep(d){ if(!LB) return; LB.i=(LB.i+d+LB.imgs.length)%LB.imgs.length;
 function lbClose(){ const lb=$('#lb'); if(lb) lb.remove(); LB=null; presUpdate(); }
 
 /* ---------- slide overview ---------- */
+/* V.4.5 ภาพย่อ = หน้าสไลด์ทั้งหน้า (ไม่ใช่รูปแรกในสไลด์) — สร้างเมื่อเลื่อนมาใกล้ (IntersectionObserver) */
 function thumb(s){
-  const img=s.img&&PH[s.img]?'<img alt="" loading="lazy" src="'+PH[s.img]+'">':'<span class="ic">'+h(s.kind==='sum'?'Dashboard':s.kind==='title'?'Title':'No photo')+'</span>';
-  return '<button type="button" class="th'+(s.i===CUR?' cur':'')+'" data-i="'+s.i+'"><span class="im">'+img+(s.kind==='find'?sevChip(s.sev):'')
+  return '<button type="button" class="th'+(s.i===CUR?' cur':'')+'" data-i="'+s.i+'"><span class="im full"><span class="ld">Slide '+(s.i+1)+'</span>'
     +(NOTES[s.key]?'<span class="nt">Note</span>':'')+'</span><span class="tx"><i>'+(s.i+1)+'</i><b>'+h(s.title)+'</b><span>'+h(s.sub||'')+'</span></span></button>';
 }
 function overview(){
@@ -12670,12 +12714,24 @@ function overview(){
   let g='', last='';
   S.forEach(s=>{ const grp=s.seq?('No. '+s.seq.no+' · '+s.seq.title):s.kind==='sum'?(s.grp==='pre'?'Before-repair summary':'After-repair summary'):'';
     if(grp!==last){ if(grp) g+='<div class="grp">'+h(grp)+'</div>'; last=grp; } g+=thumb(s); });
-  document.body.insertAdjacentHTML('beforeend','<div id="ov"><h2>Slide overview <span>'+S.length+' slides · tap to open · Esc to close</span></h2><div class="grid">'+g+'</div></div>');
+  document.body.insertAdjacentHTML('beforeend','<div id="ov"><button type="button" class="ovx" title="Close overview (G)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>Close <kbd>G</kbd></button>'
+    +'<h2>Slide overview <span>'+S.length+' slides · tap to open · G or Esc to close</span></h2><div class="grid">'+g+'</div></div>');
   const ov=$('#ov');
-  ov.addEventListener('click',e=>{ const b=e.target.closest('.th'); if(b){ const i=+b.dataset.i; ovClose(); if(i!==CUR) BACK.push(CUR); go(i); } });
+  ov.addEventListener('click',e=>{ if(e.target.closest('.ovx')){ ovClose(); return; } const b=e.target.closest('.th'); if(b){ const i=+b.dataset.i; ovClose(); if(i!==CUR) BACK.push(CUR); go(i); } });
+  const fill=im=>{ if(im.dataset.done) return; im.dataset.done='1';
+    const i=+im.parentNode.dataset.i, c=ensure(i).cloneNode(true); c.classList.add('on'); c.classList.remove('enter');
+    $$('[id]',c).forEach(x=>x.removeAttribute('id'));
+    const m=document.createElement('span'); m.className='mini'; m.appendChild(c); im.insertBefore(m,im.firstChild);
+    const ld=$('.ld',im); if(ld) ld.remove(); };
+  const ovScale=()=>{ const im=$('.th .im',ov); if(im) ov.style.setProperty('--k',im.clientWidth/1600); };
+  ovScale(); ov._rs=ovScale; addEventListener('resize',ovScale);
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ fill(e.target); io.unobserve(e.target); } }),{root:ov,rootMargin:'600px 0px'});
+    $$('.th .im',ov).forEach(im=>io.observe(im)); ov._io=io;
+  } else $$('.th .im',ov).forEach(fill);
   const c=$('.th.cur',ov); if(c) c.scrollIntoView({block:'center'});
 }
-function ovClose(){ const o=$('#ov'); if(o) o.remove(); }
+function ovClose(){ const o=$('#ov'); if(!o) return; if(o._io) o._io.disconnect(); if(o._rs) removeEventListener('resize',o._rs); o.remove(); }
 
 function help(){
   if($('#help')){ $('#help').remove(); return; }
