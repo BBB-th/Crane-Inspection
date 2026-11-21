@@ -320,6 +320,7 @@ main{flex:1;width:100%;max-width:1400px;margin:0 auto;padding:20px 16px 104px}
   cursor:nwse-resize;pointer-events:all}
 .annsvg .aho{stroke:#0E585F;stroke-width:17}
 .annsvg .ahi{stroke:#fff;stroke-width:11}
+.annmore .anum.wide{width:auto;padding:0 10px;font-size:12px}
 .anntext textarea{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);
   padding:9px 11px;font-size:14px;color:var(--ink);resize:vertical;min-height:74px;width:100%;font-family:var(--sans)}
 .anntext textarea:focus{outline:none;border-color:var(--acc);box-shadow:var(--ring)}
@@ -987,6 +988,25 @@ main{max-width:1560px}
   background:rgba(8,20,21,.68);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;z-index:5}
 .paper.edit .pcell .kill .ico{width:3.4mm;height:3.4mm;stroke-width:2.4}
 .paper.edit .pcell .kill:hover{background:rgba(158,44,34,.92)}
+/* V.5.0 ปุ่มลากย้ายรูป (มุมซ้ายล่าง) */
+.paper.edit .pcell .mv{position:absolute;left:1.2mm;bottom:1.2mm;width:6.4mm;height:6.4mm;border-radius:2mm;border:0;
+  background:rgba(8,20,21,.68);color:#fff;display:grid;place-items:center;cursor:grab;padding:0;z-index:5;touch-action:none}
+.paper.edit .pcell .mv .ico{width:3.6mm;height:3.6mm;stroke-width:2.2}
+.paper.edit .pcell .mv:hover{background:rgba(14,88,95,.92)}
+.paper.edit .pcell.mvsrc{opacity:.35}
+.paper.edit .pcell.mvto{outline:2.2pt solid #0E585F;outline-offset:-2.2pt;background:#e3f1f1}
+.phmv-ghost{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;background-size:cover;background-position:center;
+  border-radius:6px;box-shadow:0 10px 28px rgba(0,0,0,.35);opacity:.88;outline:2px solid #0E585F}
+body.phmv,body.phmv *{cursor:grabbing!important}
+/* V.5.2 กดค้างที่รูปเพื่อย้าย — ไม่ให้เบราว์เซอร์เลือกข้อความ / ลากรูป / เปิดเมนูรูปบนมือถือ */
+body.phmv{user-select:none;-webkit-user-select:none}
+.paper.edit .pcell.has,.paper.edit .pcell.has img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+.paper.edit .pcell.mvhold{animation:mvhold .45s ease-out forwards}
+.paper.edit .pcell.mvhold img{transition:transform .45s ease-out;transform:scale(.96)}
+@keyframes mvhold{to{box-shadow:0 0 0 2.5pt #0E585F inset}}
+@media(prefers-reduced-motion:reduce){ .paper.edit .pcell.mvhold img{transform:none} }
+html[data-fill="form"] #formPaper .paper .pcell .mv{left:6px;bottom:6px;width:34px;height:34px;border-radius:10px}
+html[data-fill="form"] #formPaper .paper .pcell .mv .ico{width:17px;height:17px}
 .paper.edit .pcell .tag{position:absolute;left:1.2mm;top:1.2mm;background:rgba(8,20,21,.62);color:#fff;
   font-family:var(--sans);font-size:8pt;font-weight:500;line-height:1.5;padding:0 1.6mm;border-radius:1.6mm;z-index:5;pointer-events:none}
 .paper.edit .pcell .tag.auto{background:rgba(14,88,95,.8)}
@@ -1131,6 +1151,10 @@ main{max-width:1560px}
 .dlg.mid{max-width:620px}
 .paper.edit .ce.inl{display:inline-block;min-width:26mm;width:auto;text-align:center}
 .paper .datefld.inl{display:inline-block;min-width:24mm;vertical-align:bottom}
+/* V.5.1 ค่าที่ยกมาจากก่อนซ่อม ยังไม่ได้แก้ (หลังซ่อม) */
+.paper.edit textarea.fld.prefade{color:#9AA4A2!important;-webkit-text-fill-color:#9AA4A2;font-style:italic}
+.paper.edit td.sevv.prefade{opacity:.4}
+html[data-fill="form"] #formPaper .paper textarea.fld.prefade{color:var(--muted)!important;-webkit-text-fill-color:var(--muted);font-style:italic}
 .paper.edit textarea.fld.need{background:rgba(197,48,48,.06);box-shadow:inset 0 -1.2pt 0 rgba(197,48,48,.5)}
 .paper.edit td.rmk textarea.fld{text-align:center}
 /* ไม่มีฟอนต์ TH SarabunPSK ในเครื่อง — Sarabun (Google) ที่ 75% มีขนาดตัวอักษรเท่า TH SarabunPSK */
@@ -1141,6 +1165,26 @@ body.fb .paper.cv td.s12,body.fb .paper .s12{font-size:9pt}
 
 /* แผงนำทางบนจอเล็ก — ย่อเป็นแถบเดียว แตะเพื่อเปลี่ยนหน้า */
 .navtoggle{display:none}
+/* V.5.1 ย่อแผงนำทางบนจอกว้าง — เหลือรางแคบ (ปุ่มไปหน้าแต่ละหน้า) เพิ่มพื้นที่กระดาษ */
+.navmin{display:flex;align-items:center;justify-content:flex-end;gap:6px;width:100%;border:0;background:none;color:var(--muted);
+  font-size:12px;cursor:pointer;padding:0 2px 8px;margin:-4px 0 4px}
+.navmin:hover{color:var(--acc)}
+.navmin .ico{width:15px;height:15px}
+.navrail{display:none}
+.ws.navmini{grid-template-columns:58px minmax(0,1fr)!important}
+.ws.navmini .nav{padding:8px 6px}
+.ws.navmini .nav .navbody,.ws.navmini .nav .navmin,.ws.navmini .nav .navtoggle{display:none!important}
+.ws.navmini .nav .navrail{display:flex;flex-direction:column;align-items:center;gap:5px}
+.navrail button{width:42px;min-height:34px;border:1px solid var(--line);background:var(--panel);border-radius:9px;color:var(--ink-2);
+  font-family:var(--mono);font-size:12.5px;font-weight:600;cursor:pointer;display:grid;place-items:center;position:relative;padding:0}
+.navrail button:hover{border-color:var(--acc);color:var(--acc)}
+.navrail button.on{background:var(--acc);border-color:var(--acc);color:var(--acc-on)}
+.navrail button .ico{width:17px;height:17px}
+.navrail button i{position:absolute;right:3px;top:3px;width:7px;height:7px;border-radius:50%}
+.navrail .rsep{width:26px;height:1px;background:var(--line-soft);margin:3px 0}
+.navrail .rexp{border-style:dashed;color:var(--acc)}
+@media(max-width:1020px){ .navmin,.navrail{display:none!important} .ws.navmini{grid-template-columns:minmax(0,1fr)!important}
+  .ws.navmini .nav .navbody{display:block!important} .ws.navmini .nav .navtoggle{display:flex!important} }
 @media(max-width:1020px){
   .nav{padding:8px}
   .navtoggle{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;cursor:pointer;
@@ -1182,6 +1226,16 @@ body.fb .paper.cv td.s12,body.fb .paper .s12{font-size:9pt}
 /* เว้นระยะเหนือลายเซ็น 1.5 มม. — ลายเซ็นไม่ชิด/ทับเส้นขอบบนของแถว */
 .paper td.sign .sl{padding-top:1.5mm}
 html[data-fill="form"] #formPaper .paper td.sign .sl{padding-top:0}
+/* V.5.0 ลายเซ็นทับเส้นขอบบนของตารางในไฟล์ PDF (เกิดบางเครื่อง):
+   เดิมวางกล่องลายเซ็นแบบ inline-block อิง baseline ของตัวอักษร — ตำแหน่งจึงขึ้นกับฟอนต์ที่มีในเครื่อง
+   (เครื่องที่ไม่มี TH SarabunPSK ใช้ Sarabun แทน ขนาด/ระยะบรรทัดต่างกัน) และการย่อหน้า (zoom) ตอนพิมพ์ของเบราว์เซอร์แต่ละรุ่น
+   แก้: บรรทัด "ตำแหน่ง: ลายเซ็น" เป็นกล่อง flex ความสูงคงที่ จัดชิดล่าง และตัดส่วนเกิน (overflow:hidden)
+   → ลายเซ็นอยู่ในกล่องของตัวเองเสมอ ไม่มีทางล้นขึ้นไปทับเส้นขอบบน ไม่ว่าเครื่องไหน ฟอนต์ไหน */
+.paper td.sign .sl{display:flex;align-items:flex-end;justify-content:center;gap:1mm;height:7.6mm;box-sizing:content-box;
+  padding-top:1.5mm;overflow:hidden;white-space:nowrap}
+.paper td.sign .sl .sigbox{flex:0 0 26mm;vertical-align:baseline;margin-bottom:.4mm}
+html[data-fill="form"] #formPaper .paper td.sign .sl{display:block;height:auto;padding-top:0}
+html[data-fill="form"] #formPaper .paper td.sign .sl .sigbox{margin-bottom:0;vertical-align:middle}
 .paper td.sign .sl .sigbox img.sigimg{position:absolute;left:0;top:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;
   object-fit:contain;object-position:left bottom}
 .rec[data-sid] .handle{align-self:center}
@@ -2412,6 +2466,11 @@ html[data-phase="post"][data-theme="dark"]{--acc:#AC9FF6;--acc-hi:#C5BBFA;--acc-
 .brand{order:1}.phasebar{order:2}.tabs.topnav{order:4}.netdot{order:5}#themeBtn{order:6}
 .tbbrk{order:3;display:none;flex:0 0 100%;height:0;margin:0}
 .phasebar{display:flex;gap:3px;padding:3px;border-radius:11px;background:var(--sunk);flex:none}
+/* V.5.1 แท็บของ Dashboard */
+.dtabs{display:inline-flex;gap:3px;padding:3px;border-radius:11px;background:var(--sunk);margin:0 0 14px;flex-wrap:wrap}
+.dtabs button{border:0;background:none;border-radius:8px;padding:7px 16px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.dtabs button:hover{color:var(--ink)}
+.dtabs button[aria-selected="true"]{background:var(--panel);color:var(--acc);box-shadow:var(--sh-1)}
 .phasebar button{display:flex;align-items:center;gap:8px;border:0;background:none;border-radius:8px;padding:4px 13px 4px 6px;min-height:36px;
   cursor:pointer;color:var(--ink-2);text-align:left;font:inherit;transition:background .18s,color .18s}
 .phasebar button i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font-style:normal;font-size:12px;font-weight:700;
@@ -2459,6 +2518,7 @@ html[data-phase="post"][data-theme="dark"]{--acc:#AC9FF6;--acc-hi:#C5BBFA;--acc-
 .pntx b{color:var(--ink);font-weight:600}
 .pnlink{align-self:flex-start;border:0;background:none;padding:2px 0;font-size:12px;font-weight:500;color:var(--acc);cursor:pointer;text-align:left;border-radius:4px}
 .pnlink:hover{text-decoration:underline}
+.pnlink.dang{color:var(--danger)}
 .pgbtn .dots i.pd{background:none;box-shadow:inset 0 0 0 1.5px var(--acc);position:relative}
 .pgbtn .dots i.pd::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:var(--acc);opacity:.45}
 
@@ -2987,6 +3047,7 @@ html[data-fill="form"] #formPaper .paper .sigbtn{position:static;opacity:1;margi
 
 <!-- ===================== DASHBOARD ===================== -->
 <section class="view" id="v-dash">
+  <div class="dtabs noprint" id="dashTabs" role="tablist" aria-label="ชุดข้อมูลของ Dashboard" hidden></div>
   <div class="dash" id="dash"></div>
 </section>
 
@@ -3516,6 +3577,13 @@ const ICONS={
   info:'<circle cx="12" cy="12" r="8.2"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
   arrowLeft:'<path d="M19 12H5.4"/><path d="M11 6.4L5.4 12l5.6 5.6"/>',
   arrowRight:'<path d="M5 12h13.6"/><path d="M13 6.4l5.6 5.6-5.6 5.6"/>',
+  /* ---- V.5.0 ย้ายรูป / ลูกศร / หมายเลข ---- */
+  move:'<path d="M12 3.6v16.8M3.6 12h16.8"/><path d="M9.4 6.2L12 3.6l2.6 2.6M9.4 17.8L12 20.4l2.6-2.6M6.2 9.4L3.6 12l2.6 2.6M17.8 9.4l2.6 2.6-2.6 2.6"/>',
+  annArrow:'<path d="M5.2 18.8L17.6 6.4"/><path d="M10.2 5.8h8v8"/>',
+  annArrow2:'<path d="M6.4 17.6L17.6 6.4"/><path d="M11.8 5.8h6.4v6.4"/><path d="M12.2 18.2H5.8v-6.4"/>',
+  annBArrow:'<path d="M3.6 9.4h9.2V5.4l7.6 6.6-7.6 6.6v-4H3.6z"/>',
+  annCArrow:'<path d="M5 19c0-7.4 4.8-11.8 12.4-11.8"/><path d="M13.8 3.6l3.8 3.6-3.6 3.8"/>',
+  annNum:'<circle cx="12" cy="12" r="8.2"/><path d="M10.4 9.4l2-1.4v8.2"/>',
 };
 /* fil = ไอคอนที่ต้องระบายทึบ (จุดเรียง ฯลฯ) */
 const ICONS_FILLED={grip:1,dot:1,cursor:1};
@@ -3546,6 +3614,11 @@ const ANN_W=1500, ANN_H=1125;
 const ANN_TOOLS=[
   {t:'select', ic:'cursor',   name:'เลือก / ย้าย'},
   {t:'line',   ic:'line',     name:'เส้นตรง'},
+  {t:'arrow',  ic:'annArrow', name:'ลูกศร'},
+  {t:'arrow2', ic:'annArrow2',name:'ลูกศรสองหัว'},
+  {t:'carrow', ic:'annCArrow',name:'ลูกศรโค้ง'},
+  {t:'barrow', ic:'annBArrow',name:'ลูกศรหนา (บล็อก)'},
+  {t:'num',    ic:'annNum',   name:'หมายเลขกำกับ (วงกลม) — เลขเพิ่มให้อัตโนมัติ'},
   {t:'free',   ic:'pencil',   name:'เส้นมือลาก'},
   {t:'rect',   ic:'square',   name:'สี่เหลี่ยม'},
   {t:'ellipse',ic:'circle',   name:'วงกลม / วงรี'},
@@ -3641,14 +3714,44 @@ function triPts(s){
   return [[b.x+b.w/2,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]];
 }
 const pj=pts=>pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+/* ---- V.5.0 ลูกศร ---- */
+const ANN_ARROWS={arrow:1,arrow2:1,carrow:1};
+/* สีหลักของรูปทรง: สีเส้น → ถ้าไม่มีสีเส้นใช้สีพื้น → แดง */
+function annCol(s){ const st=s.stroke, fl=s.fill; return (st&&st!=='none')?st:((fl&&fl!=='none')?fl:'#E11D1D'); }
+function annDashArr(s){ const lw=s.lw==null?7:s.lw; return s.dash?[Math.round(lw*2.4),Math.round(lw*1.8)]:null; }
+function annHead(tx,ty,ang,hs){ const w=Math.PI/7.2;
+  return [[tx,ty],[tx-hs*Math.cos(ang-w),ty-hs*Math.sin(ang-w)],[tx-hs*Math.cos(ang+w),ty-hs*Math.sin(ang+w)]]; }
+function annArrowGeo(s){
+  const lw=s.lw==null?7:s.lw, hs=Math.max(34,lw*3.4), back=hs*0.72;
+  const x1=s.x1,y1=s.y1,x2=s.x2,y2=s.y2;
+  if(s.t==='carrow'){
+    const dx=x2-x1, dy=y2-y1, k=(s.bend||1)*0.3;
+    const cx=(x1+x2)/2-dy*k, cy=(y1+y2)/2+dx*k, ang=Math.atan2(y2-cy,x2-cx);
+    return {curve:true,c:[cx,cy],p1:[x1,y1],p2:[x2-Math.cos(ang)*back,y2-Math.sin(ang)*back],heads:[annHead(x2,y2,ang,hs)]};
+  }
+  const ang=Math.atan2(y2-y1,x2-x1), two=s.t==='arrow2';
+  return {p1:two?[x1+Math.cos(ang)*back,y1+Math.sin(ang)*back]:[x1,y1],
+          p2:[x2-Math.cos(ang)*back,y2-Math.sin(ang)*back],
+          heads:[annHead(x2,y2,ang,hs)].concat(two?[annHead(x1,y1,ang+Math.PI,hs)]:[])};
+}
+function annBArrowPts(s){
+  const lw=s.lw==null?7:s.lw, dx=s.x2-s.x1, dy=s.y2-s.y1, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, nx=-uy, ny=ux;
+  const t=Math.max(28,lw*3), hw=t*2.3, hl=Math.min(L*0.5,hw*1.05), b=L-hl;
+  const P=(a,o)=>[s.x1+ux*a+nx*o, s.y1+uy*a+ny*o];
+  return [P(0,-t/2),P(b,-t/2),P(b,-hw/2),P(L,0),P(b,hw/2),P(b,t/2),P(0,t/2)];
+}
+function annNumGeo(s){ const b=annBox(s); return {cx:b.x+b.w/2,cy:b.y+b.h/2,r:Math.max(14,Math.min(b.w,b.h)/2)}; }
+/* หมายเลขถัดไป = เลขมากสุดในหน้านี้ + 1 */
+function annNextNum(){ let m=0; (cur.photos||[]).forEach(p=>annOf(p).forEach(s=>{ if(s.t==='num') m=Math.max(m,+s.n||0); })); return m+1; }
 
 /* ---- สร้าง SVG ของรูปทรงหนึ่งชิ้น ---- */
 function annShapeSvg(s,sel){
   const st=s.stroke||'none', fl=s.fill||'none', lw=s.lw==null?7:s.lw;
   /* ไม่ใช้ non-scaling-stroke — ความหนาเส้นต้องย่อ/ขยายไปกับกรอบรูป
      เพื่อให้สิ่งที่เห็นบนหน้าจอเท่ากับไฟล์ที่ส่งออกเป๊ะ ๆ */
+  const dA=annDashArr(s), da=dA?' stroke-dasharray="'+dA.join(' ')+'"':'';
   const base=' fill="'+fl+'" stroke="'+st+'" stroke-width="'+lw
-    +'" stroke-linecap="round" stroke-linejoin="round"';
+    +'" stroke-linecap="round" stroke-linejoin="round"'+da;
   const b=annBox(s);
   let body='';
   /* เส้นบาง ๆ จับยาก จึงซ้อนเส้นใสหนา ๆ ไว้เป็นพื้นที่กด */
@@ -3657,7 +3760,27 @@ function annShapeSvg(s,sel){
     body='<line class="ahit" x1="'+s.x1+'" y1="'+s.y1+'" x2="'+s.x2+'" y2="'+s.y2
         +'" fill="none" stroke="rgba(0,0,0,0)" stroke-width="'+hitw+'" stroke-linecap="round"/>'
         +'<line x1="'+s.x1+'" y1="'+s.y1+'" x2="'+s.x2+'" y2="'+s.y2+'" fill="none" stroke="'+st
-        +'" stroke-width="'+lw+'" stroke-linecap="round"/>';
+        +'" stroke-width="'+lw+'" stroke-linecap="round"'+da+'/>';
+  else if(ANN_ARROWS[s.t]){
+    const G=annArrowGeo(s), col=annCol(s), f1=n=>n.toFixed(1);
+    const d='M'+f1(G.p1[0])+' '+f1(G.p1[1])+(G.curve?(' Q'+f1(G.c[0])+' '+f1(G.c[1])+' '):' L')+f1(G.p2[0])+' '+f1(G.p2[1]);
+    body='<path class="ahit" d="'+d+'" fill="none" stroke="rgba(0,0,0,0)" stroke-width="'+hitw+'" stroke-linecap="round"/>'
+      +'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="'+lw+'" stroke-linecap="round"'+da+'/>'
+      +G.heads.map(h=>'<polygon points="'+pj(h)+'" fill="'+col+'" stroke="'+col+'" stroke-width="'+Math.max(2,lw*0.4).toFixed(1)
+        +'" stroke-linejoin="round"/>').join('');
+  }
+  else if(s.t==='barrow'){
+    const col=annCol(s), hasF=fl&&fl!=='none', hasS=st&&st!=='none';
+    body='<polygon points="'+pj(annBArrowPts(s))+'" fill="'+(hasF?fl:col)+'" stroke="'+(hasF&&hasS?st:'none')
+      +'" stroke-width="'+Math.max(3,lw*0.5).toFixed(1)+'" stroke-linejoin="round"/>';
+  }
+  else if(s.t==='num'){
+    const N=annNumGeo(s), hasF=fl&&fl!=='none', bg=hasF?fl:annCol(s);
+    body='<circle cx="'+N.cx.toFixed(1)+'" cy="'+N.cy.toFixed(1)+'" r="'+N.r.toFixed(1)+'" fill="'+bg+'" stroke="#FFFFFF" stroke-width="'
+      +Math.max(4,N.r*0.09).toFixed(1)+'"/>'
+      +'<text x="'+N.cx.toFixed(1)+'" y="'+N.cy.toFixed(1)+'" text-anchor="middle" dominant-baseline="central" font-family="'+ANN_TXT_FF
+      +'" font-size="'+(N.r*1.35).toFixed(1)+'" font-weight="700" fill="'+(s.color||'#FFFFFF')+'">'+hesc(String(s.n==null?1:s.n))+'</text>';
+  }
   else if(s.t==='free')
     body='<polyline class="ahit" points="'+pj(s.pts||[])+'" fill="none" stroke="rgba(0,0,0,0)"'
         +' stroke-width="'+hitw+'" stroke-linecap="round" stroke-linejoin="round"/>'
@@ -3705,10 +3828,27 @@ function annDraw(g,s){
   const lw=s.lw==null?7:s.lw, st=s.stroke||'', fl=s.fill||'';
   const b=annBox(s);
   g.lineWidth=lw; g.lineCap='round'; g.lineJoin='round';
+  try{ g.setLineDash(annDashArr(s)||[]); }catch(e){}
   g.strokeStyle=st==='none'?'rgba(0,0,0,0)':st;
   g.fillStyle=fl==='none'?'rgba(0,0,0,0)':fl;
   const poly=pts=>{ g.beginPath(); pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])); g.closePath(); };
   if(s.t==='line'){ g.beginPath(); g.moveTo(s.x1,s.y1); g.lineTo(s.x2,s.y2); if(st&&st!=='none') g.stroke(); }
+  else if(ANN_ARROWS[s.t]){ const G=annArrowGeo(s), col=annCol(s);
+      g.strokeStyle=col; g.beginPath(); g.moveTo(G.p1[0],G.p1[1]);
+      if(G.curve) g.quadraticCurveTo(G.c[0],G.c[1],G.p2[0],G.p2[1]); else g.lineTo(G.p2[0],G.p2[1]);
+      g.stroke(); try{ g.setLineDash([]); }catch(e){}
+      g.fillStyle=col; g.lineWidth=Math.max(2,lw*0.4);
+      G.heads.forEach(h=>{ poly(h); g.fill(); g.stroke(); }); }
+  else if(s.t==='barrow'){ const col=annCol(s), hasF=fl&&fl!=='none', hasS=st&&st!=='none';
+      try{ g.setLineDash([]); }catch(e){}
+      poly(annBArrowPts(s)); g.fillStyle=hasF?fl:col; g.fill();
+      if(hasF&&hasS){ g.strokeStyle=st; g.lineWidth=Math.max(3,lw*0.5); g.stroke(); } }
+  else if(s.t==='num'){ const N=annNumGeo(s), hasF=fl&&fl!=='none';
+      try{ g.setLineDash([]); }catch(e){}
+      g.beginPath(); g.arc(N.cx,N.cy,N.r,0,Math.PI*2); g.fillStyle=hasF?fl:annCol(s); g.fill();
+      g.strokeStyle='#FFFFFF'; g.lineWidth=Math.max(4,N.r*0.09); g.stroke();
+      g.font=annFont(Math.round(N.r*1.35)); g.textAlign='center'; g.textBaseline='middle'; g.fillStyle=s.color||'#FFFFFF';
+      g.fillText(String(s.n==null?1:s.n),N.cx,N.cy+N.r*0.04); g.textAlign='start'; }
   else if(s.t==='free'){ const pts=s.pts||[]; if(pts.length>1){ g.beginPath();
       pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])); if(st&&st!=='none') g.stroke(); } }
   else if(s.t==='rect'){ if(fl&&fl!=='none') g.fillRect(b.x,b.y,b.w,b.h);
@@ -3726,6 +3866,7 @@ function annDraw(g,s){
     annWrap(s.text||'',fs,Math.max(20,b.w-pad*2))
       .forEach((l,i)=>g.fillText(l,b.x+pad,b.y+pad+i*fs*1.12));
   }
+  try{ g.setLineDash([]); }catch(e){}
 }
 function loadImg(src){ return new Promise((res,rej)=>{ const i=new Image();
   i.onload=()=>res(i); i.onerror=()=>rej(new Error('image')); i.src=src; }); }
@@ -3757,7 +3898,7 @@ async function flattenRecordPhotos(r){
    ================================================================== */
 let annTool='select', annSel=null, annSelPhoto=-1;
 let annStroke='#E11D1D', annFill='none', annText='#111111';
-let annLw=12, annFs=54;
+let annLw=12, annFs=54, annDash=false;
 let annDrag=null;
 /* กันคำสั่งคลิกซ้อน: หลังวาด/เลือก/ย้ายลายเส้น เบราว์เซอร์จะยิง click ตามมาอีกที
    ถ้าไม่กันไว้ ช่องรูปจะเข้าใจว่าถูกคลิกแล้วเปิดหน้าต่างเลือกไฟล์ขึ้นมาด้วย */
@@ -3865,12 +4006,20 @@ function renderAnnBar(){
     +'<div class="agrp"><b>ความหนาเส้น</b><div class="arow">'
      +[6,12,22,36].map((w,i)=>'<button type="button" class="anum'+(annLw===w?' on':'')+'" data-lw="'+w+'">'
         +(i+1)+'</button>').join('')+'</div></div>'
+    +'<div class="agrp"><b>รูปแบบเส้น</b><div class="arow">'
+     +'<button type="button" class="anum wide'+(!annDash?' on':'')+'" data-dash="0">━ เส้นทึบ</button>'
+     +'<button type="button" class="anum wide'+(annDash?' on':'')+'" data-dash="1">┅ เส้นประ</button></div></div>'
     +'<div class="agrp"><b>ขนาดตัวอักษร</b><div class="arow">'
      +[34,54,80,120].map(f=>'<button type="button" class="anum'+(annFs===f?' on':'')+'" data-fs="'+f+'">'
         +Math.round(f/6)+'</button>').join('')+'</div></div>'
     +'<div class="agrp"><b>จัดการ</b><div class="arow grid2b">'
      +'<button type="button" class="abtn" data-act="edit"'+(s&&s.t==='text'?'':' disabled')+'>แก้ข้อความ</button>'
      +'<button type="button" class="abtn" data-act="front"'+(s?'':' disabled')+'>ขึ้นหน้า</button>'
+     +(s&&s.t==='carrow'?'<button type="button" class="abtn" data-act="flip">กลับด้านโค้ง</button>'
+        +'<button type="button" class="abtn" data-act="swap">สลับหัว-ท้าย</button>':'')
+     +(s&&(s.t==='arrow'||s.t==='barrow')?'<button type="button" class="abtn" data-act="swap">สลับหัว-ท้าย</button>':'')
+     +(s&&s.t==='num'?'<button type="button" class="abtn" data-act="numdn">หมายเลข −1</button>'
+        +'<button type="button" class="abtn" data-act="numup">หมายเลข +1</button>':'')
      +'<button type="button" class="abtn" data-act="undo"'+(photoUndoStack.length?'':' disabled')+'>'
        +ico('undo')+'เลิกทำ</button>'
      +'<button type="button" class="abtn" data-act="redo"'+(photoRedoStack.length?'':' disabled')+'>'
@@ -3878,7 +4027,8 @@ function renderAnnBar(){
      +'<button type="button" class="abtn dang" data-act="del"'+(s?'':' disabled')+'>ลบที่เลือก</button>'
      +'<button type="button" class="abtn dang" data-act="clear">ล้างทั้งรูป</button>'
     +'</div></div>'
-    +'<p class="ahint">ลากบนรูปเพื่อวาด · กดที่ลายเส้นเพื่อเลือก แล้วลากย้าย/ลากที่จุดมุมเพื่อปรับขนาด<br>'
+    +'<p class="ahint">ลากบนรูปเพื่อวาด · ลูกศรชี้ไปทางที่ปล่อยเมาส์ · กดที่ลายเส้นเพื่อเลือก แล้วลากย้าย/ลากที่จุดปลายเพื่อปรับ<br>'
+     +'ย้าย/สลับรูป: กดค้างที่รูป (เครื่องมือ “เลือก”) แล้วลากไปช่องอื่น · ดับเบิลคลิกรูป = เปลี่ยนรูป<br>'
      +'<b>Ctrl+Z</b> เลิกทำ · <b>Ctrl+Y</b> ทำซ้ำ (ได้ '+PHOTO_HIST_MAX+' ขั้นตอน ครอบคลุมการเพิ่ม/ลบรูปด้วย)</p>';
   annPositionMore();
 }
@@ -3952,6 +4102,10 @@ function wireAnnot(){
              stroke:annStroke,fill:annFill,lw:annLw};
     if(annTool==='free'){ s.pts=[[px,py]]; s.fill='none'; }
     if(annTool==='text'){ s.text=''; s.fs=annFs; s.color=annText; }
+    if(annDash&&annTool!=='text'&&annTool!=='num'&&annTool!=='barrow') s.dash=1;
+    if(ANN_ARROWS[annTool]||annTool==='barrow') s.fill='none';
+    if(annTool==='carrow') s.bend=1;
+    if(annTool==='num'){ s.n=annNextNum(); s.color='#FFFFFF'; s.fill='none'; }
     list.push(s);
     annSel=s.id; annSelPhoto=i;
     annDrag={mode:'draw',i:i,svg:svg,id:s.id};
@@ -3993,6 +4147,8 @@ function wireAnnot(){
       /* ลากสั้นเกินไป (คลิกเปล่า) — ให้ขนาดเริ่มต้นแทนการทิ้ง */
       if(d.mode==='draw'&&s.t!=='free'&&b.w<12&&b.h<12){
         if(s.t==='text'){ s.x2=s.x1+520; s.y2=s.y1+140; }
+        else if(s.t==='num'){ const r=60; s.x1=Math.max(0,Math.min(ANN_W-2*r,s.x1-r)); s.y1=Math.max(0,Math.min(ANN_H-2*r,s.y1-r)); s.x2=s.x1+2*r; s.y2=s.y1+2*r; }
+        else if(ANN_ARROWS[s.t]||s.t==='barrow'){ s.x2=Math.min(ANN_W,s.x1+300); s.y2=s.y1; }
         else if(s.t==='line'){ s.x2=s.x1+260; s.y2=s.y1; }
         else { s.x2=s.x1+220; s.y2=s.y1+150; }
       }
@@ -4071,6 +4227,97 @@ function wireAnnot(){
   addEventListener('resize',()=>{ if(annMoreOpen) annPositionMore(); });
 }
 
+
+/* ==================================================================
+   V.5.0 ย้าย / สลับตำแหน่งรูปในหน้า Inspection Sheet
+   กดค้างที่ปุ่ม ✥ (มุมซ้ายล่างของรูป) แล้วลากไปวางบนช่องรูปอื่นในหน้าเดียวกัน
+   · ช่องปลายทางว่าง = ย้ายรูปไปช่องนั้น · ช่องปลายทางมีรูป = สลับตำแหน่งกัน
+   ลายเส้นที่วาดทับรูปติดไปกับรูป · เลิกทำได้ด้วย Ctrl+Z / ปุ่ม ↺ เหมือนการแก้รูปอื่น ๆ
+   ใช้ pointer events จึงใช้ได้ทั้งเมาส์ ปากกา และนิ้ว (แท็บเล็ต)
+   ================================================================== */
+let photoHintAt=0;
+function photoTapHint(){ if(Date.now()-photoHintAt<8000) return; photoHintAt=Date.now();
+  toast('กดค้างที่รูปแล้วลาก = ย้าย/สลับตำแหน่ง · ดับเบิลคลิก (แตะสองครั้ง) = เปลี่ยนรูป · ✕ = ลบรูป',4500); }
+function wirePhotoMove(){
+  const paper=$('#formPaper'); let mv=null;
+  const cellAt=(x,y)=>{ const el=document.elementFromPoint(x,y); return el&&el.closest?el.closest('#formPaper .pcell[data-i]'):null; };
+  const place=e=>{ if(!mv) return;
+    mv.gh.style.transform='translate('+Math.round(e.clientX-mv.ox)+'px,'+Math.round(e.clientY-mv.oy)+'px)';
+    const c=cellAt(e.clientX,e.clientY), j=c?+c.dataset.i:-1; mv.to=j;
+    $$('#formPaper .pcell').forEach(x=>x.classList.toggle('mvto',x===c&&j!==mv.i)); };
+  /* V.5.2 เริ่มย้ายได้ 2 ทาง: (ก) กดปุ่ม ✥ = เริ่มทันที (ข) กดค้างที่ตัวรูปตรงไหนก็ได้
+     · เมาส์/ปากกา: กดค้าง 250 ms หรือกดแล้วลากเกิน 6 px
+     · นิ้ว (มือถือ/แท็บเล็ต): แตะค้าง 450 ms (สั่นเบา ๆ) แล้วลาก — ถ้าขยับก่อนครบเวลา = ไม่ย้าย
+     ใช้เฉพาะตอนเลือกเครื่องมือ "เลือก / ย้าย" และไม่ได้กดบนลายเส้น (ลายเส้นยังลากย้ายได้ตามเดิม) */
+  let hold=null, justMoved=0;
+  const startMove=(i,cell,x,y,cap)=>{
+    const p=cur.photos[i]; if(!p||!cell) return;
+    if(annMoreOpen) annCloseMore();
+    const r=cell.getBoundingClientRect(), gh=document.createElement('div');
+    gh.className='phmv-ghost'; gh.style.width=r.width+'px'; gh.style.height=r.height+'px';
+    gh.style.backgroundImage='url("'+p.dataUrl+'")'; document.body.appendChild(gh);
+    mv={i:i,ox:x-r.left,oy:y-r.top,gh:gh,cell:cell,to:-1};
+    cell.classList.add('mvsrc'); document.body.classList.add('phmv');
+    if(cap){ try{ cap.el.setPointerCapture(cap.id); }catch(err){} }
+    place({clientX:x,clientY:y});
+  };
+  const clearHold=()=>{ if(!hold) return; clearTimeout(hold.t); hold.cell.classList.remove('mvhold'); hold=null; };
+  paper.addEventListener('pointerdown',e=>{
+    if(!cur||!cur.id||mv) return;
+    const b=e.target.closest('[data-mv]');
+    if(b){ e.preventDefault(); e.stopPropagation(); clearHold();
+      startMove(+b.dataset.mv,b.closest('.pcell'),e.clientX,e.clientY,{el:b,id:e.pointerId}); return; }
+    if(e.button>0) return;
+    const cell=e.target.closest('.pcell[data-i]'); if(!cell) return;
+    const i=+cell.dataset.i; if(!cur.photos[i]) return;
+    if(e.target.closest('.ashape,.ah,[data-kill],.kill')) return;
+    if(typeof annTool!=='undefined'&&annTool!=='select') return;
+    clearHold();
+    const touch=e.pointerType==='touch', capEl=e.target;
+    hold={i:i,cell:cell,x:e.clientX,y:e.clientY,touch:touch,id:e.pointerId,
+      t:setTimeout(()=>{ const h=hold; if(!h) return; hold=null; h.cell.classList.remove('mvhold');
+        if(h.touch&&navigator.vibrate) try{ navigator.vibrate(15); }catch(err){}
+        startMove(h.i,h.cell,h.x,h.y,{el:capEl,id:h.id}); },touch?450:250)};
+    cell.classList.add('mvhold');
+  });
+  paper.addEventListener('pointermove',e=>{
+    if(mv){ e.preventDefault(); place(e); return; }
+    if(!hold||e.pointerId!==hold.id) return;
+    const d=Math.hypot(e.clientX-hold.x,e.clientY-hold.y);
+    if(hold.touch){ if(d>10) clearHold(); return; }
+    if(d>6){ const h=hold; clearHold(); startMove(h.i,h.cell,h.x,h.y,{el:e.target,id:e.pointerId}); place(e); }
+  });
+  /* กดค้างบนมือถือ — ไม่ให้เมนูบันทึกรูป / เลือกข้อความเด้งขึ้นมา */
+  paper.addEventListener('contextmenu',e=>{ const c=e.target.closest&&e.target.closest('.paper.edit .pcell.has'); if(c) e.preventDefault(); });
+  const end=e=>{
+    clearHold();
+    if(!mv) return; const m=mv; mv=null; justMoved=Date.now();
+    m.gh.remove(); m.cell.classList.remove('mvsrc'); document.body.classList.remove('phmv');
+    $$('#formPaper .pcell.mvto').forEach(x=>x.classList.remove('mvto'));
+    if(typeof annGuard==='function') annGuard();
+    if(e.type==='pointercancel'||m.to<0||m.to===m.i||!cur||!cur.id) return;
+    pushPhotoUndo();
+    const a=cur.photos[m.i], bb=cur.photos[m.to]||null;
+    cur.photos[m.to]=a; cur.photos[m.i]=bb;
+    annSel=null; annSelPhoto=-1;
+    refreshPhotos(); queueDraft();
+    toast(bb?('สลับรูปที่ '+(m.i+1)+' กับรูปที่ '+(m.to+1)+' แล้ว'):('ย้ายรูปไปช่องที่ '+(m.to+1)+' แล้ว'),2600);
+  };
+  paper.addEventListener('pointerup',end);
+  paper.addEventListener('pointercancel',end);
+  /* V.5.1 พิมพ์แก้ข้อความที่ยกมาจากก่อนซ่อม → เลิกแสดงสีจางทันที */
+  paper.addEventListener('input',e=>{ const m=/^f:(\d+):/.exec((e.target&&e.target.dataset&&e.target.dataset.k)||''); if(m) postFadeSync(+m[1]); });
+  /* กดปุ่มย้าย ไม่ใช่การแตะช่องรูป — ไม่เปิดหน้าต่างเลือกไฟล์ */
+  paper.addEventListener('click',e=>{ if((e.target.closest&&e.target.closest('[data-mv]'))||Date.now()-justMoved<500){ e.preventDefault(); e.stopPropagation(); } },true);
+  /* V.5.2 เปลี่ยนรูปในช่องที่มีรูปแล้ว: ดับเบิลคลิก / แตะสองครั้งที่รูป (ไม่ใช่ที่ลายเส้น) */
+  paper.addEventListener('dblclick',e=>{
+    const pc=e.target.closest('.pcell[data-i]'); if(!pc||!cur||!cur.id) return;
+    const i=+pc.dataset.i; if(!cur.photos[i]||e.target.closest('.ashape,[data-kill],[data-mv]')) return;
+    if(typeof annTool!=='undefined'&&annTool!=='select') return;
+    e.preventDefault(); slotIdx=i; $('#fileIn').value=''; $('#fileIn').click();
+  });
+}
+
 /* ---- กล่องพิมพ์ข้อความ ----
    skipUndo=true เมื่อเปิดตามหลังการวาดกรอบใหม่ทันที (pointerdown ได้ pushPhotoUndo ไปแล้วสำหรับ
    การกระทำเดียวกัน) — เปิดเพื่อแก้กรอบข้อความที่มีอยู่แล้ว (ดับเบิลคลิก/ปุ่มแก้ข้อความ) ให้ push ใหม่เสมอ */
@@ -4113,6 +4360,11 @@ async function annBarAction(e){
   if(d.tool){ annTool=d.tool; if(d.tool!=='select'){ annSel=null; annSelPhoto=-1; } annRefresh(); return; }
   if(d.stroke!=null){ annStroke=d.stroke; if(s){ pushPhotoUndo(); s.stroke=annStroke; queueDraft(); } annRefresh(); return; }
   if(d.fill!=null){ annFill=d.fill; if(s){ pushPhotoUndo(); s.fill=annFill; queueDraft(); } annRefresh(); return; }
+  if(d.dash!=null){ annDash=d.dash==='1'; if(s&&s.t!=='text'&&s.t!=='num'&&s.t!=='barrow'){ pushPhotoUndo(); if(annDash) s.dash=1; else delete s.dash; queueDraft(); } annRefresh(); return; }
+  if(d.act==='flip'){ if(s&&s.t==='carrow'){ pushPhotoUndo(); s.bend=-(s.bend||1); annRefresh(); queueDraft(); } return; }
+  if(d.act==='swap'){ if(s){ pushPhotoUndo(); [s.x1,s.x2]=[s.x2,s.x1]; [s.y1,s.y2]=[s.y2,s.y1]; if(s.t==='carrow') s.bend=-(s.bend||1); annRefresh(); queueDraft(); } return; }
+  if(d.act==='numup'||d.act==='numdn'){ if(s&&s.t==='num'){ pushPhotoUndo(); s.n=Math.max(0,(+s.n||0)+(d.act==='numup'?1:-1)); annRefresh(); queueDraft(); } return; }
+  if(d.color!=null&&s&&s.t==='num'){ annText=d.color; pushPhotoUndo(); s.color=annText; queueDraft(); annRefresh(); return; }
   if(d.color!=null){ annText=d.color; if(s&&s.t==='text'){ pushPhotoUndo(); s.color=annText; queueDraft(); } annRefresh(); return; }
   if(d.lw!=null){ annLw=+d.lw; if(s){ pushPhotoUndo(); s.lw=annLw; queueDraft(); } annRefresh(); return; }
   if(d.fs!=null){ annFs=+d.fs; if(s&&s.t==='text'){ pushPhotoUndo(); s.fs=annFs; queueDraft(); } annRefresh(); return; }
@@ -4248,7 +4500,11 @@ function sheetPaperHtml(seq,sh,photos,e,pg,tot){
       rows+='<tr class="ph"><td colspan="'+(5+X)+'">'+mark+photoCellS(photos[i],i,e,cap)+'</td>'
            +'<td colspan="6">'+photoCellS(photos[i+1],i+1,e,cap)+'</td></tr>';
     }
-    const cell=(k,ph)=>e?fArea('f:'+b+':'+k,f[k],ph,k==='problem'&&!String(f.problem||'').trim()?'need':''):('<span class="vtxt">'+hesc(f[k]||'')+'</span>');
+    /* V.5.1 หลังซ่อม: ข้อความที่ยกมาจากก่อนซ่อมและยังไม่ได้แก้ แสดงเป็นสีจาง */
+    /* V.5.3 จุดที่ก่อนซ่อมเป็น Severity 1 (สภาพปกติ) — ข้อความและ Severity แสดงสีปกติ (รูปยังเป็นภาพจางเหมือนเดิม) */
+    const R1=(e&&seq.phase==='post'&&isPend(f))?preIndex(seq.src).get(f.ref):null, R0=(R1&&+R1.f.sev!==1)?R1:null;
+    const fade=k=>(R0&&dxN(f[k])&&dxN(f[k])===dxN(R0.f[k]))?'prefade':'';
+    const cell=(k,ph)=>e?fArea('f:'+b+':'+k,f[k],ph,[k==='problem'&&!String(f.problem||'').trim()?'need':'',fade(k)].filter(Boolean).join(' ')):('<span class="vtxt">'+hesc(f[k]||'')+'</span>');
     /* ป้ายหัวช่อง — ตอนกรอกเป็นปุ่มเปิด Dropdown ของช่องข้าง ๆ (ไม่ติดไปกับไฟล์ส่งออก) */
     const dd=k=>e?' data-dd="f:'+b+':'+k+'" title="แตะเพื่อเลือกจากรายการ"':'';
     const car=e?'<span class="ddc" aria-hidden="true">▾</span>':'';
@@ -4262,7 +4518,7 @@ function sheetPaperHtml(seq,sh,photos,e,pg,tot){
     rows+='<tr>'+lab('Location','loc')+'<td colspan="'+(10+X)+'">'+cell('loc','ตำแหน่งที่ตรวจ เช่น Gridline A-3, EL. +12.50 m')+'</td></tr>'
       +'<tr>'+lab('Problem','problem')+'<td colspan="'+(7+X)+'">'+cell('problem','สิ่งที่ตรวจพบ เช่น Corrosion at bottom flange')+'</td>'
         +'<td class="b c" colspan="2">Severity Level</td>'
-        +'<td class="sevv'+(e?(+f.sev?' l'+f.sev:' need'):'')+'"'+(e?' data-sev="'+b+'" title="แตะเพื่อเลือก Severity Level"':'')+'>'
+        +'<td class="sevv'+(e?(+f.sev?' l'+f.sev:' need'):'')+(R0&&+f.sev&&+f.sev===+R0.f.sev?' prefade':'')+'"'+(e?' data-sev="'+b+'" title="แตะเพื่อเลือก Severity Level"':'')+'>'
         +(+f.sev||'')+'</td></tr>'
       +'<tr>'+lab('Cause','cause')+'<td colspan="'+(10+X)+'">'+cell('cause','สาเหตุ')+'</td></tr>'
       +'<tr>'+lab('Remedial','remedial')+'<td colspan="'+(10+X)+'">'+cell('remedial','แนวทางแก้ไข')+'</td></tr>';
@@ -4839,6 +5095,45 @@ async function pxFindingSlide(ctx,seq,sh,b,no){
     +pxTitle(id++,pxSeqTitle(seq),PX_FIND.tx,PX_FIND.ty)+pxNum(id++,no)+pxSevTable(id++,+f.sev||0);
   return {media:pics.media,xml:pxSlide(shapes)};
 }
+
+/* ==================================================================
+   V.5.1 สไลด์ "Before vs After Repair" ของแต่ละลำดับ (ต่อจากหน้าปก ก่อนสไลด์จุดตรวจ) — เฉพาะรอบหลังซ่อม
+   ตารางทุกจุดตรวจ: ตำแหน่ง · Severity + ข้อความก่อนซ่อม → หลังซ่อม · ผลการซ่อม (สูงสุด 8 แถว/สไลด์)
+   ================================================================== */
+const CMPX_OUT={fixed:'Fixed',better:'Improved, still a defect',same:'Unchanged defect',worse:'Worse','new':'New defect',
+  pend:'Awaiting update',wait:'Awaiting update',ok:'Normal before & after'};
+const cmpxCat=k=>k==='none'?'No before-repair data':k==='na'?'Not assessed':('Category '+DASH_CAT[k].no);
+function cmpxRows(C){
+  return C.P.map(p=>{ const F=p.A||p.B, coat=F.coat;
+    return {part:p.part,loc:coat?(deckTopicTx(F.f)||'Coating'):(F.loc||deckTopicTx(F.f)||''),sb:p.B?p.B.sev:0,sa:p.pend?0:p.sevA,pend:p.pend,
+      pb:p.B?(p.B.problem||''):'(not inspected before repair)',pa:p.pend?'Awaiting after-repair update':(p.A.problem||''),out:p.out,A:p.A,B:p.B}; });
+}
+function pxCmpSlides(seq,C,no0){
+  const rows=cmpxRows(C), per=8, out=[], pages=Math.max(1,Math.ceil(rows.length/per));
+  for(let pg=0;pg<pages;pg++){
+    const g=smG(), X=SM.X, W=SM.W, y0=SM.Y0, H0=300000, rh=Math.min(540000,Math.floor((SM.Y1-y0-H0)/per));
+    const cw=[420000,2700000,3150000,3150000,0]; cw[4]=W-cw.slice(0,4).reduce((a,b)=>a+b,0);
+    const cx=cw.map((w,i)=>X+cw.slice(0,i).reduce((a,b)=>a+b,0));
+    ['No.','Location','Before repair','After repair','Result'].forEach((t,i)=>smL(g,cx[i]+40000,y0,cw[i]-80000,H0,t,{sz:1300,b:1,color:SM.mut}));
+    smShape(g,X,y0+H0,W,12700,{fill:SM.line,name:'Rule'});
+    rows.slice(pg*per,pg*per+per).forEach((r,k)=>{ const i=pg*per+k, y=y0+H0+k*rh;
+      if(k) smShape(g,X,y,W,6350,{fill:SM.line,name:'Rule'});
+      smL(g,cx[0]+40000,y,cw[0]-80000,rh,String(i+1),{sz:1500,b:1,color:SM.ink});
+      smT(g,cx[1]+40000,y+50000,cw[1]-80000,rh-100000,smP([[r.loc||'-',{sz:1400,b:1,color:SM.ink}]])+smP([[(PART[r.part]||{}).short||'',{sz:1100,color:SM.mut}]]),{anchor:'ctr',name:'Location'});
+      [[r.sb,r.pb,2],[r.sa,r.pa,3]].forEach(c=>{ const x=cx[c[2]]+40000, s=c[0]||0;
+        smChip(g,x,y+(rh-250000)/2,250000,SM.sev[s],SM.sevT[s],s||'–',1300);
+        smT(g,x+300000,y+40000,cw[c[2]]-380000,rh-80000,smP([[c[1]||'-',{sz:1200,color:c[2]===3&&r.pend?SM.mut:SM.ink}]],{ln:90000}),{anchor:'ctr',name:'Text'}); });
+      const os=(CMP_O[r.out]||{}).s, fill=os==null?'FFFFFF':SM.sev[os];
+      smShape(g,cx[4]+40000,y+(rh-170000)/2,170000,170000,{fill:fill,line:os==null?SM.line:null,name:'Key'});
+      smL(g,cx[4]+260000,y,cw[4]-300000,rh,CMPX_OUT[r.out]||r.out,{sz:1300,b:1,color:SM.ink},{fit:[1300,1200,1100,1000]});
+    });
+    const sub=cmpxCat(C.catB)+'  →  '+cmpxCat(C.cat)+'   ·   defects before '+C.nDefB+' · fixed '+C.nFix+' · still a defect '+C.nLeft
+      +(C.nPend?(' · awaiting update '+C.nPend):'')+(pages>1?('   ·   page '+(pg+1)+' / '+pages):'');
+    out.push(smSlide(no0+pg,pxSeqTitle(seq).replace(/^\S+\.\s*/,'')+' — Before vs After Repair',sub,
+      'Each row is one inspection point: Severity and finding before repair → after repair. Grey = no after-repair result yet.',g));
+  }
+  return out;
+}
 async function renderPptx(seqList,progress){
   const files=await zipRead(pptxSkel());
   const td=new TextDecoder(), te=new TextEncoder();
@@ -4850,8 +5145,11 @@ async function renderPptx(seqList,progress){
     return m; };
   const slides=[], total=seqList.reduce((a,s)=>a+pptxSlideCount(s),0)+(seqList.length?sumSlideCount():0);
   const tick=()=>{ if(progress) progress(slides.length,total); };
+  const CX=isPost()?cmpBuild():null;
   for(const seq of seqList){
     slides.push(await pxCoverSlide(ctx,seq,slides.length+1)); tick();
+    const CC=CX&&CX.byId.get(seq.id);
+    if(CC&&CC.P.length) for(const sl of pxCmpSlides(seq,CC,slides.length+1)) slides.push(sl);
     for(const u of pptxUnits(seq)){ slides.push(await pxFindingSlide(ctx,seq,u.sh,u.b,slides.length+1)); tick(); }
   }
   /* V.2.5 สไลด์สรุปแบบ Dashboard ต่อท้ายไฟล์ (ก่อนซ่อม 3 แผ่น · หลังซ่อม 4 แผ่น เทียบก่อนซ่อม–หลังซ่อม) */
@@ -5117,6 +5415,7 @@ function renderNav(){
     el.innerHTML=(isPost()?postNavEmpty():('<div class="seqpick"><label>ลำดับรายการตรวจสอบ</label>'
       +'<button type="button" class="btn pri" data-act="newseq">'+ico('plus')+'สร้างลำดับแรก</button>'
       +'<span class="emptyp">1 ลำดับ = 1 อาคาร/อุปกรณ์ มีหน้าปกของตัวเอง</span></div>'))+foot;
+    navMiniPaint();
     return;
   }
   let seq=seqById(CUR_SEQ); if(!seq){ seq=seqsSorted()[0]; CUR_SEQ=seq.id; }
@@ -5152,12 +5451,31 @@ function renderNav(){
     +(nE?('ต้องแก้ '+nE+' · '):'')+(nW?('ควรตรวจ '+nW):(nE?'':'ข้อมูลครบ'))+'</small></span></button></div>';
   const where=PAGE.k==='sheet'&&sheetById(PAGE.id)?('หน้า '+pageNo(seq,PAGE.id)+' · '+PART[sheetById(PAGE.id).part].short)
     :PAGE.k==='head'?'ข้อมูลหัวกระดาษ':PAGE.k==='cover'?'หน้าปก':PAGE.k==='review'?'ตรวจสอบ & ยืนยัน':PAGE.k==='sign'?'ลายเซ็น':'';
-  el.innerHTML='<button type="button" class="navtoggle" data-navtoggle="1"><span class="nt"><b>ลำดับ '+seq.no+' · '+hesc(String(seq.building||'').trim()||'(ยังไม่ตั้งชื่อ)')+'</b>'
+  /* V.5.1 รางแคบตอนย่อแผงนำทาง */
+  const rdot=s=>{ const w=worstSev(s); return w?'<i class="B'+w+'"></i>':''; };
+  const rail='<div class="navrail"><button type="button" class="rexp" data-navmin="1" title="ขยายแผงนำทาง" aria-label="ขยายแผงนำทาง">'+ico('chevronRight')+'</button>'
+    +'<span class="rsep"></span>'
+    +'<button type="button"'+(on('head')?' class="on"':'')+' data-go=\'{"k":"head","id":"'+seq.id+'"}\' title="ข้อมูลหัวกระดาษ">H</button>'
+    +sheetsOf(seq.id).map(s=>'<button type="button"'+(on('sheet',s.id)?' class="on"':'')+' data-go=\'{"k":"sheet","id":"'+s.id+'"}\' title="หน้า '+pageNo(seq,s.id)+' · '+hesc(PART[s.part].short)+' — '+hesc(sheetTitle(s))+'">'+pageNo(seq,s.id)+rdot(s)+'</button>').join('')
+    +'<span class="rsep"></span>'
+    +'<button type="button"'+(on('cover')?' class="on"':'')+' data-go=\'{"k":"cover","id":"'+seq.id+'"}\' title="หน้าปก (หน้า 1)">ปก</button>'
+    +'<button type="button"'+(on('review')?' class="on"':'')+' data-go=\'{"k":"review","id":"'+seq.id+'"}\' title="ตรวจสอบ &amp; ยืนยัน">'+ico('check')+'</button>'
+    +'<button type="button"'+(PAGE.k==='sign'?' class="on"':'')+' data-go=\'{"k":"sign"}\' title="ลายเซ็นท้ายกระดาษ">'+ico('pen')+'</button></div>';
+  el.innerHTML=rail+'<button type="button" class="navmin" data-navmin="1" title="ย่อแผงนำทาง เพิ่มพื้นที่หน้ากระดาษ">ย่อแผง '+ico('arrowLeft')+'</button>'
+    +'<button type="button" class="navtoggle" data-navtoggle="1"><span class="nt"><b>ลำดับ '+seq.no+' · '+hesc(String(seq.building||'').trim()||'(ยังไม่ตั้งชื่อ)')+'</b>'
     +'<small>'+hesc(where)+(nE?' · ต้องแก้ '+nE:'')+'</small></span><span class="nb">เปลี่ยนหน้า '+ico('chevronDown')+'</span></button>'
     +'<div class="navbody">'+h+foot+'</div>';
   el.classList.toggle('collapsed',navCollapsed);
+  navMiniPaint();
 }
 let navCollapsed=true;
+/* V.5.1 สถานะย่อแผงนำทาง (จำไว้ในเครื่อง) */
+let navMini=(()=>{ try{ return localStorage.getItem('ci_navmini')==='1'; }catch(e){ return false; } })();
+function navMiniPaint(){ const nav=$('#nav'), ws=nav&&nav.closest('.ws'); if(!ws) return;
+  /* ยังไม่มีลำดับ (ไม่มีรางให้ใช้) — แสดงแผงเต็มเสมอ */
+  ws.classList.toggle('navmini',navMini&&!!nav.querySelector('.navrail')); }
+function navMiniToggle(){ navMini=!navMini; try{ localStorage.setItem('ci_navmini',navMini?'1':'0'); }catch(e){}
+  navMiniPaint(); setTimeout(()=>{ try{ remeasure(); }catch(e){} try{ annPositionMore(); }catch(e){} },30); }
 
 /* ==================================================================
    เปิดหน้า
@@ -5400,7 +5718,18 @@ function syncFinding(b){
   ['problem','cause','remedial','loc'].forEach(k=>{ const el=$('#formPaper [data-k="f:'+b+':'+k+'"]'); if(el&&el.value!==(f[k]||'')){ el.value=f[k]||''; autosize(el); }
     if(el&&k==='problem') el.classList.toggle('need',!String(f.problem||'').trim()); });
   const pp=$('#pgPend'); if(pp){ const np=fmtOf(cur.fmt).blocks.filter((r,i)=>isPend(cur.findings[i])).length; pp.hidden=!np; pp.textContent='รออัปเดตผลหลังซ่อม '+np+' จุดตรวจ'; }
+  postFadeSync(b);
   navSoon(); checkOverflow(); postDecorate();
+}
+
+/* V.5.1 สีจางของข้อความ/Severity ที่ยังเป็นค่าที่ยกมาจากก่อนซ่อม — คำนวณใหม่ทุกครั้งที่จุดตรวจเปลี่ยน */
+function postFadeSync(b){
+  if(!cur||!cur.id) return;
+  const seq=seqById(cur.seqId), f=cur.findings&&cur.findings[b];
+  const R1=(seq&&seq.phase==='post'&&isPend(f))?preIndex(seq.src).get(f.ref):null, R=(R1&&+R1.f.sev!==1)?R1:null;   /* V.5.3 Severity 1 = ไม่จาง */
+  ['problem','cause','remedial','loc'].forEach(k=>{ const el=$('#formPaper [data-k="f:'+b+':'+k+'"]'); if(!el) return;
+    el.classList.toggle('prefade',!!(R&&dxN(el.value)&&dxN(el.value)===dxN(R.f[k]))); });
+  const td=$('#formPaper td[data-sev="'+b+'"]'); if(td) td.classList.toggle('prefade',!!(R&&+f.sev&&+f.sev===+R.f.sev));
 }
 function setSev(b,n){
   const f=cur.findings[b]; if(!f) return;
@@ -5976,6 +6305,9 @@ function wireForm(){
     if(kill){ e.stopPropagation(); pushPhotoUndo(); cur.photos[+kill.dataset.kill]=null; refreshPhotos(); queueDraft(); return; }
     const pc=e.target.closest('.pcell[data-i]');
     if(pc){ if(e.target.closest('.annsvg')&&typeof annAteClick==='function'&&annAteClick()) return;
+      /* V.5.2 แตะช่องที่มีรูปแล้ว ไม่เปิดหน้าต่างเลือกไฟล์ (เดิมแตะรูปเพื่อเลือก/ย้าย แล้วหน้าต่างเลือกรูปเด้งขึ้นมาทันที)
+         — เปิดเฉพาะช่องว่าง · เปลี่ยนรูป = ดับเบิลคลิก/แตะสองครั้ง หรือ ✕ ลบแล้วแตะช่องว่าง */
+      if(cur.photos[+pc.dataset.i]){ photoTapHint(); return; }
       slotIdx=+pc.dataset.i; $('#fileIn').value=''; $('#fileIn').click(); return; }
     const cc=e.target.closest('.pcell[data-ci]'); if(cc){ chooseCoverPhoto(+cc.dataset.ci); return; }
     const sv=e.target.closest('td[data-sev]'); if(sv){ openSevPop(sv,+sv.dataset.sev); return; }
@@ -6005,6 +6337,7 @@ function wireForm(){
 
   /* แถบด้านบน / หน้าฟอร์ม / ปุ่มล่าง / แผงนำทาง — ใช้ตัวจับเหตุการณ์ร่วม */
   const common=async e=>{
+    const nm=e.target.closest('[data-navmin]'); if(nm){ navMiniToggle(); return; }
     const nt=e.target.closest('[data-navtoggle]'); if(nt){ navCollapsed=!navCollapsed; $('#nav').classList.toggle('collapsed',navCollapsed); return; }
     const mp=e.target.closest('[data-mvpg]'); if(mp){ e.preventDefault(); e.stopPropagation(); const [id,d]=mp.dataset.mvpg.split(':');
       if(await moveSheetById(id,+d)){ renderNav(); await renderPage(); } return; }
@@ -6193,8 +6526,20 @@ async function checkBeforeExport(list){
   if(v==='rv'){ go('form'); await openPage({k:'review',id:bad[0].id}); return false; }
   return v==='go';
 }
+
+/* V.5.1 มีข้อมูลหลังซ่อม → PDF / Word / PowerPoint / HTML ส่งออกเฉพาะผลหลังซ่อม
+   สลับไปชุดแท็บหลังซ่อม และเลือกลำดับหลังซ่อมที่คู่กับลำดับก่อนซ่อมที่เลือกไว้ */
+async function expUsePost(all){
+  if(isPost()||!phaseArr('post').seqs.length) return;
+  if(!withPhase('post',()=>SEQS.some(seqHasData))) return;
+  const ids=new Set(pickSeqs(all).map(s=>s.id));
+  await setPhase('post',{quiet:true});
+  if(!isPost()) return;
+  if(!all){ const m=SEQS.filter(s=>ids.has(s.src)).map(s=>s.id); if(m.length) selected=new Set(m); }
+  toast('มีข้อมูลหลังซ่อม — ส่งออกเฉพาะผลหลังซ่อม (สลับไปชุดแท็บหลังซ่อมแล้ว)',4500);
+}
 async function exportDocx(all){
-  await flushSave();
+  await flushSave(); await expUsePost(all);
   const list=await expList(all); if(!list) return;
   try{
     toast('กำลังสร้างไฟล์ Word…',60000);
@@ -6203,7 +6548,7 @@ async function exportDocx(all){
   }catch(e){ console.error(e); toast('สร้างไฟล์ไม่สำเร็จ: '+(e.message||e),6000); }
 }
 async function exportPptx(all){
-  await flushSave();
+  await flushSave(); await expUsePost(all);
   const list=await expList(all); if(!list) return;
   try{
     toast('กำลังสร้างไฟล์ PowerPoint…',60000);
@@ -6285,7 +6630,20 @@ async function deckBuild(seqList,progress){
         before:B?{sev:B.sev,problem:B.problem}:null});
       done++; if(progress) progress(done,total);
     }
-    seqs.push({id:seq.id,no:seq.no||0,title:pxSeqTitle(seq).replace(/^\S+\.\s*/,''),
+    /* V.5.1 หน้าเปรียบเทียบก่อน–หลังซ่อมของลำดับนี้ */
+    let cmp=null;
+    if(post&&C&&C.P&&C.P.length){
+      const firstPh=async F=>{ if(!F) return ''; const s0=blockStart(F.sh.fmt,F.b), n=fmtOf(F.sh.fmt).blocks[F.b]*2;
+        for(let i=s0;i<s0+n;i++){ if(!(F.sh.ph&&F.sh.ph[i])&&!(cur&&cur.id===F.sh.id)) continue;
+          const p=await getPhoto(F.sh.id,i); if(p&&p.dataUrl) return await addPh(photoKey(F.sh.id,i),p); }
+        return ''; };
+      const rows=[];
+      for(const r of cmpxRows(C)){
+        rows.push({part:r.part,loc:deckTx(r.loc),sb:r.sb,sa:r.sa,pend:r.pend,pb:deckTx(r.pb),pa:deckTx(r.pa),out:r.out,
+          ka:(r.A&&!r.pend)?fKey(r.A.sh,r.A.b):'',phB:await firstPh(r.B),phA:r.pend?'':await firstPh(r.A)}); }
+      cmp={catB:C.catB,cat:C.cat,nDefB:C.nDefB,nFix:C.nFix,nLeft:C.nLeft,nPend:C.nPend,rows:rows};
+    }
+    seqs.push({id:seq.id,no:seq.no||0,title:pxSeqTitle(seq).replace(/^\S+\.\s*/,''),cmp:cmp,
       head:{eqCode:dxN(h.eqCode),eqName:dxN(h.eqName),plantUnit:dxN(h.plantUnit),dateIssue:fmtDate(h.dateIssue),workOrder:dxN(h.workOrder)},
       cat:C?C.cat:'na',catB:post&&C?C.catB:'',ov:!!(C&&C.ov),note:C?C.note:'',rows:rows,cover:cover,finds:finds});
   }
@@ -6318,7 +6676,7 @@ function deckHtml(D,bg){
     +'<script>'+js+'</'+'script>\n</body>\n</html>\n';
 }
 async function exportDeck(all){
-  await flushSave();
+  await flushSave(); await expUsePost(all);
   const list=await expList(all); if(!list) return;
   try{
     toast('กำลังสร้างไฟล์นำเสนอ HTML…',60000);
@@ -6351,7 +6709,7 @@ async function pagesHtml(list,limit){
   return {html:h,n:n};
 }
 async function doPrint(){
-  await flushSave();
+  await flushSave(); await expUsePost(false);
   const list=await expList(false,'พิมพ์'); if(!list) return;
   toast('กำลังจัดหน้า…',6000);
   const r=await pagesHtml(list,0);
@@ -6446,9 +6804,10 @@ function projectName(){
 }
 const phaseCountTx=()=>{ const P=phaseArr('pre'), Q=phaseArr('post');
   return P.seqs.length+' ลำดับ'+(Q.seqs.length?(' และผลหลังซ่อม '+Q.seqs.length+' ลำดับ'):''); };
-async function projectText(){
+async function projectText(scope){
   await flushSave();
-  const P=phaseArr('pre'), Q=phaseArr('post');
+  const E={seqs:[],sheets:[]};
+  const P=scope==='post'?E:phaseArr('pre'), Q=scope==='pre'?E:phaseArr('post');
   const pack=async list=>{ const out=[];
     for(const s of list){ const o=Object.assign({},s); o.photos=[];
       for(let i=0;i<fmtCap(s.fmt);i++) o.photos.push((cur&&cur.id===s.id&&cur.photos)?(cur.photos[i]||null):((s.ph&&s.ph[i])?await dbGet('photos',photoKey(s.id,i)).catch(()=>null):null));
@@ -6468,25 +6827,94 @@ async function rememberHandle(){
   try{ await dbPut('meta',{name:fileName},'filename'); }catch(e){}
   try{ if(FH) await dbPut('meta',{h:FH,name:fileName},'filehandle'); }catch(e){}
 }
-async function saveProject(saveAs,quiet){
-  if(!SEQS.length&&!ALT.seqs.length){ toast('ยังไม่มีข้อมูลให้บันทึก'); return false; }
-  let text; try{ text=await projectText(); }catch(e){ toast('เตรียมข้อมูลไม่สำเร็จ'); return false; }
+/* V.5.0 แก้ "เปิดไฟล์เดิม → กดบันทึก → ได้ไฟล์ดาวน์โหลดใหม่ ไม่ทับไฟล์เดิม"
+   สาเหตุเดิม: (1) ตอนเปิดไฟล์ขอสิทธิ์แค่ "อ่าน" (2) ตอนบันทึกเตรียมข้อมูล (รวมรูปทั้งโปรเจกต์ — ใช้เวลานาน) ก่อนขอสิทธิ์ "เขียน"
+   จนสิทธิ์จากการกดปุ่ม (user activation) หมดอายุ เบราว์เซอร์จึงไม่ยอมถาม/ไม่ยอมเปิดหน้าต่างบันทึก แล้วโค้ดเดิมตีความว่า
+   "ใช้ File System Access ไม่ได้" → ตัดไปดาวน์โหลดไฟล์ใหม่ และปิดการเขียนทับไปตลอดการใช้งานครั้งนั้น
+   (3) บันทึกอัตโนมัติที่ไม่มีสิทธิ์เขียน ทำให้ลืมไฟล์ที่ผูกไว้ (FH=null)
+   แก้: ขอสิทธิ์เขียน / เลือกไฟล์ "ทันที" ที่กดปุ่ม แล้วค่อยเตรียมข้อมูล · บันทึกอัตโนมัติใช้เฉพาะสิทธิ์ที่มีอยู่แล้ว ไม่ลืมไฟล์
+   · ไม่ตัดไปดาวน์โหลดเพราะสิทธิ์หมดเวลา — บอกให้กดบันทึกอีกครั้งแทน */
+async function saveProject(saveAs,quiet,scope){
+  if(!SEQS.length&&!ALT.seqs.length){ if(!quiet) toast('ยังไม่มีข้อมูลให้บันทึก'); return false; }
+  /* V.5.1 มีข้อมูลทั้ง 2 ชุด → ถามว่าบันทึกชุดไหน (บันทึกอัตโนมัติ = รวมกันเสมอ) */
+  if(!scope){
+    const nP=phaseArr('pre').seqs.length, nQ=phaseArr('post').seqs.length;
+    if(!quiet&&nP&&nQ){
+      scope=await ask({title:'บันทึกไฟล์งาน',
+        body:'เลือกข้อมูลที่จะบันทึก<br><br>· <b>รวมกัน</b> — ก่อนซ่อม '+nP+' ลำดับ + หลังซ่อม '+nQ+' ลำดับ'+(FH&&!saveAs?(' (บันทึกทับ <b>'+hesc(fileName)+'</b>)'):'')
+          +'<br>· <b>เฉพาะก่อนซ่อม</b> / <b>เฉพาะหลังซ่อม</b> — บันทึกเป็นไฟล์แยก (เลือกชื่อไฟล์ใหม่) ไฟล์งานที่เปิดอยู่ไม่ถูกแตะ'
+          +'<br><small>ไฟล์เฉพาะหลังซ่อมไม่มีข้อมูลก่อนซ่อมไว้เปรียบเทียบ</small>',
+        buttons:[{v:'all',label:'รวมกัน',kind:'pri'},{v:'pre',label:'เฉพาะก่อนซ่อม'},{v:'post',label:'เฉพาะหลังซ่อม'},{v:null,label:'ยกเลิก'}]});
+      if(!scope) return false;
+    } else scope='all';
+  }
+  if(scope!=='all') return savePart(scope);
   if(fsaSave()){
+    let h=null;
     try{
-      if(saveAs||!FH) FH=await window.showSaveFilePicker({suggestedName:projectName(),types:FTYPES});
-      else if(!(await fsaAllow(FH))){ FH=null; return saveProject(true); }
-      const w=await FH.createWritable(); await w.write(text); await w.close();
-      fileName=FH.name; dirty=false; await rememberHandle(); renderFileState();
-      toast((quiet?'บันทึกอัตโนมัติลง ':'บันทึกลงไฟล์ ')+fileName+' แล้ว'); return true;
-    }catch(e){ if(e&&e.name==='AbortError'){ toast('ยกเลิกการบันทึก'); return false; } fsaGiveUp(e); FH=null; }
+      if(!saveAs&&FH){
+        if(quiet){ let st='prompt'; try{ st=await FH.queryPermission({mode:'readwrite'}); }catch(e){}
+          if(st!=='granted') return false; h=FH; }
+        else if(await fsaAllow(FH,'readwrite')) h=FH;
+        else toast('ไม่ได้รับสิทธิ์เขียนทับ “'+fileName+'” — เลือกไฟล์ที่จะบันทึกแทน',4500);
+      }
+      if(!h){ if(quiet) return false;
+        h=await window.showSaveFilePicker({suggestedName:projectName(),types:FTYPES}); }
+    }catch(e){
+      if(e&&e.name==='AbortError'){ toast('ยกเลิกการบันทึก'); return false; }
+      if(quiet) return false;
+      console.warn('saveProject',e);
+      if(window.top!==window||(e&&e.name==='TypeError')) fsaGiveUp(e);
+      else { toast('เบราว์เซอร์ยังไม่ยอมเปิดหน้าต่างบันทึก — กดบันทึกอีกครั้ง',5000); return false; }
+    }
+    if(h){
+      let text; try{ text=await projectText('all'); }catch(e){ toast('เตรียมข้อมูลไม่สำเร็จ'); return false; }
+      try{
+        const w=await h.createWritable(); await w.write(text); await w.close();
+        FH=h; fileName=h.name; dirty=false; await rememberHandle(); renderFileState();
+        toast((quiet?'บันทึกอัตโนมัติลง ':'บันทึกทับไฟล์ ')+fileName+' แล้ว'); return true;
+      }catch(e){ console.warn('saveProject write',e);
+        if(!quiet) toast('เขียนไฟล์ '+h.name+' ไม่สำเร็จ ('+(e&&(e.message||e.name)||'')+') — ลองบันทึกอีกครั้ง หรือใช้ "บันทึกเป็นไฟล์ใหม่…"',7000);
+        return false; }
+    }
   }
   if(quiet) return false;
+  let text; try{ text=await projectText('all'); }catch(e){ toast('เตรียมข้อมูลไม่สำเร็จ'); return false; }
   const ok=await deliver(projectName(),text,'application/json');
+  if(ok&&fileName) toast('เบราว์เซอร์นี้บันทึกทับไฟล์เดิมไม่ได้ จึงดาวน์โหลดเป็นไฟล์ใหม่ — แนะนำเปิดด้วย Chrome / Edge เพื่อบันทึกทับไฟล์เดิม',7000);
   if(ok){ dirty=false; if(!fileName) fileName=projectName(); renderFileState(); }
   return ok;
 }
-async function applyProject(text,mode){
-  let o; try{ o=JSON.parse(text); }catch(e){ toast('อ่านไฟล์ไม่ได้ — ไม่ใช่ไฟล์งานที่ถูกต้อง'); return; }
+
+/* V.5.1 บันทึกเฉพาะชุดก่อนซ่อม / หลังซ่อม เป็นไฟล์แยก — ไม่เปลี่ยนไฟล์งานที่ผูกอยู่ */
+async function savePart(scope){
+  const n=phaseArr(scope).seqs.length; if(!n){ toast('ยังไม่มีข้อมูล'+PHASES[scope].th); return false; }
+  const base=projectName().replace(/\.json$/i,'').replace(/-(BeforeRepair|AfterRepair)$/i,'');
+  const name=base+(scope==='pre'?'-BeforeRepair':'-AfterRepair')+'.json';
+  const lb='เฉพาะข้อมูล'+PHASES[scope].th;
+  if(fsaSave()){
+    let h;
+    try{ h=await window.showSaveFilePicker({suggestedName:name,types:FTYPES}); }
+    catch(e){ if(e&&e.name==='AbortError'){ toast('ยกเลิกการบันทึก'); return false; }
+      if(window.top!==window||(e&&e.name==='TypeError')) fsaGiveUp(e); else { toast('เบราว์เซอร์ยังไม่ยอมเปิดหน้าต่างบันทึก — กดบันทึกอีกครั้ง',5000); return false; } }
+    if(h){
+      if(FH&&h.isSameEntry&&await h.isSameEntry(FH).catch(()=>false)){
+        const y=await ask({title:'เขียนทับไฟล์งานที่เปิดอยู่',body:'ไฟล์ <b>'+hesc(h.name)+'</b> คือไฟล์งานที่เปิดอยู่ — ถ้าบันทึก'+lb+'ทับ ข้อมูลอีกชุดในไฟล์นี้จะหายไป',
+          buttons:[{v:1,label:'บันทึกทับ',kind:'dang'},{v:null,label:'ยกเลิก'}]});
+        if(!y) return false;
+      }
+      let text; try{ text=await projectText(scope); }catch(e){ toast('เตรียมข้อมูลไม่สำเร็จ'); return false; }
+      try{ const w=await h.createWritable(); await w.write(text); await w.close();
+        toast('บันทึก'+lb+' ('+n+' ลำดับ) ลงไฟล์ '+h.name+' แล้ว',4500); return true; }
+      catch(e){ toast('เขียนไฟล์ '+h.name+' ไม่สำเร็จ',6000); return false; }
+    }
+  }
+  let text; try{ text=await projectText(scope); }catch(e){ toast('เตรียมข้อมูลไม่สำเร็จ'); return false; }
+  return await deliver(name,text,'application/json');
+}
+async function applyProject(text,mode,opt){
+  opt=opt||{};
+  let o; try{ o=typeof text==='string'?JSON.parse(text):text; }catch(e){ toast('อ่านไฟล์ไม่ได้ — ไม่ใช่ไฟล์งานที่ถูกต้อง'); return; }
   if(!o||o.app!==APPID||!Array.isArray(o.seqs)){
     toast(o&&o.app==='egat-civil-inspection'?'ไฟล์นี้เป็นไฟล์งานของ V7.6 (ฟอร์มเดิม) — ใช้กับฟอร์ม Inspection Sheet นี้ไม่ได้':'รูปแบบไฟล์ไม่ถูกต้อง',6000); return; }
   await flushSave();
@@ -6548,6 +6976,7 @@ async function applyProject(text,mode){
   if(o.phrases&&o.phrases.t) phrMerge(o.phrases);
   else phrSeed(newSheets);
   await phrSave();
+  if(opt.stay){ markDirty(); preIdxCache.clear(); dashPhaseReset(); phasePaint(); estimateSizes(); return; }
   dirty=false; renderFileState();
   /* รอบที่เปิดอยู่ไม่มีข้อมูล แต่อีกรอบมี → กลับไปชุดก่อนซ่อม */
   if(isPost()&&!SEQS.length&&ALT.seqs.length){ phaseSwapRaw(); try{ localStorage.setItem('ci_phase','pre'); }catch(e){} }
@@ -6562,7 +6991,8 @@ async function openProject(mode){
   pendingOpenMode=mode;
   if(fsaOpen()){
     try{ const [h]=await window.showOpenFilePicker({types:FTYPES,multiple:false});
-      if(!(await fsaAllow(h,'read'))){ toast('ไม่ได้รับสิทธิ์อ่านไฟล์'); return; }
+      /* V.5.0 ขอสิทธิ์ "อ่าน+เขียน" ตั้งแต่ตอนเปิด — กดบันทึกครั้งต่อไปจะเขียนทับไฟล์นี้ได้ทันที (ถ้าไม่ให้ ก็ยังเปิดอ่านได้) */
+      if(!(await fsaAllow(h,'readwrite'))&&!(await fsaAllow(h,'read'))){ toast('ไม่ได้รับสิทธิ์อ่านไฟล์'); return; }
       const f=await h.getFile(); const text=await f.text();
       FH=h; fileName=h.name; renderFileState(); await rememberHandle();
       await applyProject(text,mode); return;
@@ -6592,20 +7022,50 @@ async function resetAll(){
 async function newProject(){
   await flushSave();
   if(!SEQS.length&&!ALT.seqs.length){ await resetAll(); toast('เริ่มโปรเจกต์ใหม่แล้ว'); return; }
+  /* V.5.1 เลือกว่าเริ่มใหม่เฉพาะก่อนซ่อม / หลังซ่อม / ทั้งหมด */
+  const nP=phaseArr('pre').seqs.length, nQ=phaseArr('post').seqs.length;
+  if(nP&&nQ){
+    const sc=await ask({title:'เริ่มโปรเจกต์ใหม่',
+      body:'เลือกข้อมูลที่จะเริ่มใหม่<br><br>· <b>ทั้งหมด</b> — ล้างก่อนซ่อม '+nP+' ลำดับ และหลังซ่อม '+nQ+' ลำดับ'
+        +'<br>· <b>เฉพาะก่อนซ่อม</b> — ล้างข้อมูลก่อนซ่อม ข้อมูลหลังซ่อมยังอยู่ (แต่จะไม่มีข้อมูลก่อนซ่อมไว้เปรียบเทียบ)'
+        +'<br>· <b>เฉพาะหลังซ่อม</b> — ล้างข้อมูลหลังซ่อม ข้อมูลก่อนซ่อมยังอยู่ ดึงมาเริ่มรอบหลังซ่อมใหม่ได้'
+        +'<br><br>ทุกแบบจะถามให้บันทึกข้อมูลปัจจุบันเป็นไฟล์ก่อน',
+      buttons:[{v:'all',label:'ทั้งหมด',kind:'pri'},{v:'pre',label:'เฉพาะก่อนซ่อม'},{v:'post',label:'เฉพาะหลังซ่อม'},{v:null,label:'ยกเลิก'}]});
+    if(!sc) return;
+    if(sc!=='all'){ await newProjectPart(sc); return; }
+  }
   if(fileName){
     const a=await ask({title:'เริ่มโปรเจกต์ใหม่ใช่หรือไม่',
       body:'ข้อมูลปัจจุบัน <b>'+phaseCountTx()+'</b> จะถูกบันทึกทับไฟล์ <b>'+hesc(fileName)+'</b> ก่อน แล้วล้างหน้าจอเพื่อเริ่มชุดงานใหม่ (ทั้งชุดก่อนซ่อมและหลังซ่อม)<br><br>ลายเซ็นยังคงไว้ให้ใช้ต่อ',
       buttons:[{v:'go',label:'บันทึกแล้วเริ่มใหม่',kind:'pri'},{v:null,label:'ยกเลิก'}]});
     if(a!=='go') return;
-    if(!(await saveProject(false))){ toast('ยังไม่ได้เริ่มโปรเจกต์ใหม่ เพราะบันทึกไฟล์ไม่สำเร็จ',5000); return; }
+    if(!(await saveProject(false,false,'all'))){ toast('ยังไม่ได้เริ่มโปรเจกต์ใหม่ เพราะบันทึกไฟล์ไม่สำเร็จ',5000); return; }
     await resetAll(); toast('เริ่มโปรเจกต์ใหม่แล้ว — ชุดงานเดิมถูกบันทึกไว้',5000); return;
   }
   const a=await ask({title:'เริ่มโปรเจกต์ใหม่ใช่หรือไม่',
     body:'ข้อมูลปัจจุบัน <b>'+phaseCountTx()+'</b> <b>ยังไม่เคยบันทึกเป็นไฟล์</b> ถ้าเริ่มใหม่เลยข้อมูลชุดนี้ (ทั้งชุดก่อนซ่อมและหลังซ่อม) จะหายถาวร',
     buttons:[{v:'save',label:'บันทึกเป็นไฟล์ก่อน',kind:'pri'},{v:'skip',label:'เริ่มใหม่โดยไม่บันทึก',kind:'dang'},{v:null,label:'ยกเลิก'}]});
   if(!a) return;
-  if(a==='save'&&!(await saveProject(true))){ toast('ยังไม่ได้เริ่มโปรเจกต์ใหม่ เพราะยังไม่ได้บันทึกไฟล์',5000); return; }
+  if(a==='save'&&!(await saveProject(true,false,'all'))){ toast('ยังไม่ได้เริ่มโปรเจกต์ใหม่ เพราะยังไม่ได้บันทึกไฟล์',5000); return; }
   await resetAll(); toast('เริ่มโปรเจกต์ใหม่แล้ว');
+}
+
+
+/* V.5.1 เริ่มใหม่เฉพาะชุดแท็บเดียว — บันทึกข้อมูลปัจจุบัน (รวมกัน) ก่อน แล้วล้างชุดที่เลือก
+   ไฟล์งานที่ผูกอยู่ถูกปลดออก (บันทึกครั้งต่อไปเป็นไฟล์ใหม่ ไม่ทับไฟล์เดิม) */
+async function newProjectPart(p){
+  const a=await ask({title:'เริ่มใหม่เฉพาะข้อมูล'+PHASES[p].th,
+    body:'ข้อมูล'+PHASES[p].th+' <b>'+phaseArr(p).seqs.length+' ลำดับ</b> จะถูกล้างออกจากเครื่องนี้'
+      +(fileName?('<br>แนะนำบันทึกข้อมูลปัจจุบันลงไฟล์ <b>'+hesc(fileName)+'</b> ก่อน'):'<br>ข้อมูลชุดนี้ยังไม่เคยบันทึกเป็นไฟล์'),
+    buttons:[{v:'save',label:fileName?'บันทึกแล้วเริ่มใหม่':'บันทึกเป็นไฟล์ก่อน',kind:'pri'},{v:'skip',label:'เริ่มใหม่โดยไม่บันทึก',kind:'dang'},{v:null,label:'ยกเลิก'}]});
+  if(!a) return;
+  if(a==='save'&&!(await saveProject(!fileName,false,'all'))){ toast('ยังไม่ได้เริ่มใหม่ เพราะบันทึกไฟล์ไม่สำเร็จ',5000); return; }
+  await phaseWipe(p);
+  FH=null; fileName=''; for(const k of ['filehandle','filename']) await dbDel('meta',k).catch(()=>{});
+  dirty=true; renderFileState();
+  if(p===PHASE){ renderNav(); await openPage({k:'welcome'}); }
+  phaseRefreshView();
+  toast('เริ่มใหม่เฉพาะข้อมูล'+PHASES[p].th+'แล้ว — บันทึกครั้งต่อไปจะเป็นไฟล์ใหม่',5000);
 }
 
 /* ================= ขนาดไฟล์ & ลดขนาดรูป ================= */
@@ -6700,7 +7160,7 @@ function wire(){
   $('#photoQ').addEventListener('change',e=>{ photoPreset=e.target.value; try{ localStorage.setItem('ci_photoq',photoPreset); }catch(err){}
     toast('รูปที่ใส่หลังจากนี้จะเก็บที่ '+PP().label); estimateSizes(); });
   $('#shrinkAll').onclick=shrinkAllPhotos;
-  wireForm(); wireAnnot();
+  wireForm(); wireAnnot(); wirePhotoMove();
   $('#fileIn').addEventListener('change',async e=>{ const fs=e.target.files; if(!fs||!fs.length) return; await addPhotos(fs,slotIdx); e.target.value=''; });
   document.addEventListener('paste',async e=>{
     const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
@@ -6787,7 +7247,10 @@ function wire(){
   $('#fileOpenMerge').onclick=()=>openProject('merge');
   $('#autoSaveOn').addEventListener('change',e=>{ autoSaveOn=e.target.checked; try{ localStorage.setItem('ci_autosave_on',autoSaveOn?'1':'0'); }catch(err){} restartAutoSaveTimer(); });
   $('#autoSaveMin').addEventListener('change',e=>{ autoSaveMin=Math.max(5,Math.min(60,(+e.target.value||15))); try{ localStorage.setItem('ci_autosave_min',String(autoSaveMin)); }catch(err){} restartAutoSaveTimer(); });
-  $('#jsonIn').addEventListener('change',async e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; fileName=f.name; FH=null; await applyProject(await f.text(),pendingOpenMode); });
+  $('#jsonIn').addEventListener('change',async e=>{ const f=e.target.files&&e.target.files[0];
+    if(pendingOpenMode==='pick'){ const r=jsonPickRes; jsonPickRes=null; pendingOpenMode='merge'; if(r) r(f?{text:await f.text(),name:f.name}:null); return; }
+    if(!f) return; fileName=f.name; FH=null; await applyProject(await f.text(),pendingOpenMode); });
+  $('#jsonIn').addEventListener('cancel',()=>{ if(pendingOpenMode==='pick'&&jsonPickRes){ const r=jsonPickRes; jsonPickRes=null; pendingOpenMode='merge'; r(null); } });
   addEventListener('beforeunload',e=>{ if(saveT) flushSave(); if(dirty&&fileName){ e.preventDefault(); e.returnValue=''; } });
   addEventListener('pagehide',()=>{ if(saveT) flushSave(); });
   document.addEventListener('visibilitychange',()=>{ if(document.hidden&&saveT) flushSave(); });
@@ -7256,7 +7719,10 @@ const DX_STD=(()=>{
   S.problem.add(dxK(LV1_AUTO.problem)); S.normal.add(dxK(LV1_AUTO.problem));
   return S;
 })();
-const dxIsStd=(k,v)=>DX_STD[k].has(dxK(v));
+/* V.5.0 Cause เลือกได้หลายสาเหตุ — เก็บบรรทัดละ 1 สาเหตุ */
+const causeParts=v=>String(v==null?'':v).split(/\n+/).map(dxN).filter(Boolean);
+const dxIsStd=(k,v)=>{ if(k==='cause'){ const p=causeParts(v); if(p.length>1) return p.every(x=>DX_STD.cause.has(dxK(x))); }
+  return DX_STD[k].has(dxK(v)); };
 /* ข้อความ Coating มาตรฐาน — เทียบโดยไม่สนตัวเลขที่ใส่แทน [426] */
 const dxCoatShape=s=>dxK(s).replace(/\[\s*\d+(?:[.,]\d+)?\s*\]/g,'#').replace(/\d+(?:[.,]\d+)?/g,'#');
 const DX_COATSHAPES=new Set([].concat.apply([],Object.keys(DX.coat).map(k=>DX.coat[k])).map(dxCoatShape));
@@ -7334,6 +7800,11 @@ function phrDrop(tk,k,v){ const bag=phrBag(tk); if(!bag) return false; const kv=
 function phrLearn(part,f,k,quiet){
   const tk=phrTK(part,f); if(!tk) return false;
   const coat=tk==='coat'; if(coat&&k!=='problem') return false;
+  /* V.5.0 Cause หลายสาเหตุ — จำทีละสาเหตุ (ไม่จำทั้งก้อน) */
+  if(k==='cause'){ const ps=causeParts(f[k]); if(ps.length>1){ let any=false;
+    const bag=phrBag(tk,true), ctx=phrCtx(f,k,false);
+    ps.forEach(pv=>{ if(pv!=='-'&&!DX_STD.cause.has(dxK(pv))&&phrFind(bag,k,pv,ctx)<0){ bag[k].push({v:pv,l:ctx.l||'',p:ctx.p||''}); any=true; } });
+    if(any&&!quiet) phrSaveSoon(); return any; } }
   const v=dxN(f[k]), rec=phrLast.get(f)||{}, old=rec[k];
   let ch=false;
   /* แก้คำที่เพิ่งพิมพ์ในช่องเดิม (เช่น แก้คำผิด) — ไม่เก็บฉบับก่อนแก้ไว้ ถ้าไม่มีจุดตรวจอื่นใช้อยู่ */
@@ -7421,13 +7892,14 @@ function dxRows(c){
         x.g.items.forEach(it=>{ if(dxK(it.problem)===P) push(linked,it[k],'['+it.n+']'); }); });
       use.forEach(x=>x.g.items.forEach(it=>push(other,it[k],'['+it.n+']')));
       push(other,'-','');
-      linked.forEach(r=>rows.push({grp:'ตรงกับ Problem ที่เลือก',v:r.v,tag:r.tag,cls:'lk',pick:()=>dxPickText(c.b,k,r.v)}));
-      other.forEach(r=>rows.push({grp:linked.length?'ข้อความอื่นในกลุ่มเดียวกัน':'',v:r.v,tag:r.tag,pick:()=>dxPickText(c.b,k,r.v)}));
-      hdr=(k==='cause'?'Cause':'Remedial')+' — ผูกกับ Problem ตามเลข [n]';
+      const pk=v=>k==='cause'?()=>dxPickCause(c.b,v):()=>dxPickText(c.b,k,v);
+      linked.forEach(r=>rows.push({grp:'ตรงกับ Problem ที่เลือก',v:r.v,tag:r.tag,cls:'lk',pick:pk(r.v)}));
+      other.forEach(r=>rows.push({grp:linked.length?'ข้อความอื่นในกลุ่มเดียวกัน':'',v:r.v,tag:r.tag,pick:pk(r.v)}));
+      hdr=k==='cause'?'Cause — เลือกได้หลายสาเหตุ (แตะซ้ำเพื่อเอาออก) · ผูกกับ Problem ตามเลข [n]':'Remedial — ผูกกับ Problem ตามเลข [n]';
     }
   }
   phrList(c.part,f,k).forEach(m=>rows.push({grp:'ที่เคยพิมพ์ในโปรเจกต์นี้'+(m.near?'':' (ใช้กับ Location / Problem อื่น)'),
-    v:m.v,mem:true,pick:()=>dxPickMem(c.b,k,m.v)}));
+    v:m.v,mem:true,pick:()=>k==='cause'?dxPickCause(c.b,m.v):dxPickMem(c.b,k,m.v)}));
   return {rows:rows,hdr:hdr};
 }
 /* เลื่อนหน้าจอให้เห็นรายการทั้งกล่อง (ช่องที่อยู่ล่าง ๆ ของจอ / จอมือถือ) */
@@ -7436,7 +7908,8 @@ function sugReveal(){ const bx=sugBox; if(!bx) return;
 function dxOpen(el,all){
   const c=dxCtx(el); if(!c) return false;
   const R=dxRows(c); if(!R) return false;
-  const q=dxK(fldVal(el));
+  const cp=c.k==='cause'?causeParts(fldVal(el)):null, cset=new Set((cp||[]).map(dxK));
+  const q=cp?dxK(cp[cp.length-1]||''):dxK(fldVal(el));
   let rows=R.rows;
   if(!all&&q&&!rows.some(r=>dxK(r.v)===q)) rows=rows.filter(r=>dxK(r.v).indexOf(q)>=0);
   if(!rows.length){ if(sugBox&&sugFor===el) closeSug(); return true; }
@@ -7448,8 +7921,9 @@ function dxOpen(el,all){
   let h='<div class="hdr">'+hesc(R.hdr)+'</div>', g='';
   rows.forEach((r,i)=>{
     if((r.grp||'')!==g){ g=r.grp||''; if(g) h+='<div class="ghd">'+hesc(g)+'</div>'; }
-    const on=dxK(r.v)===q&&(r.t==null||!c.f.dt||c.part!=='runway'||+r.t===+c.f.dt);
+    const on=cp?cset.has(dxK(r.v)):(dxK(r.v)===q&&(r.t==null||!c.f.dt||c.part!=='runway'||+r.t===+c.f.dt));
     h+='<div class="drow"><button type="button" data-si="'+i+'" class="'+(on?'cur':'')+'">'
+      +(cp&&on?'<i class="ok">✓</i>':'')
       +(r.tag?'<i class="'+(r.cls||'')+'">'+hesc(r.tag)+'</i>':'')
       +'<span class="eqtx"><b>'+hesc(r.v)+'</b>'+(r.sub?'<small>'+hesc(r.sub)+'</small>':'')+'</span></button>'
       +(r.mem?'<span class="pdel" role="button" data-pdel="'+i+'" title="ลบออกจากรายการที่จำไว้" aria-label="ลบออกจากรายการที่จำไว้">×</span>':'')+'</div>';
@@ -7518,6 +7992,22 @@ function dxPickProblem(b,x,it){
   if(needSev) dxAskSev(b,DEFECT_MIN);
 }
 function dxPickText(b,k,v){ const f=cur.findings[b]; if(!f) return; f[k]=v; dxAfter(b); }
+/* V.5.0 Cause: แตะ = เพิ่มสาเหตุ (บรรทัดใหม่) · แตะสาเหตุที่เลือกไว้แล้ว = เอาออก · “-” = ไม่มีสาเหตุ (ล้างทั้งหมด)
+   รายการยังเปิดค้างไว้ให้เลือกสาเหตุต่อได้ทันที */
+function dxPickCause(b,v){
+  const f=cur.findings[b]; if(!f) return;
+  const kv=dxK(v);
+  if(!kv||kv==='-'){ f.cause='-'; dxAfter(b); return; }
+  const p=causeParts(f.cause).filter(x=>x!=='-'), i=p.findIndex(x=>dxK(x)===kv);
+  if(i>=0) p.splice(i,1); else p.push(dxN(v));
+  f.cause=p.join('\n');
+  postEdited(f); queueMeta(); syncFinding(b);
+  const el=$('#formPaper [data-k="f:'+b+':cause"]');
+  if(el){ autosize(el); dxOpen(el,true); }
+  if(typeof checkOverflow==='function') try{ checkOverflow(); }catch(e){}
+  if(i>=0) toast('เอาสาเหตุนี้ออกแล้ว'+(p.length?(' · เหลือ '+p.length+' สาเหตุ'):''),2400);
+  else if(p.length>1) toast('Cause มี '+p.length+' สาเหตุ — เลือกเพิ่มได้อีก หรือแตะสาเหตุเดิมเพื่อเอาออก',3200);
+}
 function dxPickMem(b,k,v){
   const f=cur.findings[b]; if(!f) return;
   f[k]=v;
@@ -8364,7 +8854,7 @@ function dashClassify(c){
   c.why=why;
 }
 /* สร้างชุดข้อมูลของ Dashboard จากข้อมูลในเครื่อง (ทุกลำดับ) */
-function dashBuild(){
+function dashBuild(skipPend){
   const cranes=[], finds=[];
   seqsSorted().forEach(seq=>{
     const h=seq.head||{};
@@ -8374,6 +8864,7 @@ function dashBuild(){
     shs.forEach((sh,si)=>fmtOf(sh.fmt).blocks.forEach((r,b)=>{
       if(pxBlank(sh,b)) return;
       const f=(sh.findings||[])[b]||{}, sev=+f.sev||0, coat=isCoat(f);
+      if(skipPend&&isPend(f)) return;      /* V.5.1 Dashboard หลังซ่อม: ไม่นับจุดที่ยังเป็นข้อมูลก่อนซ่อม */
       const F={c:c,sh:sh,b:b,part:sh.part,sev:sev,coat:coat,f:f,page:si+2,pend:isPend(f),
         loc:coat?'':dxN(f.loc),problem:dxN(f.problem),cause:coat?'':dxN(f.cause),remedial:coat?'':dxN(f.remedial),
         topics:dashTopics(f),dmg:sev>=DEFECT_MIN?dashDamage(f):[],rep:dashRepair(f,sev)};
@@ -8430,7 +8921,8 @@ const dashListRefresh=()=>DASH.mode==='cmp'?cmpRows(cmpScope(null)):dashRows(das
 function dashPhaseReset(){
   const f=DASH.f; f.unit=''; f.q=''; dashSets().forEach(k=>f[k].clear());
   DASH.sig=''; DASH.M=null; DASH.opt=null; DASH.list=[]; DASH.menu=null; DASH.all=false; DASH.tbl.clear(); DASH.sort={k:'cat',dir:1};
-  DASH.mode=(typeof isPost==='function'&&isPost())?'cmp':'one';
+  DASH.view=dashWant||((typeof isPost==='function'&&isPost())?'post':'pre'); dashWant=null;
+  DASH.mode=DASH.view==='cmp'?'cmp':'one';
   const host=$('#dash'); if(host) host.innerHTML='';
 }
 /* จำสถานะกาง / พับ ของแผงเกณฑ์ (ค่าเริ่มต้น = กาง ให้เห็นเกณฑ์ทันที) */
@@ -8642,11 +9134,26 @@ function dashSkeleton(M){
 
 /* ---------- แสดงผล ---------- */
 /* keep = วาดใหม่หลังปรับ Category ในหน้ารายละเอียด (คงสถานะ "แสดงทั้งหมด" และไม่เล่นภาพเคลื่อนไหวตอนเปิดซ้ำ) */
+/* V.5.1 แท็บของ Dashboard (แสดงเมื่อมีข้อมูลหลังซ่อม): ก่อนซ่อม · หลังซ่อม · เปรียบเทียบ */
+let dashWant=null;
+function dashTabsPaint(){
+  const el=$('#dashTabs'); if(!el) return;
+  const has=phaseArr('post').seqs.length>0; el.hidden=!has; if(!has){ el.innerHTML=''; return; }
+  const v=isPost()?(DASH.view==='cmp'?'cmp':'post'):'pre';
+  el.innerHTML=[['pre','ก่อนซ่อม','ผลการตรวจสอบก่อนซ่อม'],['post','หลังซ่อม','ผลการตรวจสอบหลังซ่อม (เฉพาะจุดที่ยืนยันแล้ว)'],['cmp','เปรียบเทียบ ก่อน – หลังซ่อม','ผลการซ่อมของแต่ละจุดตรวจ']]
+    .map(t=>'<button type="button" role="tab" aria-selected="'+(t[0]===v)+'" data-dview="'+t[0]+'" title="'+t[2]+'">'+t[1]+'</button>').join('');
+}
+async function dashTabGo(v){
+  if(v==='pre'){ if(isPost()) await setPhase('pre'); else renderDash(); return; }
+  if(isPost()){ if(DASH.view===v) return; DASH.view=v; DASH.sig=''; dashSets().forEach(k=>DASH.f[k].clear()); renderDash(); return; }
+  dashWant=v; await setPhase('post');
+}
 function renderDash(keep){
   const host=$('#dash'); if(!host) return;
-  if(typeof isPost==='function'&&isPost()) return cmpRender(keep);
+  dashTabsPaint();
+  if(typeof isPost==='function'&&isPost()&&DASH.view==='cmp') return cmpRender(keep);
   DASH.mode='one';
-  const M=DASH.M=dashBuild(), f=DASH.f;
+  const M=DASH.M=dashBuild(isPost()), f=DASH.f;
   dashMenu(null); dashTipHide(); if(!keep) DASH.all=false;
   f.catB.clear(); f.out.clear();
   if(!DASH_CMP[DASH.sort.k]) DASH.sort={k:'cat',dir:1};
@@ -8981,6 +9488,7 @@ function dashLeave(){ dashMenu(null); dashTipHide(); }
 
 function wireDash(){
   const host=$('#dash'), dlg=$('#dashDlg'); if(!host) return;
+  const tb=$('#dashTabs'); if(tb) tb.addEventListener('click',e=>{ const b=e.target.closest('[data-dview]'); if(b) dashTabGo(b.dataset.dview); });
   host.addEventListener('click',e=>{
     const t=e.target;
     const mb=t.closest('[data-dmenu]'); if(mb){ dashMenu(mb.dataset.dmenu); return; }
@@ -9243,6 +9751,90 @@ async function postSync(seq){
   return miss.length;
 }
 
+
+/* ==================================================================
+   V.5.1 · จัดการข้อมูลรายชุดแท็บ (ก่อนซ่อม / หลังซ่อม)
+   ================================================================== */
+/* ลบข้อมูลทั้งหมดของชุดแท็บหนึ่งออกจากเครื่อง (ไม่ถาม — ผู้เรียกต้องถามเอง) */
+async function phaseWipe(p){
+  await flushSave();
+  const D=phaseArr(p);
+  for(const sh of D.sheets){ for(let i=0;i<6;i++) await dbDel('photos',photoKey(sh.id,i)).catch(()=>{}); await dbDel('sheets',sh.id).catch(()=>{}); }
+  for(const q of D.seqs){ for(let k=0;k<6;k++) await dbDel('photos',coverKey(q.id,k)).catch(()=>{}); await dbDel('seqs',q.id).catch(()=>{}); }
+  D.seqs.length=0; D.sheets.length=0;
+  if(p===PHASE){ cur={photos:[]}; CUR_SEQ=null; PAGE={k:'welcome'}; photoUndoStack=[]; photoRedoStack=[]; annSel=null; annSelPhoto=-1;
+    selected.clear(); coverCache=null; }
+  PH_UI[p]=null; try{ localStorage.removeItem(uiKey(p)); }catch(e){}
+  preIdxCache.clear(); POST_OPEN.clear(); POST_PHC.clear();
+  dashPhaseReset(); phasePaint(); estimateSizes(); markDirty();
+}
+/* ข้อ 4 — ล้างเฉพาะข้อมูลหลังซ่อม เพื่อเริ่มใหม่ */
+async function postClearAsk(){
+  const Q=phaseArr('post'); if(!Q.seqs.length){ toast('ยังไม่มีข้อมูลหลังซ่อมให้ล้าง'); return false; }
+  const y=await ask({title:'ล้างข้อมูลหลังซ่อม',
+    body:'ลบข้อมูลชุด <b>ตรวจสอบหลังซ่อม</b> ทั้งหมด <b>'+Q.seqs.length+' ลำดับ</b> (รูป ข้อความ และผลที่ยืนยันแล้ว) ออกจากเครื่องนี้ เพื่อเริ่มใหม่'
+      +'<br>ข้อมูลก่อนซ่อมไม่ถูกแตะ — กด “ดึงข้อมูลก่อนซ่อม” เพื่อเริ่มรอบหลังซ่อมใหม่ได้ทันที'
+      +(fileName?('<br><br>ไฟล์ <b>'+hesc(fileName)+'</b> ยังไม่เปลี่ยน จนกว่าจะกดบันทึกไฟล์งาน'):''),
+    buttons:[{v:1,label:'ล้างข้อมูลหลังซ่อม',kind:'dang'},{v:null,label:'ยกเลิก'}]});
+  if(!y) return false;
+  await phaseWipe('post');
+  if(isPost()){ renderNav(); await openPage({k:'welcome'}); }
+  phaseRefreshView();
+  toast('ล้างข้อมูลหลังซ่อมแล้ว — กด “ดึงข้อมูลก่อนซ่อม” เพื่อเริ่มใหม่',5000);
+  return true;
+}
+/* เลือกไฟล์งาน .json แล้วคืนข้อความ (ไม่ผูกกับไฟล์งานที่เปิดอยู่) */
+let jsonPickRes=null;
+function pickJsonText(){
+  return new Promise(async res=>{
+    if(fsaOpen()){
+      try{ const [h]=await window.showOpenFilePicker({types:FTYPES,multiple:false}); const f=await h.getFile(); res({text:await f.text(),name:h.name}); return; }
+      catch(e){ if(e&&e.name==='AbortError'){ res(null); return; } fsaGiveUp(e); }
+    }
+    jsonPickRes=res; pendingOpenMode='pick'; $('#jsonIn').value=''; $('#jsonIn').click();
+  });
+}
+/* ข้อ 5 — แทนที่ข้อมูลก่อนซ่อมด้วยไฟล์ที่เลือก (ข้อมูลหลังซ่อมที่ผูกกับชุดเดิมถูกล้างด้วย) */
+async function preReplaceFromFile(){
+  const r=await pickJsonText(); if(!r) return false;
+  let o; try{ o=JSON.parse(r.text); }catch(e){ toast('อ่านไฟล์ไม่ได้ — ไม่ใช่ไฟล์งานที่ถูกต้อง',5000); return false; }
+  if(!o||o.app!==APPID||!Array.isArray(o.seqs)){ toast('รูปแบบไฟล์ไม่ถูกต้อง',5000); return false; }
+  const pre=o.seqs.filter(q=>q.phase!=='post');
+  if(!pre.length){ toast('ไฟล์ '+r.name+' ไม่มีข้อมูลก่อนซ่อม',5000); return false; }
+  const P=phaseArr('pre'), Q=phaseArr('post');
+  const y=await ask({title:'แทนที่ข้อมูลก่อนซ่อม',
+    body:'ดึงข้อมูลก่อนซ่อม <b>'+pre.length+' ลำดับ</b> จากไฟล์ <b>'+hesc(r.name)+'</b>'
+      +(P.seqs.length?('<br>ข้อมูลก่อนซ่อมที่เปิดอยู่ <b>'+P.seqs.length+' ลำดับ</b> จะถูกล้าง แล้วแทนด้วยข้อมูลจากไฟล์นี้'):'')
+      +(Q.seqs.length?('<br>ข้อมูลหลังซ่อมที่มีอยู่ <b>'+Q.seqs.length+' ลำดับ</b> ผูกกับข้อมูลก่อนซ่อมชุดเดิม จึงถูกล้างด้วย แล้วดึงใหม่จากไฟล์นี้'):''),
+    buttons:[{v:1,label:'แทนที่และดึงข้อมูล',kind:'pri'},{v:null,label:'ยกเลิก'}]});
+  if(!y) return false;
+  if(Q.seqs.length) await phaseWipe('post');
+  if(P.seqs.length) await phaseWipe('pre');
+  const ids=new Set(pre.map(q=>q.id));
+  await applyProject({app:o.app,v:o.v,sig:o.sig,seqs:pre,sheets:(o.sheets||[]).filter(sh=>ids.has(sh.seqId)),
+    coverPhotos:o.coverPhotos,eqMaster:o.eqMaster,phrases:o.phrases},'merge',{stay:true});
+  return true;
+}
+/* ข้อ 5 — ปุ่มดึงข้อมูลก่อนซ่อม: ใช้ชุดที่เปิดอยู่ หรือเปิดจากไฟล์ก่อนซ่อมอื่น */
+async function postPullAsk(){
+  if(!isPost()||BUSY) return;
+  const dEl=$('#postDate'), date=dEl?dEl.value:null;
+  const P=phaseArr('pre');
+  let src='file';
+  if(P.seqs.length){
+    const plan=postPlan();
+    src=await ask({title:'ดึงข้อมูลก่อนซ่อม',
+      body:'เลือกต้นทางของข้อมูลก่อนซ่อม ที่จะใช้เปรียบเทียบกับผลหลังซ่อม'
+        +'<br><br>· <b>ชุดที่เปิดอยู่</b> — '+P.seqs.length+' ลำดับ'+(plan.seqs.length?(' (ยังไม่ได้ดึง '+plan.seqs.length+' ลำดับ · '+plan.finds+' จุดตรวจ)'):' (ดึงมาครบแล้ว)')
+        +'<br>· <b>เปิดจากไฟล์ก่อนซ่อม</b> — ใช้ไฟล์งานอื่น ข้อมูลก่อนซ่อมที่เปิดอยู่จะถูกล้างและแทนด้วยไฟล์ที่เลือก',
+      buttons:[{v:'cur',label:'ใช้ชุดที่เปิดอยู่',kind:'pri'},{v:'file',label:'เปิดจากไฟล์ก่อนซ่อม…'},{v:null,label:'ยกเลิก'}]});
+    if(!src) return;
+  }
+  if(src==='file'&&!(await preReplaceFromFile())) return;
+  if(!postPlan().seqs.length){ toast('ดึงข้อมูลก่อนซ่อมครบทุกลำดับแล้ว — ถ้าต้องการเริ่มใหม่ ใช้ “ล้างข้อมูลหลังซ่อม”',5000); return; }
+  await postPull(date);
+}
+
 /* ---------- สลับรอบ ---------- */
 function phaseLoadUi(p){
   let st=null; try{ st=JSON.parse(localStorage.getItem(uiKey(p))||'null'); }catch(e){}
@@ -9321,7 +9913,8 @@ function wirePhase(){
     if(pa){ const a=pa.dataset.pact.split(':'); await postAct(a[0],+a[1]); return; }
     const a=e.target.closest('[data-act]'); if(!a) return;
     const k=a.dataset.act;
-    if(k==='postpull'){ const d=$('#postDate'); await postPull(d?d.value:null); }
+    if(k==='postpull'){ await postPullAsk(); }
+    else if(k==='postclear'){ await postClearAsk(); }
     else if(k==='postsync'){ const s=seqById(PAGE.id||CUR_SEQ)||seqById(CUR_SEQ); if(s) await postSync(s); }
     else if(k==='postsameall'){ const s=seqById(PAGE.id||CUR_SEQ)||seqById(CUR_SEQ); if(s) await postSameAllAsk(s); }
     else if(k==='postcoverok'){ const s=seqById(PAGE.id||CUR_SEQ); if(s) postCoverReviewed(s); }
@@ -9355,8 +9948,11 @@ function renderPostStart(){
     +'<div><i>3</i><b>ตรวจเช็คความครบ</b><span>ระบบบอกว่าจุดตรวจไหนยังรออัปเดต ทั้งในแผงนำทาง และหน้า ตรวจสอบ &amp; ยืนยัน</span></div>'
     +'<div><i>4</i><b>เปรียบเทียบและส่งออก</b><span>Dashboard เทียบก่อนซ่อมกับหลังซ่อม · Export เฉพาะผลหลังซ่อมที่ยืนยันแล้ว</span></div>'
     +'</div>';
-  if(!P.seqs.length) h+='<p>ยังไม่มีข้อมูลการตรวจสอบก่อนซ่อมให้ดึง — บันทึกผลการตรวจสอบครั้งแรกในชุดแท็บ “ตรวจสอบก่อนซ่อม” ก่อน</p>'
-    +'<button type="button" class="btn pri" data-phasego="pre">ไปที่ชุดแท็บตรวจสอบก่อนซ่อม</button>';
+  if(!P.seqs.length) h+='<p>ยังไม่มีข้อมูลการตรวจสอบก่อนซ่อมเปิดอยู่ — เปิดจากไฟล์งานก่อนซ่อม หรือบันทึกผลในชุดแท็บ “ตรวจสอบก่อนซ่อม” ก่อน</p>'
+    +'<div class="poststart"><div class="f"><label for="postDate">วันที่ตรวจสอบหลังซ่อม <em>ใช้เป็น DATE ISSUE ของทุกลำดับ</em></label>'
+    +'<input type="date" id="postDate" value="'+todayIso()+'"></div>'
+    +'<button type="button" class="btn pri" data-act="postpull">'+ico('download')+'ดึงข้อมูลก่อนซ่อมจากไฟล์…</button>'
+    +'<button type="button" class="btn" data-phasego="pre">ไปที่ชุดแท็บตรวจสอบก่อนซ่อม</button></div>';
   else h+='<div class="poststart"><div class="f"><label for="postDate">วันที่ตรวจสอบหลังซ่อม <em>ใช้เป็น DATE ISSUE ของทุกลำดับ · แก้รายลำดับได้ภายหลัง</em></label>'
       +'<input type="date" id="postDate" value="'+todayIso()+'"></div>'
     +'<button type="button" class="btn pri" data-act="postpull">'+ico('download')+'ดึงข้อมูลก่อนซ่อม '+plan.seqs.length+' ลำดับ · '+plan.finds+' จุดตรวจ</button></div>'
@@ -9367,9 +9963,8 @@ function renderPostStart(){
 function postNavEmpty(){
   const plan=postPlan();
   return '<div class="seqpick"><label>ตรวจสอบหลังซ่อม</label>'
-    +(plan.seqs.length?('<button type="button" class="btn pri" data-act="postpull">'+ico('download')+'ดึงข้อมูลก่อนซ่อม '+plan.seqs.length+' ลำดับ</button>'
-        +'<span class="emptyp">ยกทุกลำดับ ทุกจุดตรวจจากชุดก่อนซ่อมมาเป็นค่าเริ่มต้น</span>')
-      :'<span class="emptyp">ยังไม่มีข้อมูลก่อนซ่อมให้ดึง — เริ่มที่ชุดแท็บตรวจสอบก่อนซ่อม</span>')+'</div>';
+    +'<button type="button" class="btn pri" data-act="postpull">'+ico('download')+'ดึงข้อมูลก่อนซ่อม'+(plan.seqs.length?(' '+plan.seqs.length+' ลำดับ'):'…')+'</button>'
+    +'<span class="emptyp">'+(plan.seqs.length?'ยกทุกลำดับ ทุกจุดตรวจจากชุดก่อนซ่อมมาเป็นค่าเริ่มต้น · หรือเลือกเปิดจากไฟล์ก่อนซ่อมอื่น':'เปิดข้อมูลก่อนซ่อมจากไฟล์งาน แล้วดึงมาเป็นค่าเริ่มต้น')+'</span></div>';
 }
 function postNavState(seq){
   const c=postCount(seq), pct=c.n?Math.round(c.done/c.n*100):100, miss=postMissing(seq).length, plan=postPlan();
@@ -9377,7 +9972,8 @@ function postNavState(seq){
     +'<span class="pntx">'+(c.n?(c.pend?('อัปเดตแล้ว <b>'+c.done+'</b> จาก '+c.n+' จุดตรวจ · เหลือ '+c.pend):('อัปเดตครบ '+c.n+' จุดตรวจแล้ว')):(seq.src?'ไม่มีจุดตรวจที่ดึงจากก่อนซ่อม':'ลำดับนี้ไม่ได้ดึงจากชุดก่อนซ่อม'))
       +(c.add?(' · เพิ่มใหม่ '+c.add):'')+'</span>'
     +(miss?('<button type="button" class="pnlink" data-act="postsync">ดึงจุดตรวจก่อนซ่อมที่ยังไม่มีในลำดับนี้ ('+miss+')</button>'):'')
-    +(plan.seqs.length?('<button type="button" class="pnlink" data-act="postpull">ดึงลำดับก่อนซ่อมที่ยังไม่ได้ดึง ('+plan.seqs.length+')</button>'):'')+'</div>';
+    +'<button type="button" class="pnlink" data-act="postpull">ดึงข้อมูลก่อนซ่อม…'+(plan.seqs.length?(' (ยังไม่ได้ดึง '+plan.seqs.length+' ลำดับ)'):'')+'</button>'
+    +'<button type="button" class="pnlink dang" data-act="postclear">ล้างข้อมูลหลังซ่อมทั้งหมด…</button></div>';
 }
 
 /* ==================================================================
@@ -10541,15 +11137,15 @@ function smSevPre(no,D,sub){
   smPanel(g,SM.X,y,pw,ph,'Severity of inspection points','Number of inspection points at each Severity level',(x,cy,w,h)=>{
     const rows=[1,2,3,4,5].concat(D.sev.get(0)?[0]:[]), a=s=>D.sev.get(s)||DASH_A0;
     smBar(g,x,cy,w+12700,150000,rows.map(s=>({n:a(s).n,fill:SM.sev[s]})),tot||1);
-    const C=[620000,620000,760000], H0=210000, ry0=cy+215000, rowH=Math.min(430000,(cy+h-ry0-H0)/rows.length);
-    ['Points','Share','Cranes'].forEach((t,i)=>smL(g,x+w-C.slice(i).reduce((p,q)=>p+q,0),ry0,C[i],H0,t,{sz:1200,color:SM.mut},{algn:'r'}));
+    /* V.5.0 ตัดคอลัมน์ Share ออก — เหลือ Points / Cranes */
+    const C=[760000,760000], H0=210000, ry0=cy+215000, rowH=Math.min(430000,(cy+h-ry0-H0)/rows.length);
+    ['Points','Cranes'].forEach((t,i)=>smL(g,x+w-C.slice(i).reduce((p,q)=>p+q,0),ry0,C[i],H0,t,{sz:1200,color:SM.mut},{algn:'r'}));
     rows.forEach((s,i)=>{ const ry=ry0+H0+i*rowH, v=a(s);
       if(i) smShape(g,x,ry,w,6350,{fill:SM.line,name:'Rule'});
       smChip(g,x,ry+(rowH-250000)/2,250000,SM.sev[s],SM.sevT[s],s||'',1400);
-      smL(g,x+340000,ry,w-340000-C[0]-C[1]-C[2]-40000,rowH,s?LEVELS[s-1].en:'Severity not rated yet',{sz:1600,color:SM.ink},{fit:[1600,1500,1400,1300,1200]});
-      smL(g,x+w-C[0]-C[1]-C[2],ry,C[0],rowH,String(v.n),{sz:1800,b:1,color:SM.ink},{algn:'r'});
-      smL(g,x+w-C[1]-C[2],ry,C[1],rowH,smPct(v.n,tot)||'–',{sz:1500,color:SM.mut},{algn:'r'});
-      smL(g,x+w-C[2],ry,C[2],rowH,String(v.cr.size),{sz:1500,color:SM.mut},{algn:'r'});
+      smL(g,x+340000,ry,w-340000-C[0]-C[1]-40000,rowH,s?LEVELS[s-1].en:'Severity not rated yet',{sz:1600,color:SM.ink},{fit:[1600,1500,1400,1300,1200]});
+      smL(g,x+w-C[0]-C[1],ry,C[0],rowH,String(v.n),{sz:1800,b:1,color:SM.ink},{algn:'r'});
+      smL(g,x+w-C[1],ry,C[1],rowH,String(v.cr.size),{sz:1500,color:SM.mut},{algn:'r'});
     });
   });
   smPanel(g,SM.X+pw+SM.GAP,y,pw,ph,'Defects by structure','Inspection points at Severity 2–5 in each part of the crane',(x,cy,w,h)=>{
@@ -10662,15 +11258,15 @@ function smResPost(no,D,sub){
   smPanel(g,SM.X,y,pw,ph,'Result at points that were defects','What happened to the '+smN(tot,'defect point','defect points')+' found before repair',(x,cy,w,h)=>{
     if(!tot&&!o('new').n){ smT(g,x,cy+40000,w,300000,smP([['No defects were found before repair.',{sz:1500,color:SM.mut}]]),{name:'Note'}); return; }
     smBar(g,x,cy,w+12700,150000,CMP_REPAIR.map(k=>({n:o(k).n,fill:SM.sev[CMP_O[k].s]})),tot||1);
-    const KS=CMP_REPAIR.concat(['new']), C=[620000,620000,760000], H0=210000, ry0=cy+215000, rowH=Math.min(430000,(cy+h-ry0-H0)/KS.length);
-    ['Points','Share','Cranes'].forEach((t,i)=>smL(g,x+w-C.slice(i).reduce((p,q)=>p+q,0),ry0,C[i],H0,t,{sz:1200,color:SM.mut},{algn:'r'}));
+    /* V.5.0 ตัดคอลัมน์ Share ออก — เหลือ Points / Cranes */
+    const KS=CMP_REPAIR.concat(['new']), C=[760000,760000], H0=210000, ry0=cy+215000, rowH=Math.min(430000,(cy+h-ry0-H0)/KS.length);
+    ['Points','Cranes'].forEach((t,i)=>smL(g,x+w-C.slice(i).reduce((p,q)=>p+q,0),ry0,C[i],H0,t,{sz:1200,color:SM.mut},{algn:'r'}));
     KS.forEach((k,i)=>{ const ry=ry0+H0+i*rowH, v=o(k);
       if(i) smShape(g,x,ry,w,k==='new'?12700:6350,{fill:SM.line,name:'Rule'});
       smShape(g,x+35000,ry+(rowH-170000)/2,170000,170000,{fill:SM.sev[CMP_O[k].s],name:'Key'});
-      smL(g,x+340000,ry,w-340000-C[0]-C[1]-C[2]-40000,rowH,SM_OUT[k][0],{sz:1600,color:SM.ink},{fit:[1600,1500,1400,1300,1200]});
-      smL(g,x+w-C[0]-C[1]-C[2],ry,C[0],rowH,String(v.n),{sz:1800,b:1,color:SM.ink},{algn:'r'});
-      smL(g,x+w-C[1]-C[2],ry,C[1],rowH,k==='new'?'':(smPct(v.n,tot)||'–'),{sz:1500,color:SM.mut},{algn:'r'});
-      smL(g,x+w-C[2],ry,C[2],rowH,String(v.cr.size),{sz:1500,color:SM.mut},{algn:'r'});
+      smL(g,x+340000,ry,w-340000-C[0]-C[1]-40000,rowH,SM_OUT[k][0],{sz:1600,color:SM.ink},{fit:[1600,1500,1400,1300,1200]});
+      smL(g,x+w-C[0]-C[1],ry,C[0],rowH,String(v.n),{sz:1800,b:1,color:SM.ink},{algn:'r'});
+      smL(g,x+w-C[1],ry,C[1],rowH,String(v.cr.size),{sz:1500,color:SM.mut},{algn:'r'});
     });
   });
   smPanel(g,SM.X+pw+SM.GAP,y,pw,ph,'Severity before and after repair','Number of inspection points at each Severity level',(x,cy,w,h)=>{
@@ -12095,6 +12691,28 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mtx td.sel{outline:3px solid var(--acc)}
 .mtx td.tot{background:none;border:0;font-size:16px;color:var(--muted);cursor:default}
 .kpis{display:flex;gap:12px;flex:none}
+/* V.5.1 before vs after repair slide */
+.sbody.cmpb{flex-direction:column;gap:14px}
+.cmpl{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.cmpl .chd,.cmpl .cr{display:grid;grid-template-columns:44px 230px minmax(0,1fr) 30px minmax(0,1fr) 190px;gap:12px;align-items:center;padding:8px 16px}
+.cmpl .chd{font-size:13px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line)}
+.cmpl .cr{border-bottom:1px solid var(--line-soft);font-size:14px}
+.cmpl .cr[data-act]{cursor:pointer}
+.cmpl .cr[data-act]:hover{background:rgba(14,88,95,.05)}
+.cmpl .no{font-family:var(--mono);color:var(--muted);font-size:13px}
+.cmpl .loc{display:flex;flex-direction:column;min-width:0}
+.cmpl .loc b{font-weight:600;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cmpl .loc small{color:var(--muted);font-size:12px}
+.cmpl .cs{display:flex;gap:10px;align-items:center;min-width:0}
+.cmpl .cs img,.cmpl .cs .noph{width:96px;height:72px;flex:none;object-fit:cover;border-radius:8px;background:#eef1f0}
+.cmpl .cs .noph{display:grid;place-items:center;font-size:11px;color:var(--muted)}
+.cmpl .ct{display:flex;gap:8px;align-items:flex-start;min-width:0}
+.cmpl .ct em{font-style:normal;font-size:13.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cmpl .ct em.dim{color:var(--muted);font-style:italic}
+.cmpl .arrow{color:var(--muted);font-size:20px;text-align:center}
+.cmpl .res{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px}
+.cmpl .res i{width:12px;height:12px;border-radius:3px;flex:none;background:var(--c,#ccc)}
+.cmpl .res i.c-ok{background:#fff;border:1px solid var(--line)}
 .kpi{flex:1;border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column}
 .kpi b{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1.15}
 .kpi span{font-size:13px;color:var(--muted)}
@@ -12239,6 +12857,8 @@ const nFinds=D.seqs.reduce((a,s)=>a+s.finds.length,0);
 add({key:'title',kind:'title',title:D.title,sub:'Title',make:titleSlide});
 D.seqs.forEach(seq=>{
   add({key:'cv:'+seq.id,kind:'cover',seq:seq,title:seq.title,sub:'Cover · Checklist',img:seq.cover[0],cat:seq.cat,make:()=>coverSlide(seq)});
+  if(seq.cmp) add({key:'cmp:'+seq.id,kind:'cmp',seq:seq,title:seq.title,sub:'Before vs After repair',
+    img:(seq.cmp.rows.find(r=>r.phA)||seq.cmp.rows.find(r=>r.phB)||{}).phA||(seq.cmp.rows.find(r=>r.phB)||{}).phB||'',make:()=>cmpSlide(seq)});
   seq.finds.forEach((f,j)=>add({key:f.key,kind:'find',seq:seq,f:f,j:j,title:seq.title,sub:(j+1)+'. '+(PART[f.part]||{}).short+(nb(f.loc)?' · '+f.loc:''),
     img:f.ph[0],sev:f.sev,make:()=>findSlide(seq,f,j)}));
 });
@@ -12317,6 +12937,24 @@ function ckFilter(root,n){
   const t=$('.cvf',root); if(t) t.textContent=n?('· Item '+n+'. '+CK[n].en):'';
 }
 
+
+/* ---------- V.5.1 before vs after repair (one slide per crane, after the cover) ---------- */
+function cmpSlide(seq){
+  const s=S[KEY.get('cmp:'+seq.id)], C=seq.cmp;
+  const k=(n,l,c)=>'<div class="kpi'+(c?' '+c:'')+'"><b>'+n+'</b><span>'+l+'</span></div>';
+  const badge='<div style="display:flex;align-items:center;gap:8px"><span class="catb c-'+C.catB+'"><small>Before</small>'+h(catTx(C.catB,false))+'</span><span class="arrow" style="font-size:22px">→</span>'
+    +'<span class="catb c-'+(C.cat||'na')+'"><small>After</small>'+h(catTx(C.cat||'na',true))+'</span></div>';
+  const side=(ph,sv,tx,dim)=>'<span class="cs">'+(ph?'<img alt="" src="'+(PH[ph]||'')+'">':'<span class="noph">No photo</span>')
+    +'<span class="ct">'+sevChip(sv,1)+'<em'+(dim?' class="dim"':'')+'>'+h(nb(tx)||'-')+'</em></span></span>';
+  const rows=C.rows.map((r,i)=>'<div class="cr"'+(r.ka?' data-act="go" data-k="'+h(r.ka)+'" role="button" title="Open the after-repair slide"':'')+'>'
+    +'<span class="no">'+(i+1)+'</span><span class="loc"><b>'+h(nb(r.loc)||'-')+'</b><small>'+h((PART[r.part]||{}).short||'')+'</small></span>'
+    +side(r.phB,r.sb,r.pb,false)+'<span class="arrow">→</span>'+side(r.phA,r.pend?0:r.sa,r.pa,r.pend)
+    +'<span class="res o-'+h(r.out)+'"><i class="'+outCls(r.out)+'"></i>'+h((OUT[r.out]||{}).lb||r.out)+'</span></div>').join('');
+  return '<div class="sl post">'+head('No. '+h(seq.no)+' · Before vs After Repair '+phasePill(),seq.title,'',badge)
+    +'<div class="sbody cmpb"><div class="kpis">'+k(C.nDefB,'Defect points before repair')+k(C.nFix,'Fixed (now Severity 1)')+k(C.nLeft,'Still a defect after repair')+k(C.nPend,'Awaiting update')+'</div>'
+    +'<div class="cmpl"><div class="chd"><span class="no">No.</span><span class="loc">Location</span><span class="cs">Before repair</span><span class="arrow"></span><span class="cs">After repair</span><span class="res">Result</span></div>'
+    +'<div class="scr">'+rows+'</div></div></div>'+foot(s.i)+'</div>';
+}
 /* ---------- inspection-point slide ---------- */
 function findSlide(seq,f,j){
   const s=S[KEY.get(f.key)], n=Math.min(6,f.ph.length);
