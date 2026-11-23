@@ -381,6 +381,10 @@ main{flex:1;width:100%;max-width:1400px;margin:0 auto;padding:20px 16px 104px}
 .warnbar .wtx b{font-weight:700}
 .warnbar .btn{border-color:var(--l3);color:var(--l3);background:var(--panel);white-space:nowrap}
 .warnbar .btn:hover{background:var(--l3);color:#fff;border-color:var(--l3)}
+/* V.5.4 แถบล็อกข้อมูลก่อนซ่อม — ปลดล็อกอยู่ = แถบสีกลาง ๆ */
+.lockbar.open{background:var(--panel-2);border-color:var(--line)}
+.lockbar.open .wtx{color:var(--ink)}
+body.prelocked #formPaper textarea,body.prelocked #formPaper .pcell,body.prelocked #formPaper [data-sev],body.prelocked #formPaper .ddl{cursor:default}
 .filtwrap{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
 .filtwrap[hidden]{display:none}
 .filterbox{margin-bottom:0;display:flex;align-items:flex-start;gap:10px}
@@ -4230,7 +4234,7 @@ function wireAnnot(){
 
 /* ==================================================================
    V.5.0 ย้าย / สลับตำแหน่งรูปในหน้า Inspection Sheet
-   กดค้างที่ปุ่ม ✥ (มุมซ้ายล่างของรูป) แล้วลากไปวางบนช่องรูปอื่นในหน้าเดียวกัน
+   กดค้างที่รูป (เครื่องมือ "เลือก") แล้วลากไปวางบนช่องรูปอื่นในหน้าเดียวกัน (V.5.3 เอาปุ่ม ✥ ออกแล้ว — โค้ด [data-mv] ที่เหลือไม่มีผล)
    · ช่องปลายทางว่าง = ย้ายรูปไปช่องนั้น · ช่องปลายทางมีรูป = สลับตำแหน่งกัน
    ลายเส้นที่วาดทับรูปติดไปกับรูป · เลิกทำได้ด้วย Ctrl+Z / ปุ่ม ↺ เหมือนการแก้รูปอื่น ๆ
    ใช้ pointer events จึงใช้ได้ทั้งเมาส์ ปากกา และนิ้ว (แท็บเล็ต)
@@ -4501,8 +4505,9 @@ function sheetPaperHtml(seq,sh,photos,e,pg,tot){
            +'<td colspan="6">'+photoCellS(photos[i+1],i+1,e,cap)+'</td></tr>';
     }
     /* V.5.1 หลังซ่อม: ข้อความที่ยกมาจากก่อนซ่อมและยังไม่ได้แก้ แสดงเป็นสีจาง */
-    /* V.5.3 จุดที่ก่อนซ่อมเป็น Severity 1 (สภาพปกติ) — ข้อความและ Severity แสดงสีปกติ (รูปยังเป็นภาพจางเหมือนเดิม) */
-    const R1=(e&&seq.phase==='post'&&isPend(f))?preIndex(seq.src).get(f.ref):null, R0=(R1&&+R1.f.sev!==1)?R1:null;
+    /* V.5.4 กลับเป็นแบบ V.5.2 — จุด Severity 1 ที่ยังรออัปเดตก็แสดงสีจางด้วย (ยังไม่ถูกนับในผลหลังซ่อมจนกว่าจะยืนยัน)
+       ตอนกดยืนยัน ระบบถามย้ำเฉพาะช่องที่ยังเหมือนก่อนซ่อม (postConfirmCheck) */
+    const R0=(e&&seq.phase==='post'&&isPend(f))?preIndex(seq.src).get(f.ref):null;
     const fade=k=>(R0&&dxN(f[k])&&dxN(f[k])===dxN(R0.f[k]))?'prefade':'';
     const cell=(k,ph)=>e?fArea('f:'+b+':'+k,f[k],ph,[k==='problem'&&!String(f.problem||'').trim()?'need':'',fade(k)].filter(Boolean).join(' ')):('<span class="vtxt">'+hesc(f[k]||'')+'</span>');
     /* ป้ายหัวช่อง — ตอนกรอกเป็นปุ่มเปิด Dropdown ของช่องข้าง ๆ (ไม่ติดไปกับไฟล์ส่งออก) */
@@ -5540,6 +5545,7 @@ async function renderPage(){
   else if(k==='sign'){ showPaper(false); renderSignPage(); }
   else { showPaper(false); renderWelcome(); }
   paintIcons($('#mainPane'));
+  preLockPaint();
 }
 function navBtnsHtml(){
   const seq=seqById(CUR_SEQ); if(!seq) return '';
@@ -5726,7 +5732,7 @@ function syncFinding(b){
 function postFadeSync(b){
   if(!cur||!cur.id) return;
   const seq=seqById(cur.seqId), f=cur.findings&&cur.findings[b];
-  const R1=(seq&&seq.phase==='post'&&isPend(f))?preIndex(seq.src).get(f.ref):null, R=(R1&&+R1.f.sev!==1)?R1:null;   /* V.5.3 Severity 1 = ไม่จาง */
+  const R=(seq&&seq.phase==='post'&&isPend(f))?preIndex(seq.src).get(f.ref):null;   /* V.5.4 กลับเป็นแบบ V.5.2 (Severity 1 ก็จาง) */
   ['problem','cause','remedial','loc'].forEach(k=>{ const el=$('#formPaper [data-k="f:'+b+':'+k+'"]'); if(!el) return;
     el.classList.toggle('prefade',!!(R&&dxN(el.value)&&dxN(el.value)===dxN(R.f[k]))); });
   const td=$('#formPaper td[data-sev="'+b+'"]'); if(td) td.classList.toggle('prefade',!!(R&&+f.sev&&+f.sev===+R.f.sev));
@@ -6529,17 +6535,34 @@ async function checkBeforeExport(list){
 
 /* V.5.1 มีข้อมูลหลังซ่อม → PDF / Word / PowerPoint / HTML ส่งออกเฉพาะผลหลังซ่อม
    สลับไปชุดแท็บหลังซ่อม และเลือกลำดับหลังซ่อมที่คู่กับลำดับก่อนซ่อมที่เลือกไว้ */
+/* V.5.4 แก้ 2 เรื่องของ V.5.1:
+   (1) ส่งออกได้เครนผิดตัว — หลังสลับแท็บเคยใช้ selection / ลำดับที่เปิดค้างไว้ของแท็บหลังซ่อม เมื่อลำดับที่เลือกไม่มีคู่หลังซ่อม
+       → ตอนนี้เลือกเฉพาะลำดับหลังซ่อมที่คู่กับลำดับก่อนซ่อมที่เลือกไว้เท่านั้น และบอกลำดับที่ไม่มีผลหลังซ่อม
+   (2) ส่งออกรายงานก่อนซ่อมไม่ได้อีกเลยเมื่อมีผลหลังซ่อม → อยู่แท็บก่อนซ่อมแล้วมีผลหลังซ่อม ให้ถามว่าส่งออกชุดไหน (ค่าเริ่มต้น = หลังซ่อม)
+   คืนค่า false = ผู้ใช้ยกเลิก */
 async function expUsePost(all){
-  if(isPost()||!phaseArr('post').seqs.length) return;
-  if(!withPhase('post',()=>SEQS.some(seqHasData))) return;
-  const ids=new Set(pickSeqs(all).map(s=>s.id));
+  if(isPost()||!phaseArr('post').seqs.length) return true;
+  const pre=pickSeqs(all), ids=new Set(pre.map(s=>s.id));
+  const pairs=withPhase('post',()=>SEQS.filter(s=>(all||ids.has(s.src))&&seqHasData(s)));
+  if(!pairs.length) return true;   /* ลำดับที่เลือกยังไม่มีผลหลังซ่อม → ส่งออกก่อนซ่อมตามปกติ */
+  const noPost=all?[]:pre.filter(s=>!pairs.some(q=>q.src===s.id));
+  const v=await ask({title:'ส่งออกข้อมูลชุดไหน',
+    body:'ลำดับที่เลือกมีผลหลังซ่อมแล้ว <b>'+pairs.length+' ลำดับ</b><br><br>'
+      +'· <b>หลังซ่อม</b> — เฉพาะจุดตรวจที่ยืนยันผลหลังซ่อมแล้ว (สลับไปชุดแท็บหลังซ่อม)<br>'
+      +'· <b>ก่อนซ่อม</b> — รายงานก่อนซ่อมตามข้อมูลเดิม'
+      +(noPost.length?('<br><br><small>ลำดับ '+noPost.map(s=>'<b>'+s.no+'</b>').join(', ')+' ยังไม่มีผลหลังซ่อม — ถ้าเลือกหลังซ่อม ลำดับเหล่านี้จะไม่ถูกส่งออก</small>'):''),
+    buttons:[{v:'post',label:'หลังซ่อม',kind:'pri'},{v:'pre',label:'ก่อนซ่อม'},{v:null,label:'ยกเลิก'}]});
+  if(!v) return false;
+  if(v==='pre') return true;
+  const want=new Set(pairs.map(s=>s.id));
   await setPhase('post',{quiet:true});
-  if(!isPost()) return;
-  if(!all){ const m=SEQS.filter(s=>ids.has(s.src)).map(s=>s.id); if(m.length) selected=new Set(m); }
-  toast('มีข้อมูลหลังซ่อม — ส่งออกเฉพาะผลหลังซ่อม (สลับไปชุดแท็บหลังซ่อมแล้ว)',4500);
+  if(!isPost()){ toast('สลับไปชุดแท็บหลังซ่อมไม่ได้ขณะระบบกำลังทำงาน — ลองส่งออกอีกครั้ง',4500); return false; }
+  selected=all?selected:want;
+  toast('ส่งออกผลหลังซ่อม '+want.size+' ลำดับ (สลับไปชุดแท็บหลังซ่อมแล้ว)',4500);
+  return true;
 }
 async function exportDocx(all){
-  await flushSave(); await expUsePost(all);
+  await flushSave(); if(!(await expUsePost(all))) return;
   const list=await expList(all); if(!list) return;
   try{
     toast('กำลังสร้างไฟล์ Word…',60000);
@@ -6548,7 +6571,7 @@ async function exportDocx(all){
   }catch(e){ console.error(e); toast('สร้างไฟล์ไม่สำเร็จ: '+(e.message||e),6000); }
 }
 async function exportPptx(all){
-  await flushSave(); await expUsePost(all);
+  await flushSave(); if(!(await expUsePost(all))) return;
   const list=await expList(all); if(!list) return;
   try{
     toast('กำลังสร้างไฟล์ PowerPoint…',60000);
@@ -6676,7 +6699,7 @@ function deckHtml(D,bg){
     +'<script>'+js+'</'+'script>\n</body>\n</html>\n';
 }
 async function exportDeck(all){
-  await flushSave(); await expUsePost(all);
+  await flushSave(); if(!(await expUsePost(all))) return;
   const list=await expList(all); if(!list) return;
   try{
     toast('กำลังสร้างไฟล์นำเสนอ HTML…',60000);
@@ -6709,7 +6732,7 @@ async function pagesHtml(list,limit){
   return {html:h,n:n};
 }
 async function doPrint(){
-  await flushSave(); await expUsePost(false);
+  await flushSave(); if(!(await expUsePost(false))) return;
   const list=await expList(false,'พิมพ์'); if(!list) return;
   toast('กำลังจัดหน้า…',6000);
   const r=await pagesHtml(list,0);
@@ -6779,7 +6802,31 @@ let autoSaveOn=true, autoSaveMin=15, autoSaveTimer=null;
 function restartAutoSaveTimer(){
   clearInterval(autoSaveTimer); autoSaveTimer=null;
   if(!autoSaveOn) return;
-  autoSaveTimer=setInterval(async()=>{ if(FH&&dirty){ try{ await flushSave(); await saveProject(false,true); }catch(e){} } },Math.max(5,Math.min(60,autoSaveMin||15))*60000);
+  autoSaveTimer=setInterval(()=>fileSaveSoon('timer'),Math.max(5,Math.min(60,autoSaveMin||15))*60000);
+}
+/* V.5.4 บันทึกอัตโนมัติลงไฟล์งาน (เขียนทับไฟล์เดิมที่ผูกไว้ — saveProject(quiet) ใช้ FH เดิมเสมอ ไม่เปิดหน้าต่างเลือกไฟล์)
+   ปัญหาเดิม: เปิดแอปใหม่ เบราว์เซอร์รีเซ็ตสิทธิ์เขียนของไฟล์ที่จำไว้เป็น "ต้องถาม" → บันทึกอัตโนมัติข้ามไปเงียบ ๆ ทุกรอบ
+   จนกว่าผู้ใช้จะกดบันทึกเอง (ไฟล์งานไม่ถูกอัปเดตเลย ทั้งที่เปิดบันทึกอัตโนมัติไว้)
+   แก้: ถ้าไม่มีสิทธิ์ ถามครั้งเดียวต่อการเปิดแอป — กด "อนุญาต" (การกดปุ่ม = เบราว์เซอร์ยอมถามสิทธิ์) แล้วบันทึกทับไฟล์ทันที */
+let fileSaving=false, autoPermAsked=false, lastFileSaveAt=0;
+async function fileSaveSoon(why){
+  if(!autoSaveOn||!FH||!dirty||fileSaving||BUSY) return;
+  if(why==='hidden'&&Date.now()-lastFileSaveAt<60000) return;   /* สลับหน้าต่างบ่อย ๆ — ไม่เขียนไฟล์ถี่เกินนาทีละครั้ง */
+  fileSaving=true;
+  try{
+    await flushSave();
+    let st='prompt'; try{ st=await FH.queryPermission({mode:'readwrite'}); }catch(e){}
+    if(st==='granted'){ if(await saveProject(false,true)) lastFileSaveAt=Date.now(); return; }
+    if(why!=='timer'||autoPermAsked||document.hidden||$('#dlg').open) return;
+    autoPermAsked=true;
+    const v=await ask({title:'อนุญาตบันทึกอัตโนมัติลงไฟล์',
+      body:'บันทึกอัตโนมัติยัง<b>เขียนทับไฟล์ '+hesc(fileName)+' ไม่ได้</b> — เบราว์เซอร์ขอให้อนุญาตใหม่ทุกครั้งที่เปิดแอป<br><br>'
+        +'กด <b>อนุญาตและบันทึก</b> แล้วเลือก “อนุญาต” ในหน้าต่างของเบราว์เซอร์ จากนั้นระบบจะบันทึกทับไฟล์นี้อัตโนมัติตามรอบที่ตั้งไว้'
+        +'<br><small>ข้อมูลยังเก็บอยู่ในเครื่องนี้ครบ — แค่ยังไม่ได้เขียนลงไฟล์งาน</small>',
+      buttons:[{v:1,label:'อนุญาตและบันทึก',kind:'pri'},{v:null,label:'ไว้ทีหลัง'}]});
+    if(v&&await saveProject(false,false,'all')) lastFileSaveAt=Date.now();
+  }catch(e){ console.warn('fileSaveSoon',e); }
+  finally{ fileSaving=false; }
 }
 let fsaBlocked=false;
 const fsaSave=()=>!fsaBlocked&&typeof window.showSaveFilePicker==='function';
@@ -6921,7 +6968,9 @@ async function applyProject(text,mode,opt){
   const phOf=q=>q&&q.phase==='post'?'post':'pre';
   const nPre=o.seqs.filter(q=>phOf(q)==='pre').length, nPost=o.seqs.length-nPre;
   if(mode==='replace'){
-    if(SEQS.length||ALT.seqs.length){
+    preUnlocked=false;   /* V.5.4 เปิดไฟล์งานใหม่ = ล็อกข้อมูลก่อนซ่อมกลับ */
+    /* V.5.4 opt.confirmed = ผู้ใช้ตอบกล่อง "บันทึกงานปัจจุบันก่อนหรือไม่" แล้ว (บอกไว้แล้วว่าข้อมูลจะถูกแทนที่) — ไม่ถามซ้ำ */
+    if((SEQS.length||ALT.seqs.length)&&!opt.confirmed){
       const y=await ask({title:'แทนที่ข้อมูลเดิม',body:'ข้อมูล <b>'+phaseCountTx()+'</b> ในเครื่องนี้จะถูกแทนที่ด้วย <b>'+nPre+' ลำดับ</b>'
           +(nPost?(' และผลหลังซ่อม <b>'+nPost+' ลำดับ</b>'):'')+' จากไฟล์',
         buttons:[{v:1,label:'แทนที่',kind:'dang'},{v:null,label:'ยกเลิก'}]});
@@ -6968,7 +7017,10 @@ async function applyProject(text,mode,opt){
     await migrateData(); await renumberSeqs();
     await phaseRun(isPost()?'pre':'post',async()=>{ await migrateData(); await renumberSeqs(); });
     await phaseFids();
-  }catch(e){ console.warn(e); busyClose(); toast('เปิดไฟล์งานไม่สำเร็จ — พื้นที่ในเครื่องอาจเต็ม',6000); return; }
+  }catch(e){ console.warn(e); busyClose();
+    /* V.5.4 แทนที่ไม่สำเร็จ (ข้อมูลในเครื่องถูกล้างไปแล้วบางส่วน) — ปลดไฟล์ที่ผูกไว้ ไม่ให้บันทึกอัตโนมัติเอาข้อมูลไม่ครบไปทับไฟล์งาน */
+    if(mode==='replace'){ FH=null; dirty=true; renderFileState(); }
+    toast('เปิดไฟล์งานไม่สำเร็จ — พื้นที่ในเครื่องอาจเต็ม',6000); return false; }
   busyClose();
   if(o.eqMaster){ const ne=await eqMergeFrom(o.eqMaster); if(ne) setTimeout(()=>toast('เพิ่มรายการ EQ จากไฟล์งาน '+ne+' รายการ',4000),2600); }
   /* ข้อความที่พิมพ์เอง (Dropdown) เป็นของแต่ละโปรเจกต์ — ไฟล์งานรุ่นก่อนไม่มี จึงเก็บจากจุดตรวจที่เปิดเข้ามาแทน */
@@ -6976,8 +7028,9 @@ async function applyProject(text,mode,opt){
   if(o.phrases&&o.phrases.t) phrMerge(o.phrases);
   else phrSeed(newSheets);
   await phrSave();
-  if(opt.stay){ markDirty(); preIdxCache.clear(); dashPhaseReset(); phasePaint(); estimateSizes(); return; }
-  dirty=false; renderFileState();
+  if(opt.stay){ markDirty(); preIdxCache.clear(); dashPhaseReset(); phasePaint(); estimateSizes(); return true; }
+  /* V.5.4 รวมข้อมูล = งานปัจจุบันมีข้อมูลเพิ่มที่ยังไม่อยู่ในไฟล์งาน → ยังไม่ได้บันทึก (เดิมตั้งเป็นบันทึกแล้ว) */
+  dirty=mode!=='replace'; renderFileState();
   /* รอบที่เปิดอยู่ไม่มีข้อมูล แต่อีกรอบมี → กลับไปชุดก่อนซ่อม */
   if(isPost()&&!SEQS.length&&ALT.seqs.length){ phaseSwapRaw(); try{ localStorage.setItem('ci_phase','pre'); }catch(e){} }
   preIdxCache.clear(); dashPhaseReset(); phasePaint(); estimateSizes();
@@ -6985,7 +7038,23 @@ async function applyProject(text,mode,opt){
   PAGE={k:'welcome'};
   await openPage(first?{k:'head',id:first.id}:{k:'welcome'});
   phaseRefreshView();
-  toast((mode==='replace'?'เปิดไฟล์งานแล้ว ':'รวมข้อมูลแล้ว ')+nPre+' ลำดับ'+(nPost?(' · ผลหลังซ่อม '+nPost+' ลำดับ'):''));
+  toast((mode==='replace'?'เปิดไฟล์งานแล้ว ':'รวมข้อมูลแล้ว ')+nPre+' ลำดับ'+(nPost?(' · ผลหลังซ่อม '+nPost+' ลำดับ'):'')
+    +(mode==='replace'?'':' — กดบันทึกไฟล์งานเพื่อเก็บข้อมูลที่รวมแล้ว'));
+  return true;
+}
+/* V.5.4 ก่อนเปิดไฟล์งานอื่นแทนที่งานปัจจุบัน — ถ้ามีการแก้ไขที่ยังไม่ได้บันทึกลงไฟล์ ให้ถามว่าจะบันทึกก่อนหรือไม่
+   คืนค่า: true = ไม่มีอะไรค้าง (ถามยืนยันแทนที่ตามปกติ) · 'save' / 'skip' = ผู้ใช้ตอบแล้ว · false = ยกเลิก */
+async function askSaveBeforeSwitch(){
+  if(!dirty||(!SEQS.length&&!ALT.seqs.length)) return true;
+  await flushSave();
+  const v=await ask({title:'บันทึกงานปัจจุบันก่อนหรือไม่',
+    body:'ข้อมูล <b>'+phaseCountTx()+'</b> มีการแก้ไขที่<b>ยังไม่ได้บันทึกลงไฟล์</b>'+(fileName?(' <b>'+hesc(fileName)+'</b>'):'')
+      +'<br><br>ไฟล์ที่เลือกจะ<b>แทนที่</b>ข้อมูลทั้งหมดในเครื่องนี้ — ถ้าไม่บันทึกก่อน การแก้ไขที่ค้างอยู่จะหายไป',
+    buttons:[{v:'save',label:FH?('บันทึกลง '+fileName+' แล้วเปิด'):'บันทึกเป็นไฟล์แล้วเปิด',kind:'pri'},
+      {v:'skip',label:'เปิดโดยไม่บันทึก',kind:'dang'},{v:null,label:'ยกเลิก'}]});
+  if(!v) return false;
+  if(v==='save'&&!(await saveProject(!FH,false,'all'))){ toast('ยังไม่ได้เปิดไฟล์งาน เพราะบันทึกงานปัจจุบันไม่สำเร็จ',5000); return false; }
+  return v;
 }
 async function openProject(mode){
   pendingOpenMode=mode;
@@ -6994,8 +7063,13 @@ async function openProject(mode){
       /* V.5.0 ขอสิทธิ์ "อ่าน+เขียน" ตั้งแต่ตอนเปิด — กดบันทึกครั้งต่อไปจะเขียนทับไฟล์นี้ได้ทันที (ถ้าไม่ให้ ก็ยังเปิดอ่านได้) */
       if(!(await fsaAllow(h,'readwrite'))&&!(await fsaAllow(h,'read'))){ toast('ไม่ได้รับสิทธิ์อ่านไฟล์'); return; }
       const f=await h.getFile(); const text=await f.text();
-      FH=h; fileName=h.name; renderFileState(); await rememberHandle();
-      await applyProject(text,mode); return;
+      /* V.5.4 เดิมผูกไฟล์ใหม่ (FH) ก่อนยืนยันแทนที่ — ถ้ากดยกเลิก / ไฟล์ผิดรูปแบบ / เป็นการรวมข้อมูล
+         บันทึกอัตโนมัติครั้งถัดไปจะเอางานปัจจุบันไปเขียนทับไฟล์ที่เพิ่งเลือก → ตอนนี้ผูกไฟล์ใหม่เฉพาะเมื่อแทนที่สำเร็จ */
+      const opt={};
+      if(mode==='replace'){ const s=await askSaveBeforeSwitch(); if(!s) return; if(s!==true) opt.confirmed=true; }
+      const ok=await applyProject(text,mode,opt);
+      if(ok&&mode==='replace'){ FH=h; fileName=h.name; await rememberHandle(); renderFileState(); }
+      return;
     }catch(e){ if(e&&e.name==='AbortError') return; fsaGiveUp(e); }
   }
   $('#jsonIn').value=''; $('#jsonIn').click();
@@ -7013,7 +7087,7 @@ async function resetAll(){
   PHR={v:1,t:{}};
   FH=null; fileName=''; dirty=false; SEQS=[]; SHEETS=[]; cur={photos:[]}; CUR_SEQ=null;
   /* V.2.5 ล้างทั้ง 2 ชุดแท็บ แล้วกลับไปชุดก่อนซ่อม */
-  ALT={seqs:[],sheets:[]}; PH_UI={pre:null,post:null}; PHASE='pre'; preIdxCache.clear(); POST_OPEN.clear(); postShowAll=false;
+  ALT={seqs:[],sheets:[]}; PH_UI={pre:null,post:null}; PHASE='pre'; preIdxCache.clear(); POST_OPEN.clear(); postShowAll=false; preUnlocked=false;
   try{ localStorage.setItem('ci_phase','pre'); localStorage.removeItem(uiKey('post')); }catch(e){}
   dashPhaseReset(); phasePaint();
   selected.clear(); lvFilter.clear(); stFilter.clear(); openGroups.clear();
@@ -7099,6 +7173,8 @@ function reencode(p,max,q){
 async function shrinkAllPhotos(){
   const AS=SHEETS.concat(ALT.sheets);      /* V.2.5 ทั้งชุดก่อนซ่อมและหลังซ่อม */
   if(!AS.length){ toast('ยังไม่มีรูป'); return; }
+  /* V.5.4 ลดขนาดรูปแก้รูปของข้อมูลก่อนซ่อมด้วย — ทำได้เฉพาะตอนปลดล็อกข้อมูลก่อนซ่อมแล้ว */
+  if(preHasPost()&&!preUnlocked){ toast('ลดขนาดรูปจะแก้รูปของข้อมูลก่อนซ่อมด้วย — ไปที่ชุดแท็บก่อนซ่อม กด “ปลดล็อกเพื่อแก้ไข” ก่อน แล้วสั่งใหม่',6000); return; }
   await flushSave();
   const P=PP(), before=AS.reduce((a,s)=>a+(s.photoBytes||0),0);
   const yes=await ask({title:'ลดขนาดรูปทั้งโปรเจกต์',
@@ -7249,11 +7325,20 @@ function wire(){
   $('#autoSaveMin').addEventListener('change',e=>{ autoSaveMin=Math.max(5,Math.min(60,(+e.target.value||15))); try{ localStorage.setItem('ci_autosave_min',String(autoSaveMin)); }catch(err){} restartAutoSaveTimer(); });
   $('#jsonIn').addEventListener('change',async e=>{ const f=e.target.files&&e.target.files[0];
     if(pendingOpenMode==='pick'){ const r=jsonPickRes; jsonPickRes=null; pendingOpenMode='merge'; if(r) r(f?{text:await f.text(),name:f.name}:null); return; }
-    if(!f) return; fileName=f.name; FH=null; await applyProject(await f.text(),pendingOpenMode); });
+    if(!f) return;
+    /* V.5.4 เปลี่ยนชื่อไฟล์งาน / ปลดไฟล์ที่ผูกไว้ เฉพาะเมื่อแทนที่สำเร็จ · ถามบันทึกงานปัจจุบันก่อน */
+    const mode=pendingOpenMode, nm=f.name, text=await f.text(), opt={};
+    if(mode==='replace'){ const s=await askSaveBeforeSwitch(); if(!s) return; if(s!==true) opt.confirmed=true; }
+    const ok=await applyProject(text,mode,opt);
+    if(ok&&mode==='replace'){ fileName=nm; FH=null; for(const k of ['filehandle']) await dbDel('meta',k).catch(()=>{}); await rememberHandle(); renderFileState(); } });
   $('#jsonIn').addEventListener('cancel',()=>{ if(pendingOpenMode==='pick'&&jsonPickRes){ const r=jsonPickRes; jsonPickRes=null; pendingOpenMode='merge'; r(null); } });
-  addEventListener('beforeunload',e=>{ if(saveT) flushSave(); if(dirty&&fileName){ e.preventDefault(); e.returnValue=''; } });
+  /* V.5.4 ปิดหน้าต่าง / รีโหลด ขณะที่มีการแก้ไขที่ยังไม่ได้บันทึกลงไฟล์ → เบราว์เซอร์ถามยืนยันก่อนออก
+     (เดิมถามเฉพาะเมื่อผูกไฟล์งานแล้ว — งานที่ยังไม่เคยบันทึกเป็นไฟล์ปิดได้เลยโดยไม่เตือน)
+     หมายเหตุ: เบราว์เซอร์ไม่อนุญาตให้แสดงข้อความหรือปุ่ม "บันทึก" เอง — แสดงได้เฉพาะกล่อง "ออกจากหน้านี้?" ของเบราว์เซอร์ */
+  addEventListener('beforeunload',e=>{ if(saveT) flushSave(); if(dirty&&(SEQS.length||ALT.seqs.length)){ e.preventDefault(); e.returnValue=''; } });
   addEventListener('pagehide',()=>{ if(saveT) flushSave(); });
-  document.addEventListener('visibilitychange',()=>{ if(document.hidden&&saveT) flushSave(); });
+  /* V.5.4 สลับไปแท็บ / แอปอื่น หรือย่อหน้าต่าง → บันทึกลงไฟล์งานทันที (ถ้ามีสิทธิ์เขียนอยู่แล้ว) ไม่ต้องรอรอบบันทึกอัตโนมัติ */
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) return; if(saveT) flushSave(); fileSaveSoon('hidden'); });
   addEventListener('afterprint',()=>{ const p=$('#printRoot'); if(p) p.innerHTML=''; });
   const net=()=>{ const on=navigator.onLine; $('#netdot').classList.toggle('off',!on); $('#netlabel').textContent=on?'ออนไลน์':'ออฟไลน์'; };
   addEventListener('online',net); addEventListener('offline',net); net();
@@ -9014,8 +9099,15 @@ function dashOvTarget(key){
   const c=!M?null:(which==='pre'&&M.pre)?M.pre.byId.get(id):M.byId.get(id);
   return {which:which,id:id,seq:seq,c:c||null};
 }
+/* V.5.4 Category ที่ปรับเอง / หมายเหตุ ของลำดับก่อนซ่อม เป็นข้อมูลก่อนซ่อม — ถูกล็อกเหมือนส่วนอื่น */
+function dashPreBlocked(T){
+  if(!(T.which==='pre'||PHASE==='pre')||!preHasPost()||preUnlocked) return false;
+  toast('ข้อมูลก่อนซ่อมถูกล็อก — ปรับ Category / หมายเหตุของก่อนซ่อมได้หลังกด “ปลดล็อกเพื่อแก้ไข” ในชุดแท็บก่อนซ่อม',5000);
+  return true;
+}
 async function dashSetOv(key,val){
   const T=dashOvTarget(key), d=$('#dashDlg'); if(!T.seq) return;
+  if(dashPreBlocked(T)) return;
   if(val&&DASH_OVK.indexOf(val)<0) return;
   if(val&&T.c&&!T.c.ov&&val===T.c.auto){ toast('ตรงกับผลที่ระบบประเมินอยู่แล้ว',2600); return; }
   if(val&&T.c&&val===T.c.auto) val='';
@@ -9030,6 +9122,7 @@ async function dashSetOv(key,val){
 }
 async function dashSetNote(key,text){
   const T=dashOvTarget(key); if(!T.seq||!T.seq.catOv) return;
+  if(dashPreBlocked(T)){ const d=$('#dashDlg'); if(d&&d.open&&d.dataset.crane) dashOpenCrane(d.dataset.crane); return; }
   const v=dxN(text);
   if(v) T.seq.catNote=v; else delete T.seq.catNote;
   if(T.c) T.c.note=v;
@@ -9847,6 +9940,7 @@ async function setPhase(p,opts){
   opts=opts||{};
   if(!PHASES[p]||p===PHASE||phaseBusy||BUSY) return;
   phaseBusy=true;
+  preUnlocked=false;   /* V.5.4 สลับชุดแท็บ = ล็อกข้อมูลก่อนซ่อมกลับ */
   try{
     await flushSave(); await ordOnLeave(false); await flushSave();
     closeSug(); if(typeof annCloseMore==='function') annCloseMore();
@@ -9892,7 +9986,98 @@ function phasePaint(){
     +(isPost()?' เปรียบเทียบก่อนซ่อมกับหลังซ่อม':'')
     +' · นำเสนอ HTML: เปิดด้วย Chrome / Edge / Safari — กด F เต็มจอ, P เปิด Presenter View (โน้ตบันทึกลงไฟล์ได้ด้วย Ctrl+S), Dashboard ก่อนซ่อม'+(isPost()?' และหลังซ่อม':'')+' แตะกรองได้';
   $$('.tabbadge').forEach(b=>{ b.hidden=!SEQS.length; b.textContent=SEQS.length; });
+  preLockPaint();
 }
+
+/* ==================================================================
+   V.5.4 · ล็อกข้อมูลก่อนซ่อม
+   ------------------------------------------------------------------
+   · เมื่อมีข้อมูลหลังซ่อมแล้ว ข้อมูลก่อนซ่อมเป็น "อ่านอย่างเดียว" โดยค่าเริ่มต้น — เปิดดู / เลื่อนหน้า / ส่งออกได้ แต่แก้ไม่ได้
+     (ผลก่อนซ่อมคือฐานที่ใช้เปรียบเทียบกับหลังซ่อม ไม่ควรเปลี่ยนโดยไม่ตั้งใจ)
+   · ปลดล็อกได้ด้วยปุ่มบนแถบเตือน และต้องยืนยันอีกครั้ง · ล็อกกลับเองเมื่อสลับชุดแท็บ เปิดไฟล์งาน หรือเปิดแอปใหม่
+   · กันที่จุดเดียว: ตัวจับเหตุการณ์แบบ capture บน document ตัดการคลิก / แตะ / พิมพ์ / วาง / ลากวาง ในส่วนที่แก้ข้อมูลได้
+     ปุ่มนำทาง ซูม และพับ/กางยังใช้ได้ · หน้าลายเซ็นไม่ถูกล็อก (ลายเซ็นใช้ร่วมกันทั้ง 2 ชุด)
+   ================================================================== */
+let preUnlocked=false, preNagAt=0;
+/* ล็อกเมื่อมีลำดับหลังซ่อมที่ "ผูกกับ" ลำดับก่อนซ่อมที่มีอยู่จริง — ถ้าล้างข้อมูลก่อนซ่อมไปแล้ว (เริ่มใหม่เฉพาะก่อนซ่อม)
+   ชุดก่อนซ่อมใหม่ยังไม่มีอะไรอ้างอิง จึงไม่ล็อก */
+const preHasPost=()=>{ const Q=phaseArr('post').seqs; if(!Q.length) return false;
+  const P=new Set(phaseArr('pre').seqs.map(s=>s.id)); return Q.some(q=>q.src&&P.has(q.src)); };
+const preLocked=()=>PHASE==='pre'&&!preUnlocked&&preHasPost();
+function preLockPaint(){
+  const show=PHASE==='pre'&&preHasPost(), locked=preLocked();
+  document.body.classList.toggle('prelocked',locked);
+  let bar=$('#preLockBar');
+  if(!bar){
+    const mp=$('#mainPane'), top=$('#pageTop'); if(!mp||!top) return;
+    bar=document.createElement('div'); bar.id='preLockBar'; bar.className='warnbar lockbar noprint'; bar.hidden=true;
+    mp.insertBefore(bar,top);
+    bar.addEventListener('click',e=>{ const b=e.target.closest('[data-lock]'); if(!b) return; if(b.dataset.lock==='open') preUnlockAsk(); else preRelock(); });
+  }
+  bar.hidden=!show;
+  if(!show) return;
+  bar.classList.toggle('open',!locked);
+  bar.innerHTML=locked
+    ?('<span class="wtx"><b>🔒 ข้อมูลก่อนซ่อมถูกล็อก</b> — มีข้อมูลหลังซ่อมแล้ว จึงเปิดดูและส่งออกได้ แต่แก้ไขไม่ได้ เพื่อไม่ให้ผลก่อนซ่อมที่ใช้เปรียบเทียบเปลี่ยนโดยไม่ตั้งใจ</span>'
+      +'<button type="button" class="btn sm" data-lock="open">ปลดล็อกเพื่อแก้ไข</button>')
+    :('<span class="wtx"><b>🔓 ปลดล็อกข้อมูลก่อนซ่อมอยู่</b> — การแก้ไขจะเปลี่ยนผลก่อนซ่อมที่ใช้เปรียบเทียบกับหลังซ่อม</span>'
+      +'<button type="button" class="btn sm" data-lock="close">ล็อกอีกครั้ง</button>');
+  if(!locked||PAGE.k==='sign') return;
+  $$('#paperArea textarea,#paperArea input:not([type=checkbox]):not([type=radio]),#pageAlt textarea,#pageAlt input:not([type=checkbox]):not([type=radio]),#pageTop textarea,#pageTop input:not([type=checkbox]):not([type=radio])')
+    .forEach(el=>{ el.readOnly=true; });
+  $$('#paperArea select,#paperArea input[type=checkbox],#paperArea input[type=radio],#pageAlt select,#pageAlt input[type=checkbox],#pageAlt input[type=radio],#pageTop select,#pageTop input[type=checkbox],#pageTop input[type=radio]')
+    .forEach(el=>{ el.disabled=true; });
+}
+async function preUnlockAsk(){
+  const n=phaseArr('post').seqs.length;
+  const y=await ask({title:'ปลดล็อกข้อมูลก่อนซ่อม',
+    body:'ข้อมูลหลังซ่อม <b>'+n+' ลำดับ</b> ใช้ผลก่อนซ่อมชุดนี้เป็นฐานเปรียบเทียบ<br><br>'
+      +'ถ้าแก้ผลก่อนซ่อม รายงานก่อนซ่อม, สีจางของค่าที่ยกมา, Dashboard และสไลด์เปรียบเทียบก่อน–หลังซ่อม จะเปลี่ยนตาม<br><br>'
+      +'<b>ยืนยันปลดล็อกเพื่อแก้ไขข้อมูลก่อนซ่อมหรือไม่?</b><br><small>ล็อกกลับเองเมื่อสลับชุดแท็บ เปิดไฟล์งาน หรือเปิดแอปใหม่</small>',
+    buttons:[{v:1,label:'ปลดล็อกเพื่อแก้ไข',kind:'dang'},{v:null,label:'ยกเลิก'}]});
+  if(!y) return;
+  preUnlocked=true; renderNav(); await renderPage();
+  toast('ปลดล็อกข้อมูลก่อนซ่อมแล้ว — แก้ไขได้',3000);
+}
+async function preRelock(){
+  await flushSave();
+  preUnlocked=false; photoUndoStack=[]; photoRedoStack=[]; annSel=null; annSelPhoto=-1; closeSug();
+  renderNav(); await renderPage();
+  toast('ล็อกข้อมูลก่อนซ่อมแล้ว',2600);
+}
+function preLockNag(){ if(Date.now()-preNagAt<2500) return; preNagAt=Date.now();
+  toast('ข้อมูลก่อนซ่อมถูกล็อก — กด “ปลดล็อกเพื่อแก้ไข” ที่แถบด้านบนถ้าต้องการแก้',3600); }
+(function preLockWire(){
+  const ZONE='#paperArea,#pageTop,#pageAlt,#pageBottom,#nav,#recList,#eqSortList';
+  /* ยังใช้ได้ตอนล็อก: นำทาง · ซูม · พับ/กาง · เลือกลำดับเพื่อส่งออก · ปุ่มบนแถบล็อก */
+  const OK='[data-go],[data-navmin],[data-navtoggle],#seqSel,[data-open],[data-gtoggle],[data-gsel],#zOut,#zIn,#zFit,#fillSeg,'
+    +'[data-fmfold],.fmtog,[data-act="gotoexport"],[data-act="more"],[data-act="closemore"],[data-lock]';
+  const HIT='button,input,textarea,select,label,[contenteditable],[role=button],[data-act],[data-k],[data-sev],[data-dd],[data-addsheet],'
+    +'[data-lmv],[data-mvpg],[data-delseq],[data-gup],[data-gdn],[data-dmg],[data-sevq],[data-ann],[data-tool],[data-mv],.pcell,.ashape,.handle,[draggable=true]';
+  const ALWAYS=new Set(['beforeinput','paste','drop','dragstart','dragover']);
+  const guard=e=>{
+    if(!preLocked()) return;
+    const t=e.target;
+    /* วางรูปจากคลิปบอร์ด / ลากไฟล์มาวาง ที่หน้า Inspection Sheet (ตัวจับระดับ document) */
+    if((e.type==='paste'||e.type==='drop')&&PAGE.k==='sheet'&&curView()==='form'){ e.preventDefault(); e.stopImmediatePropagation(); preLockNag(); return; }
+    if(!t||!t.closest) return;
+    const z=t.closest(ZONE); if(!z) return;
+    if(PAGE.k==='sign'&&!t.closest('#recList,#eqSortList,#nav')) return;
+    if(t.closest(OK)) return;
+    if(!ALWAYS.has(e.type)&&!t.closest(HIT)) return;
+    if(e.type==='dragover'){ e.preventDefault(); return; }
+    e.preventDefault(); e.stopImmediatePropagation();
+    if(e.type!=='pointerdown') preLockNag();
+  };
+  ['pointerdown','click','dblclick','beforeinput','paste','drop','dragstart','dragover','change'].forEach(ev=>document.addEventListener(ev,guard,true));
+  /* คีย์ลัดที่แก้รูป / ลายเส้น (Ctrl+Z / Ctrl+Y / Delete) */
+  document.addEventListener('keydown',e=>{
+    if(!preLocked()||PAGE.k!=='sheet'||curView()!=='form') return;
+    const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+    const mod=e.ctrlKey||e.metaKey, k=(e.key||'').toLowerCase();
+    if((mod&&(k==='z'||k==='y'))||k==='delete'||k==='backspace'){ e.preventDefault(); e.stopImmediatePropagation(); preLockNag(); }
+  },true);
+})();
 /* ตัวเลขบนแถบสลับรอบ */
 function phaseNote(){
   const P=phaseArr('pre'), Q=phaseArr('post');
@@ -10052,6 +10237,25 @@ async function postDecorate(){
   }
 }
 function postCopyFields(f,src){ POST_COPY.forEach(k=>{ if(src[k]===undefined) delete f[k]; else f[k]=clone(src[k]); }); }
+/* V.5.4 ก่อนยืนยันผลหลังซ่อม (ปุ่ม "ยืนยัน") — ช่องที่ยังเหมือนผลก่อนซ่อม (ยังไม่ได้แก้ไข) ให้ถามย้ำเฉพาะช่องเหล่านั้น
+   ช่องที่ว่างทั้งก่อนและหลังซ่อมไม่นับ · ปุ่ม "คงเดิม" ไม่ผ่านขั้นนี้ เพราะผู้ใช้เลือกเองว่าเหมือนเดิม · คืนค่า true = ยืนยันต่อได้ */
+async function postConfirmCheck(sh,b,f){
+  const seq=seqById(sh.seqId), R=(seq&&f&&f.ref)?preIndex(seq.src).get(f.ref):null;
+  if(!R) return true;
+  const keys=isCoat(f)?[['problem','Coating Thickness condition']]
+    :[['loc','Location'],['problem','Problem'],['cause','Cause'],['remedial','Remedial']];
+  const same=keys.filter(x=>dxN(f[x[0]])&&dxN(f[x[0]])===dxN(R.f[x[0]])).map(x=>({k:x[0],l:x[1],v:dxN(f[x[0]])}));
+  if(+f.sev&&+f.sev===+R.f.sev) same.push({k:'sev',l:'Severity Level',v:String(+f.sev)});
+  if(!same.length) return true;
+  const cut=s=>s.length>140?s.slice(0,140)+'…':s;
+  const v=await ask({title:'ยืนยันผลหลังซ่อม — จุดตรวจ '+(b+1),
+    body:'ช่องต่อไปนี้<b>ยังเหมือนผลก่อนซ่อม</b> (ยังไม่ได้แก้ไข) — ยืนยันว่าผลหลังซ่อมเป็นตามนี้หรือไม่'
+      +'<ul style="margin:10px 0 0;padding-left:20px;line-height:1.7">'+same.map(x=>'<li><b>'+x.l+'</b> : '+hesc(cut(x.v))+'</li>').join('')+'</ul>',
+    buttons:[{v:'ok',label:'ยืนยันตามนี้',kind:'pri'},{v:'edit',label:'กลับไปแก้ไข'}]});
+  if(v==='ok') return true;
+  if(v==='edit'){ const x=same[0]; setTimeout(()=>focusField(x.k==='sev'?('sev:'+b):('f:'+b+':'+x.k)),60); }
+  return false;
+}
 const postPhotoRec=p=>({dataUrl:p.dataUrl,w:p.w,h:p.h,bytes:p.bytes||Math.round((p.dataUrl||'').length*0.75),ann:clone(annOf(p))});
 async function postAct(kind,b){
   const sh=cur; if(!sh||!sh.id||!isPost()||PAGE.k!=='sheet') return;
@@ -10061,6 +10265,8 @@ async function postAct(kind,b){
   if(kind==='undo'){ delete f.upd; queueMeta(); syncFinding(b); toast('จุดตรวจ '+(b+1)+' กลับเป็นรออัปเดตแล้ว'); return; }
   if(kind==='ok'){
     if(!(+f.sev)){ toast('เลือก Severity ของผลหลังซ่อมก่อน แล้วจึงยืนยัน',4000); const el=$('#fbar [data-sevq^="'+b+':"]'); if(el) el.focus(); return; }
+    if(!(await postConfirmCheck(sh,b,f))) return;
+    if(cur!==sh||sh.findings[b]!==f) return;
     f.upd={at:new Date().toISOString()};
     queueMeta(); syncFinding(b);
     const s0=blockStart(sh.fmt,b), n=fmtOf(sh.fmt).blocks[b]*2, np=(sh.photos||[]).slice(s0,s0+n).filter(Boolean).length;
