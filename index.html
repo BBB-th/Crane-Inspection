@@ -1057,7 +1057,47 @@ html[data-fill="form"] #formPaper .paper .pcell .mv .ico{width:17px;height:17px}
 .sigslot .kill{position:absolute;right:5px;top:5px;width:24px;height:24px;border-radius:6px;border:0;
   background:rgba(8,20,21,.72);color:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px;line-height:1}
 .sigslot:hover{border-color:var(--acc)}
+.eqsug button em.eqbad{color:var(--danger,#C53030);background:var(--danger-soft,#FDECEA)}
 .sigslot.drop{border-color:var(--acc);border-style:dashed;background:var(--acc-soft);box-shadow:0 0 0 3px var(--acc-soft)}
+/* V.5.5 ลายเซ็นหลายทีม / แก้รายหน้า */
+.sgteam{margin-bottom:14px}
+.sgthead{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.sgthead .f{flex:1;min-width:180px}
+.sgtuse{font-size:12.5px;color:var(--muted);padding-bottom:8px}
+.sgtdef{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--acc);padding-bottom:8px}
+.sgtdef svg{width:14px;height:14px}
+.paper.edit td.sign.sgov{box-shadow:inset 0 0 0 1.5px rgba(14,88,95,.45)}
+.paper.edit td.sign.sgov .sigbtn{opacity:1}
+.sgdlg .sgnote{font-size:12.5px;color:var(--muted);margin:0 0 10px;line-height:1.55}
+.sgdlg .sglink{color:var(--acc);cursor:pointer;font-weight:600}
+.sgteams{display:grid;gap:8px;margin-bottom:4px}
+.sgtpick{display:grid;grid-template-columns:1fr;gap:6px;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px 12px;cursor:pointer;color:inherit;font:inherit}
+@media(min-width:620px){ .sgtpick{grid-template-columns:1.1fr repeat(3,1fr);align-items:center} }
+.sgtpick:hover{border-color:var(--acc)}
+.sgtpick.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc-soft)}
+.sgtn{font-weight:600;font-size:14px}
+.sgtn small,.sgtag{font-size:11px;font-weight:600;color:var(--acc);background:var(--acc-soft);border-radius:5px;padding:1px 6px;margin-left:4px;white-space:nowrap}
+.sgtr{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sgtr>small{font-size:11px;color:var(--muted)}
+.sgwho{display:flex;align-items:center;gap:8px;min-width:0}
+.sgwho b{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sgwho em{font-style:normal;color:var(--muted);font-weight:500}
+.sgimg{flex:none;width:58px;height:26px;border-radius:5px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.sgimg img{max-width:54px;max-height:22px;object-fit:contain;display:block}
+.sgimg i{font-style:normal;font-size:9.5px;color:#888}
+.sgimg.big{width:220px;height:80px}
+.sgimg.big img{max-width:210px;max-height:72px}
+.sgnow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);margin-bottom:12px}
+.sgnow>small{font-size:11.5px;color:var(--muted)}
+.sgpeople{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:12px;max-height:46vh;overflow:auto}
+.sgperson{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:8px 10px;cursor:pointer;color:inherit;font:inherit}
+.sgperson:hover{border-color:var(--acc)}
+.sgperson>small{font-size:11px;color:var(--muted)}
+.sgacts{display:flex;gap:6px;flex-wrap:wrap}
+.sgconf{display:grid;gap:8px;margin:12px 0 4px;padding:10px 12px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line)}
+.pagebar .acts .btn.sgseqbtn{color:var(--acc);font-weight:600}
+.sgdiff{margin-left:6px;font-size:11px;font-weight:600;color:var(--danger,#C53030);background:var(--danger-soft,#FDECEA);border-radius:5px;padding:1px 6px}
+.sgwarn{margin:10px 0 0;font-size:13px;font-weight:600;color:var(--danger,#C53030)}
 
 .rvsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
 .issues{display:flex;flex-direction:column;gap:7px}
@@ -3319,8 +3359,56 @@ function fmtDate(iso){ if(!iso) return ''; const m=/^(\d{4})-(\d{2})-(\d{2})$/.e
 const todayIso=()=>{ const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); };
 
 /* =============== state =============== */
-let SEQS=[], SHEETS=[], SIG={};
-let CUR_SEQ=null;                 /* id ของลำดับที่เปิดอยู่ */
+let SEQS=[], SHEETS=[], SIG={v:2,def:'',teams:[]};
+
+/* ==================================================================
+   V.5.5 ลายเซ็นแบบหลายทีม + แก้ลายเซ็นแยกรายหน้า
+   ------------------------------------------------------------------
+   · SIG = {v:2, def:<id ทีมค่าเริ่มต้น>, teams:[{id, name, report:{name,img}, approved:{…}, inspected:{…}}]}
+     (ไฟล์งาน/ข้อมูลเดิมแบบ {report,approved,inspected} แปลงเป็น "ทีม 1" ให้อัตโนมัติ)
+   · ทุกหน้า (หน้าปก = seq.cover.sig · Inspection Sheet = sheet.sig) เก็บ {team, r:{<role>:override}}
+       team     = ทีมที่เลือกให้หน้านี้ (ไม่มี → ทีมของลำดับ seq.sigTeam → ทีมค่าเริ่มต้น)
+       override = แก้เฉพาะช่องในหน้านี้ — from:{t,r} ใช้คนจากทีม/ตำแหน่งอื่น · name = ชื่อที่พิมพ์เอง
+                  · img = รูปที่อัปโหลดเฉพาะหน้านี้ (null = ไม่ใช้รูป เว้นเส้นให้เซ็นมือ)
+   ================================================================== */
+const sigBlankTeam=(name)=>{ const t={id:uid('t'),name:name||''}; SIG_ROLES.forEach(r=>t[r.key]={}); return t; };
+function sigNorm(o){
+  let out;
+  if(o&&Array.isArray(o.teams)){
+    out={v:2,def:o.def||'',teams:o.teams.filter(t=>t&&t.id).map(t=>{ const x={id:String(t.id),name:String(t.name||'')};
+      SIG_ROLES.forEach(r=>{ const s=t[r.key]||{}; x[r.key]={}; if(s.name) x[r.key].name=String(s.name); if(s.img&&s.img.dataUrl) x[r.key].img=s.img; }); return x; })};
+  }else{
+    const t=sigBlankTeam('ทีม 1'); o=o||{};
+    SIG_ROLES.forEach(r=>{ const s=o[r.key]||{}; if(s.name) t[r.key].name=String(s.name); if(s.img&&s.img.dataUrl) t[r.key].img=s.img; });
+    out={v:2,def:t.id,teams:[t]};
+  }
+  if(!out.teams.length) out.teams.push(sigBlankTeam('ทีม 1'));
+  if(!out.teams.some(t=>t.id===out.def)) out.def=out.teams[0].id;
+  return out;
+}
+const sigTeam=id=>(id&&SIG&&SIG.teams)?(SIG.teams.find(t=>t.id===id)||null):null;
+const sigDefTeam=()=>sigTeam(SIG.def)||(SIG.teams||[])[0]||null;
+const sigTeamName=t=>t?(String(t.name||'').trim()||('ทีม '+(SIG.teams.indexOf(t)+1))):'—';
+/* ที่เก็บลายเซ็นของหน้า: Inspection Sheet = sheet · หน้าปก = seq.cover */
+const sigHolder=(seq,sh)=>sh?sh:((seq&&seq.cover)||null);
+function pageTeam(seq,sh){ const h=sigHolder(seq,sh);
+  return sigTeam(h&&h.sig&&h.sig.team)||sigTeam(seq&&seq.sigTeam)||sigDefTeam(); }
+/* ลายเซ็นที่ใช้จริงในช่อง role ของหน้า → {name, img, ov:แก้เฉพาะหน้านี้หรือไม่} */
+function pageSig(seq,sh,role){
+  const h=sigHolder(seq,sh), ov=(h&&h.sig&&h.sig.r&&h.sig.r[role])||null;
+  let base=(pageTeam(seq,sh)||{})[role]||{};
+  if(ov&&ov.from){ const t=sigTeam(ov.from.t); if(t&&t[ov.from.r]) base=t[ov.from.r]; }
+  const name=(ov&&ov.name!=null)?ov.name:(base.name||'');
+  const img=(ov&&('img' in ov))?(ov.img||null):(base.img||null);
+  return {name:name,img:img,ov:!!(ov&&Object.keys(ov).length)};
+}
+/* ทุกหน้าที่มีลายเซ็น (ทั้ง 2 ชุดแท็บ) — ใช้นับว่าทีมไหนถูกใช้กี่หน้า */
+function sigAllPages(){
+  const seqs=SEQS.concat((typeof ALT!=='undefined'&&ALT.seqs)||[]), shs=SHEETS.concat((typeof ALT!=='undefined'&&ALT.sheets)||[]);
+  const out=[]; seqs.forEach(q=>{ out.push({seq:q,sh:null}); shs.forEach(s=>{ if(s.seqId===q.id) out.push({seq:q,sh:s}); }); });
+  return out;
+}
+let CUR_SEQ=null;                /* id ของลำดับที่เปิดอยู่ */
 let PAGE={k:'welcome'};           /* {k:'head'|'sheet'|'cover'|'review'|'sign'|'welcome', id} */
 let cur={photos:[]};              /* Sheet ที่เปิดอยู่ (มี .photos) — หน้าอื่นเป็นตัวว่าง */
 let selected=new Set(), lvFilter=new Set(), stFilter=new Set(), openGroups=new Set();
@@ -3466,6 +3554,8 @@ function seqIssues(seq){
   if(!String(seq.building||'').trim()) E('ยังไม่ได้กรอกชื่ออาคาร / อุปกรณ์ (แถว Building Name)','แสดงบนหัวทุกหน้าของลำดับนี้',{k:'head',focus:'seq:building'});
   const emptyHead=HEAD_FIELDS.filter(h=>!String((seq.head||{})[h.k]||'').trim());
   if(emptyHead.length) W('หัวกระดาษยังว่าง '+emptyHead.length+' ช่อง',emptyHead.map(h=>h.lb.replace(':','')).join(', '),{k:'head',focus:'h:'+emptyHead[0].k});
+  { const hd=seq.head||{}, cl=eqUnitClash(hd.plantUnit,hd.eqCode);      /* V.5.5 EQ.CODE ต้องตรงกับ Unit ของ PLANT UNIT */
+    if(cl) E('EQ.CODE ไม่ตรงกับ PLANT UNIT',cl,{k:'head',focus:'h:eqCode'}); }
   const shs=sheetsOf(seq.id);
   if(!shs.length) E('ยังไม่มี Inspection Sheet ในลำดับนี้','เพิ่มอย่างน้อย 1 หน้าในส่วนที่ตรวจ',{k:'head'});
   PARTS.forEach(p=>{ if(!shs.some(s=>s.part===p.k)) W('ยังไม่มี Sheet ในส่วน '+p.short,'ถ้าไม่ได้ตรวจส่วนนี้ ข้ามได้ — หัวข้อในหน้าปกจะว่าง',null); });
@@ -3497,8 +3587,13 @@ function seqIssues(seq){
   if(blankRows.length&&!(post&&postCount(seq).pend)) W('หน้าปก: ยังไม่มีผล '+blankRows.length+' หัวข้อ',blankRows.map(c=>c.n+'. '+c.en).join(' · '),{k:'cover'});
   const plan=coverPhotoPlan(seq);
   if(plan.some(p=>p.mode==='missing')) W('หน้าปก: รูปที่เลือกไว้ถูกลบไปแล้ว','แตะช่องรูปเพื่อเลือกใหม่',{k:'cover'});
-  const miss=SIG_ROLES.filter(r=>!String((SIG[r.key]||{}).name||'').trim());
-  if(miss.length) W('ยังไม่ได้ใส่ชื่อผู้ลงนาม '+miss.length+' ช่อง',miss.map(r=>r.label).join(', ')+' — ใช้ร่วมกันทุกหน้า',{k:'sign'});
+  /* V.5.5 ลายเซ็นแยกรายหน้า — ตรวจชื่อผู้ลงนามของทุกหน้า */
+  const sgMiss=[{sh:null,pg:1}].concat(shs.map(s=>({sh:s,pg:pageNo(seq,s.id)})))
+    .map(p=>Object.assign(p,{roles:SIG_ROLES.filter(r=>!String(pageSig(seq,p.sh,r.key).name||'').trim())}))
+    .filter(p=>p.roles.length);
+  if(sgMiss.length){ const p0=sgMiss[0];
+    W('ยังไม่ได้ใส่ชื่อผู้ลงนามใน '+sgMiss.length+' หน้า',sgMiss.slice(0,6).map(p=>'หน้า '+p.pg+': '+p.roles.map(r=>r.label).join(', ')).join(' · ')+(sgMiss.length>6?' …':''),
+      p0.sh?{k:'sheet',id:p0.sh.id}:{k:'cover',id:seq.id}); }
   return out;
 }
 
@@ -4463,15 +4558,16 @@ function bldgRow(seq,span,e){
    ส่วนลงนาม 2 บรรทัดเท่ากันทุกช่อง: "ตำแหน่ง: ____" (หรือรูปลายเซ็นต่อท้าย) / (ชื่อ) แล้วตามด้วย Date
    เส้นเซ็นสั้นพอให้อยู่บรรทัดเดียวกับป้ายเสมอ — วันที่ = DATE ISSUE ของหน้านั้น ---- */
 const SIGN_LINE='__________';
-function signRow(spans,e,small,date){
+/* V.5.5 ลายเซ็นของแต่ละหน้า (pageSig) — ตอนกรอก: ชื่อพิมพ์แก้ได้เฉพาะหน้านี้ · ปุ่ม ✍ เลือกคน/รูปของช่องนี้ */
+function signRow(spans,e,small,date,seq,sh){
   return '<tr>'+SIG_ROLES.map((r,i)=>{
-    const s=SIG[r.key]||{};
-    const nm=e?fTxt('sig:'+r.key+':name',s.name,'ชื่อ-นามสกุล','inl'):hesc(s.name||'\u00A0'.repeat(26));
-    return '<td class="sign'+(small?' s12':'')+'" colspan="'+spans[i]+'">'
+    const s=pageSig(seq,sh,r.key);
+    const nm=e?fTxt('ps:'+r.key+':name',s.name,'ชื่อ-นามสกุล','inl'):hesc(s.name||' '.repeat(26));
+    return '<td class="sign'+(small?' s12':'')+(e&&s.ov?' sgov':'')+'" colspan="'+spans[i]+'">'
       +'<div class="sl">'+r.label+': '+(s.img?('<span class="sigbox"><img class="sigimg" src="'+s.img.dataUrl+'" alt=""></span>'):SIGN_LINE)+'</div>'
       +'<div>('+nm+')</div>'
       +'<div class="dt">Date '+hesc(fmtDate(date))+'</div>'
-      +(e?'<button type="button" class="sigbtn" data-gosign="1" title="ใส่รูปลายเซ็น">✍ ลายเซ็น</button>':'')
+      +(e?'<button type="button" class="sigbtn" data-sigpick="'+r.key+'" title="เลือก/เปลี่ยนลายเซ็นช่อง '+r.label+' ของหน้านี้">✍ ลายเซ็น</button>':'')
       +'</td>';
   }).join('')+'</tr>';
 }
@@ -4529,7 +4625,7 @@ function sheetPaperHtml(seq,sh,photos,e,pg,tot){
       +'<tr>'+lab('Remedial','remedial')+'<td colspan="'+(10+X)+'">'+cell('remedial','แนวทางแก้ไข')+'</td></tr>';
   });
   if(F.spacer) rows+='<tr class="spc"><td colspan="'+(11+X)+'" style="height:'+TWMM(spacerTw(seq,sh))+'"></td></tr>';
-  rows+=signRow([2+X,4,5],e,false,pageDate(seq,sh));
+  rows+=signRow([2+X,4,5],e,false,pageDate(seq,sh),seq,sh);
   return '<div class="paper'+(e?' edit':'')+'" data-sheet="'+sh.id+'"><span class="probe" aria-hidden="true"></span>'
     +'<div class="sheetin">'+tblOpen(G)+rows+'</table></div></div>';
 }
@@ -4573,7 +4669,7 @@ function coverPaperHtml(seq,plan,photos,e,tot){
         +'</td></tr>';
     });
   });
-  rows+=signRow([3,6,4],e,true,pageDate(seq,null));
+  rows+=signRow([3,6,4],e,true,pageDate(seq,null),seq,null);
   return '<div class="paper cv'+(e?' edit':'')+'" data-cover="'+seq.id+'"><span class="probe" aria-hidden="true"></span>'
     +'<div class="sheetin">'+tblOpen(CG)+rows+'</table></div></div>';
 }
@@ -4775,9 +4871,9 @@ function textTw(text,sizePt,bold){
 const dBldg=(seq,W,span)=>wTr(wTc(W,span,wT(seq.building||'',{b:1,jc:'center'}),{fill:'F2F2F2'}));
 /* แถวลงนาม — ส่วนลงนาม 2 บรรทัดเท่ากันทุกช่อง: "ตำแหน่ง: ____" (หรือรูปลายเซ็นต่อท้ายในบรรทัดเดียวกัน) / (ชื่อ)
    แล้วตามด้วย Date กึ่งกลาง · เส้นเซ็นสั้นพอให้อยู่บรรทัดเดียวกับป้ายเสมอ */
-function dSign(ctx,spans,widths,sz,date){
+function dSign(ctx,spans,widths,sz,date,seq,sh){
   return wTr(SIG_ROLES.map((r,i)=>{
-    const s=SIG[r.key]||{}, o={b:1,sz:sz,jc:'center'}, sr=ctx.sig[r.key];
+    const s=pageSig(seq,sh,r.key), o={b:1,sz:sz,jc:'center'}, sr=ctx.sigImg(s.img);
     let c;
     if(sr){ const f=Math.min(SIG_BOX_CX*0.5/sr.w,SIG_BOX_CY/sr.h);
       c=wP(wRuns(r.label+': ',o)+'<w:r><w:rPr><w:noProof/></w:rPr>'
@@ -4815,7 +4911,7 @@ function dSheet(ctx,seq,sh,photos,pg,tot){
       +wTr(lbl('Remedial')+wTc(8647,10+X,wT(f.remedial||'')));
   });
   if(F.spacer){ const h=spacerTw(seq,sh); rows+=wTr(wTc(9918,11+X,wP('')),h); }
-  rows+=dSign(ctx,[2+X,4,5],[3306,3306,3306],28,pageDate(seq,sh));
+  rows+=dSign(ctx,[2+X,4,5],[3306,3306,3306],28,pageDate(seq,sh),seq,sh);
   return wTbl(G,rows);
 }
 /* ---- หน้าปก ---- */
@@ -4841,7 +4937,7 @@ function dCover(ctx,seq,photos,tot){
         +wTc(2835,2,wT(r.remark||'',Object.assign({jc:'center'},s12))));
     });
   });
-  rows+=dSign(ctx,[3,6,4],[3306,3306,3311],24,pageDate(seq,null));
+  rows+=dSign(ctx,[3,6,4],[3306,3306,3311],24,pageDate(seq,null),seq,null);
   return wTbl(G,rows);
 }
 
@@ -4876,14 +4972,16 @@ async function flatBytes(list){
 async function renderDocx(seqList,progress){
   const files=await zipRead(SKEL);
   const td=new TextDecoder(), te=new TextEncoder();
-  const ctx={did:100,n:0,rels:'',sig:{}};
+  const ctx={did:100,n:0,rels:'',sig:new Map()};
   ctx.addImg=(bytes,ext)=>{ const n=++ctx.n, rid='rIdM'+n, fn='media/m'+n+'.'+ext;
     files.set('word/'+fn,bytes);
     ctx.rels+='<Relationship Id="'+rid+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="'+fn+'"/>';
     return rid; };
-  SIG_ROLES.forEach(r=>{ const s=SIG[r.key]; if(s&&s.img&&s.img.dataUrl){
-    const png=/^data:image\/png/.test(s.img.dataUrl);
-    ctx.sig[r.key]={rid:ctx.addImg(dataUrlToBytes(s.img.dataUrl),png?'png':'jpeg'),w:s.img.w,h:s.img.h}; } });
+  /* V.5.5 ลายเซ็นแต่ละหน้าอาจต่างกัน — ฝังรูปลายเซ็นแต่ละรูปครั้งเดียว ใช้ซ้ำทุกหน้าที่ใช้รูปเดียวกัน */
+  ctx.sigImg=img=>{ if(!img||!img.dataUrl) return null; let v=ctx.sig.get(img.dataUrl);
+    if(!v){ const png=/^data:image\/png/.test(img.dataUrl);
+      v={rid:ctx.addImg(dataUrlToBytes(img.dataUrl),png?'png':'jpeg'),w:img.w,h:img.h}; ctx.sig.set(img.dataUrl,v); }
+    return v; };
   const bodies=[]; let done=0;
   /* V.2.5 expPages: ชุดแท็บหลังซ่อมส่งออกเฉพาะจุดตรวจที่ยืนยันผลหลังซ่อมแล้ว (ชุดก่อนซ่อม = ทุกหน้าตามเดิม) */
   const totalPages=seqList.reduce((a,s)=>a+expTotal(s),0);
@@ -5414,8 +5512,7 @@ function renderNav(){
   if(phaseHold){ navSoon(); return; }      /* V.2.5 ระบบกำลังทำงานกับอีกชุดแท็บ — วาดเมื่อเสร็จ */
   const foot='<div class="navfoot">'
     +'<button type="button" class="pgbtn'+(PAGE.k==='sign'?' on':'')+'" data-go=\'{"k":"sign"}\'>'+ico('pen')
-      +'<span class="pt">ลายเซ็นท้ายกระดาษ<small>'+SIG_ROLES.filter(r=>(SIG[r.key]||{}).name).length+'/3 ชื่อ · '
-      +SIG_ROLES.filter(r=>(SIG[r.key]||{}).img).length+'/3 รูปลายเซ็น · ใช้ทุกหน้า</small></span></button></div>';
+      +'<span class="pt">ลายเซ็นท้ายกระดาษ<small>'+SIG.teams.length+' ทีม · ค่าเริ่มต้น: '+hesc(sigTeamName(sigDefTeam()))+' · '+SIG_ROLES.filter(r=>((sigDefTeam()||{})[r.key]||{}).name).length+'/3 ชื่อ</small></span></button></div>';
   if(!SEQS.length){
     el.innerHTML=(isPost()?postNavEmpty():('<div class="seqpick"><label>ลำดับรายการตรวจสอบ</label>'
       +'<button type="button" class="btn pri" data-act="newseq">'+ico('plus')+'สร้างลำดับแรก</button>'
@@ -5608,18 +5705,28 @@ function renderHeadPage(){
 
 /* ---------- หน้าลายเซ็น (เฉพาะส่วนใส่ลายเซ็นจาก Signature.html) ---------- */
 function renderSignPage(){
+  const use={}; sigAllPages().forEach(p=>{ const t=pageTeam(p.seq,p.sh); if(t) use[t.id]=(use[t.id]||0)+1; });
   $('#pageTop').innerHTML='<div class="pagebar"><div class="ptitle"><b>ลายเซ็นท้ายกระดาษ</b>'
-    +'<span>ชื่อและรูปลายเซ็น 3 ช่องนี้ ใช้ร่วมกันทุกหน้าของทุกลำดับ · วันที่ใต้ลายเซ็นใช้ DATE ISSUE ของแต่ละหน้าให้อัตโนมัติ</span></div></div>';
-  $('#pageAlt').innerHTML='<div class="card"><div class="body"><div class="siggrid">'
-    +SIG_ROLES.map(r=>{ const s=SIG[r.key]||{};
-      return '<div class="sigcard"><b>'+r.label+' <span style="color:var(--muted);font-weight:500">· '+r.th+'</span></b>'
-        +'<div class="f"><label for="sg_'+r.key+'">ชื่อ-นามสกุล (แสดงในวงเล็บ)</label><input id="sg_'+r.key+'" name="sig:'+r.key+':name" data-sig="'+r.key+'" data-sf="name" value="'+hesc(s.name||'')+'" placeholder="ชื่อ-นามสกุล"></div>'
-        +'<div class="f"><label>รูปลายเซ็น <em>PNG พื้นใสดีที่สุด · ลากไฟล์มาวางได้</em></label>'
-        +'<button type="button" class="sigslot'+(s.img?' has':'')+'" data-sigslot="'+r.key+'">'
-        +(s.img?('<img src="'+s.img.dataUrl+'" alt="ลายเซ็น '+r.label+'"><span class="kill" data-sigkill="'+r.key+'" role="button" aria-label="ลบลายเซ็น">&times;</span>')
-               :'<span class="ph">แตะเพื่อเพิ่มรูปลายเซ็น</span>')+'</button></div></div>';
-    }).join('')+'</div>'
-    +'<p class="hint2">ถ้าไม่ใส่รูปลายเซ็น รายงานจะเว้นเส้น “_____” ไว้ให้เซ็นด้วยมือเหมือนต้นฉบับ</p></div></div>';
+    +'<span>ตั้งทีมผู้ลงนามได้หลายทีม (ทีมละ 3 ช่อง) · ในหน้า Data Collection เลือกทีมให้แต่ละหน้า แล้วแก้รายช่องเฉพาะหน้านั้นได้ · วันที่ใต้ลายเซ็นใช้ DATE ISSUE ของแต่ละหน้าให้อัตโนมัติ</span></div>'
+    +'<div class="acts"><button type="button" class="btn sm" data-act="addteam">'+ico('plus')+'เพิ่มทีม</button></div></div>';
+  $('#pageAlt').innerHTML=SIG.teams.map((t,ti)=>{ const def=t.id===SIG.def;
+    return '<div class="card sgteam" data-team="'+t.id+'"><div class="body">'
+      +'<div class="sgthead"><div class="f"><label for="tn_'+t.id+'">ชื่อทีม'+(def?' <em>ทีมค่าเริ่มต้นของหน้าใหม่</em>':'')+'</label>'
+        +'<input id="tn_'+t.id+'" data-tname="'+t.id+'" value="'+hesc(t.name||'')+'" placeholder="ทีม '+(ti+1)+'"></div>'
+        +'<span class="sgtuse">ใช้อยู่ '+(use[t.id]||0)+' หน้า</span>'
+        +(def?'<span class="sgtdef">'+ico('check')+'ค่าเริ่มต้น</span>':'<button type="button" class="btn sm ghost" data-act="defteam" data-tid="'+t.id+'">ตั้งเป็นค่าเริ่มต้น</button>')
+        +(SIG.teams.length>1?'<button type="button" class="btn sm dang" data-act="delteam" data-tid="'+t.id+'">'+ico('trash')+'ลบทีม</button>':'')
+      +'</div><div class="siggrid">'
+      +SIG_ROLES.map(r=>{ const s=t[r.key]||{}, key=t.id+':'+r.key;
+        return '<div class="sigcard"><b>'+r.label+' <span style="color:var(--muted);font-weight:500">· '+r.th+'</span></b>'
+          +'<div class="f"><label for="sg_'+t.id+'_'+r.key+'">ชื่อ-นามสกุล (แสดงในวงเล็บ)</label><input id="sg_'+t.id+'_'+r.key+'" data-sig="'+key+'" data-sf="name" value="'+hesc(s.name||'')+'" placeholder="ชื่อ-นามสกุล"></div>'
+          +'<div class="f"><label>รูปลายเซ็น <em>PNG พื้นใสดีที่สุด · ลากไฟล์มาวางได้</em></label>'
+          +'<button type="button" class="sigslot'+(s.img?' has':'')+'" data-sigslot="'+key+'">'
+          +(s.img?('<img src="'+s.img.dataUrl+'" alt="ลายเซ็น '+r.label+'"><span class="kill" data-sigkill="'+key+'" role="button" aria-label="ลบลายเซ็น">&times;</span>')
+                 :'<span class="ph">แตะเพื่อเพิ่มรูปลายเซ็น</span>')+'</button></div></div>';
+      }).join('')+'</div></div></div>';
+  }).join('')
+    +'<p class="hint2">ถ้าไม่ใส่รูปลายเซ็น รายงานจะเว้นเส้น “_____” ไว้ให้เซ็นด้วยมือเหมือนต้นฉบับ · แก้ชื่อ/รูปของทีมที่นี่ ทุกหน้าที่ใช้ทีมนี้เปลี่ยนตาม (ยกเว้นช่องที่แก้เฉพาะหน้าไว้)</p>';
   $('#pageBottom').innerHTML='<p class="savestate" id="saveState"></p>';
 }
 let sigInput=null;
@@ -5645,11 +5752,166 @@ function shrinkSig(file){ return new Promise(function(res,rej){
     };
     img.onerror=function(){rej(new Error('เปิดรูปไม่ได้'));}; img.src=fr.result; };
   fr.onerror=function(){rej(new Error('อ่านไฟล์ไม่ได้'));}; fr.readAsDataURL(file); }); }
-async function addSignature(role,file){
+/* key = "<team id>:<role>" (หน้าลายเซ็น) */
+async function addSignature(key,file){
   if(!/^image\//.test(file.type)){ toast('ไฟล์นี้ไม่ใช่รูปภาพ'); return; }
-  try{ SIG[role]=Object.assign({},SIG[role]||{},{img:await shrinkSig(file)}); dirtySig=true; schedule();
-       renderSignPage(); renderNav(); toast('เพิ่มลายเซ็นแล้ว — ใช้กับทุกหน้า'); }
+  const [tid,role]=String(key).split(':'), t=sigTeam(tid); if(!t||!SIG_ROLES.some(r=>r.key===role)) return;
+  try{ t[role]=Object.assign({},t[role]||{},{img:await shrinkSig(file)}); dirtySig=true; schedule();
+       renderSignPage(); paintIcons($('#mainPane')); renderNav(); toast('เพิ่มลายเซ็นแล้ว — ใช้กับทุกหน้าที่ใช้'+sigTeamName(t)); }
   catch(e){ toast(e.message||'เพิ่มลายเซ็นไม่สำเร็จ'); }
+}
+
+/* ---------- V.5.5 ลายเซ็นของหน้า Data Collection (หน้าปก / Inspection Sheet) ---------- */
+function pgSigCtx(){
+  if(PAGE.k==='sheet'&&cur&&cur.id){ const q=seqById(cur.seqId); return q?{seq:q,sh:cur}:null; }
+  if(PAGE.k==='cover'){ const q=seqById(PAGE.id); return q?{seq:q,sh:null}:null; }
+  return null;
+}
+function pgSigObj(c,create){ const h=c.sh?c.sh:ensureCover(c.seq); if(!h.sig&&create) h.sig={}; return h.sig||null; }
+function pgSigTouch(c){ if(c.sh) queueMeta(); else touchSeq(c.seq.id); navSoon(); }
+function pgSigClean(o){ if(!o) return; if(o.r){ Object.keys(o.r).forEach(k=>{ if(!o.r[k]||!Object.keys(o.r[k]).length) delete o.r[k]; }); if(!Object.keys(o.r).length) delete o.r; } }
+function pgSigDrop(c){ const o=pgSigObj(c,false); if(!o) return; pgSigClean(o); if(!o.team&&!o.r){ const h=c.sh?c.sh:ensureCover(c.seq); delete h.sig; } }
+const sigThumb=img=>img&&img.dataUrl?'<img src="'+img.dataUrl+'" alt="">':'<i>____ เซ็นมือ</i>';
+const sigWho=s=>'<span class="sgwho"><span class="sgimg">'+sigThumb(s.img)+'</span><b>'+(hesc(String(s.name||'').trim())||'<em>(ยังไม่มีชื่อ)</em>')+'</b></span>';
+function sigPickFile(cb){
+  if(!sigInput){ sigInput=document.createElement('input'); sigInput.type='file';
+    sigInput.accept='image/*'; sigInput.style.display='none'; document.body.appendChild(sigInput); }
+  sigInput.value=''; sigInput.onchange=async function(){ const f=sigInput.files&&sigInput.files[0]; if(f) await cb(f); };
+  sigInput.click();
+}
+/* V.5.6 เลือกทีมลายเซ็น — ถามยืนยันก่อนเปลี่ยนเสมอ
+   · หน้าปก = ทีมของทั้งลำดับ: เลือกแล้วทุกหน้าในลำดับ (หน้าปก + ทุก Inspection Sheet + หน้าที่เพิ่มใหม่) ใช้ลายเซ็นของทีมนั้น
+     ค่าที่เคยแก้เฉพาะหน้าไว้ถูกล้าง (เตือนในกล่องยืนยัน) · หลังจากนั้นแต่ละหน้ายังเปลี่ยนเองได้อิสระเหมือนเดิม
+   · Inspection Sheet = เปลี่ยนเฉพาะหน้านั้น */
+function sigSeqPages(seq){ return [{seq:seq,sh:null}].concat(sheetsOf(seq.id).map(s=>({seq:seq,sh:s}))); }
+/* หน้าที่ลายเซ็นไม่ตรงกับทีม t ทั้ง 3 ช่อง (คนละทีม หรือแก้เฉพาะหน้าไว้) */
+function sigPagesDiff(seq,t){ return sigSeqPages(seq).filter(p=>{ const h=sigHolder(p.seq,p.sh);
+  return pageTeam(p.seq,p.sh)!==t||Object.keys((h&&h.sig&&h.sig.r)||{}).length>0; }); }
+async function sigChooseTeam(){
+  const c=pgSigCtx(); if(!c) return;
+  const all=!c.sh, curT=pageTeam(c.seq,c.sh);
+  const nPages=sheetsOf(c.seq.id).length+1;
+  const pick=await ask({title:all?('ทีมลายเซ็นของลำดับที่ '+c.seq.no+' (หน้าปก)'):('เลือกทีมลายเซ็น — หน้า '+pageNo(c.seq,c.sh.id)),cls:'sgdlg',
+    body:'<p class="sgnote">'+(all
+        ?('เลือกทีมแล้ว<b>ทุกหน้าในลำดับนี้ ('+nPages+' หน้า รวมหน้าปก)</b> และหน้าที่เพิ่มใหม่ จะใช้ลายเซ็นทั้ง 3 ช่องของทีมนั้นเหมือนหน้าปก · หลังจากนั้นแต่ละหน้ายังเปลี่ยนเองได้ที่ปุ่ม “ลายเซ็น” ของหน้านั้น หรือปุ่ม ✍ ในช่องลายเซ็น')
+        :('เปลี่ยนเฉพาะหน้านี้ — ลายเซ็นทั้ง 3 ช่องของทีมที่เลือกจะถูกนำมาใช้ · ถ้าต้องการเปลี่ยนทั้งลำดับ ให้เลือกทีมที่หน้าปก'))+'</p>'
+      +'<div class="sgteams">'+SIG.teams.map(t=>'<button type="button" class="sgtpick'+(t===curT?' on':'')+'" data-tpick="'+t.id+'">'
+        +'<span class="sgtn">'+hesc(sigTeamName(t))+(t===curT?' <small>ใช้อยู่</small>':'')+(t.id===SIG.def?' <small>ค่าเริ่มต้น</small>':'')+'</span>'
+        +SIG_ROLES.map(r=>'<span class="sgtr"><small>'+r.label+'</small>'+sigWho(t[r.key]||{})+'</span>').join('')+'</button>').join('')+'</div>'
+      +'<p class="sgnote"><span role="button" class="sglink" data-gomanage="1">เพิ่ม / แก้ไขทีมที่หน้าลายเซ็น →</span></p>',
+    buttons:[{v:null,label:'ยกเลิก'}],
+    onBody:(el,done)=>{ el.addEventListener('click',e=>{
+      const b=e.target.closest('[data-tpick]'); if(b){ done(b.dataset.tpick); return; }
+      if(e.target.closest('[data-gomanage]')) done('__manage'); }); }});
+  if(!pick) return;
+  if(pick==='__manage'){ await openPage({k:'sign'}); return; }
+  const t=sigTeam(pick); if(!t) return;
+  let body;
+  if(all){
+    const diff=sigPagesDiff(c.seq,t);
+    if(!diff.length){ if(c.seq.sigTeam!==t.id){ c.seq.sigTeam=t.id; touchSeq(c.seq.id,true); } toast('ทุกหน้าในลำดับนี้ใช้ '+sigTeamName(t)+' อยู่แล้ว'); return; }
+    body='เปลี่ยนลายเซ็นท้ายกระดาษของ<b>ทุกหน้าในลำดับที่ '+c.seq.no+' ('+nPages+' หน้า)</b> เป็น <b>'+hesc(sigTeamName(t))+'</b>'
+      +'<div class="sgconf">'+SIG_ROLES.map(r=>'<span class="sgtr"><small>'+r.label+'</small>'+sigWho(t[r.key]||{})+'</span>').join('')+'</div>'
+      +(diff.length?'<p class="sgwarn">'+diff.length+' หน้าที่ตอนนี้ใช้ลายเซ็นต่างจากนี้ ('
+        +diff.slice(0,8).map(p=>p.sh?('หน้า '+pageNo(p.seq,p.sh.id)):'หน้าปก').join(', ')+(diff.length>8?' …':'')+') จะถูกเปลี่ยนให้เหมือนกัน</p>':'');
+  }else{
+    const h=sigHolder(c.seq,c.sh), nOv=Object.keys((h&&h.sig&&h.sig.r)||{}).length;
+    if(curT===t&&!nOv){ toast('หน้านี้ใช้ '+sigTeamName(t)+' อยู่แล้ว'); return; }
+    body='เปลี่ยนลายเซ็นท้ายกระดาษของ<b>หน้านี้</b> จาก <b>'+hesc(sigTeamName(curT))+'</b> เป็น <b>'+hesc(sigTeamName(t))+'</b>'
+      +'<div class="sgconf">'+SIG_ROLES.map(r=>'<span class="sgtr"><small>'+r.label+'</small>'+sigWho(t[r.key]||{})+'</span>').join('')+'</div>'
+      +(nOv?'<p class="sgwarn">ช่องที่แก้เฉพาะหน้าไว้ '+nOv+' ช่อง จะถูกแทนที่ด้วยลายเซ็นของทีมนี้</p>':'');
+  }
+  const ok=await ask({title:'ยืนยันเปลี่ยนลายเซ็น',body:body,buttons:[{v:1,label:'เปลี่ยนลายเซ็น',kind:'pri'},{v:null,label:'ยกเลิก'}]});
+  if(!ok) return;
+  if(all){
+    c.seq.sigTeam=t.id;
+    for(const s of sheetsOf(c.seq.id)){ if(!s.sig) continue; delete s.sig;
+      if(s===cur) dirtySheet=true; else await dbPut('sheets',stripSheet(s)).catch(()=>{}); }
+    delete ensureCover(c.seq).sig; touchSeq(c.seq.id);
+  }else{ const o=pgSigObj(c,true); o.team=t.id; delete o.r; pgSigTouch(c); }
+  await renderPage(); renderNav();
+  toast('ใช้ลายเซ็นของ '+sigTeamName(t)+(all?(' กับทุกหน้าในลำดับที่ '+c.seq.no):' กับหน้านี้')+' แล้ว');
+}
+/* แก้ลายเซ็นช่องเดียวของหน้านี้: เลือกคนจากทีมใดก็ได้ · อัปโหลดรูปเฉพาะหน้า · ไม่ใช้รูป · กลับไปใช้ตามทีม */
+async function sigPickRole(role){
+  const c=pgSigCtx(), R=SIG_ROLES.find(r=>r.key===role); if(!c||!R) return;
+  const now=pageSig(c.seq,c.sh,role), team=pageTeam(c.seq,c.sh);
+  const people=[], seen=new Set();
+  SIG_ROLES.slice().sort((a,b)=>(a.key===role?-1:0)-(b.key===role?-1:0)).forEach(rr=>SIG.teams.forEach(t=>{
+    const s=t[rr.key]||{}; if(!String(s.name||'').trim()&&!s.img) return;
+    const k=String(s.name||'').trim()+'|'+((s.img&&s.img.dataUrl)||''); if(seen.has(k)) return; seen.add(k);
+    people.push({t:t,r:rr,s:s}); }));
+  const where=c.sh?'หน้า '+pageNo(c.seq,c.sh.id):'หน้าปก';
+  const act=await ask({title:'ลายเซ็นช่อง '+R.label+' — '+where,cls:'sgdlg',
+    body:'<div class="sgnow"><small>ตอนนี้</small>'+sigWho(now)+(now.ov?'<span class="sgtag">แก้เฉพาะหน้านี้</span>':'<span class="sgtag">ตาม '+hesc(sigTeamName(team))+'</span>')+'</div>'
+      +'<p class="sgnote">เลือกผู้ลงนามสำหรับช่องนี้ (เฉพาะหน้านี้ หน้าอื่นไม่เปลี่ยน) — ชื่อในวงเล็บพิมพ์แก้บนกระดาษได้โดยตรง</p>'
+      +'<div class="sgpeople">'+(people.length?people.map((p,i)=>'<button type="button" class="sgperson" data-pp="'+i+'">'+sigWho(p.s)
+          +'<small>'+hesc(sigTeamName(p.t))+' · '+p.r.label+'</small></button>').join(''):'<p class="sgnote">ยังไม่มีชื่อ/รูปลายเซ็นในทีมใด — เพิ่มได้ที่หน้าลายเซ็น</p>')+'</div>'
+      +'<div class="sgacts">'
+        +'<button type="button" class="btn sm" data-pa="up">'+ico('upload')+'อัปโหลดรูปเฉพาะหน้านี้</button>'
+        +(now.img?'<button type="button" class="btn sm ghost" data-pa="noimg">ไม่ใช้รูป (เว้นเส้นให้เซ็นมือ)</button>':'')
+        +(now.ov?'<button type="button" class="btn sm ghost" data-pa="reset">'+ico('refresh')+'กลับไปใช้ตาม '+hesc(sigTeamName(team))+'</button>':'')
+        +'<button type="button" class="btn sm ghost" data-pa="team">'+(c.sh?'เปลี่ยนทั้งทีม (หน้านี้)…':'เปลี่ยนทีมทั้งลำดับ…')+'</button>'
+      +'</div>',
+    buttons:[{v:null,label:'ยกเลิก'}],
+    onBody:(el,done)=>{ paintIcons(el); el.addEventListener('click',e=>{
+      const b=e.target.closest('[data-pp]'); if(b){ done({pp:+b.dataset.pp}); return; }
+      const a=e.target.closest('[data-pa]'); if(a) done({pa:a.dataset.pa}); }); }});
+  if(!act) return;
+  if(act.pa==='team'){ await sigChooseTeam(); return; }
+  const at=' ของ<b>'+where+'</b> (หน้าอื่นไม่เปลี่ยน)';
+  const apply=async(fn,msg)=>{
+    const y=await ask({title:'ยืนยันเปลี่ยนลายเซ็น',body:msg,buttons:[{v:1,label:'เปลี่ยนลายเซ็น',kind:'pri'},{v:null,label:'ยกเลิก'}]});
+    if(!y) return;
+    const o=pgSigObj(c,true); o.r=o.r||{}; fn(o); pgSigDrop(c);
+    pgSigTouch(c); await renderPage(); toast('เปลี่ยนลายเซ็นช่อง '+R.label+' ของ'+where+'แล้ว');
+  };
+  if(act.pp!=null){ const p=people[act.pp]; if(!p) return;
+    await apply(o=>{ if(p.t===team&&p.r.key===role) delete o.r[role]; else o.r[role]={from:{t:p.t.id,r:p.r.key}}; },
+      'เปลี่ยนช่อง <b>'+R.label+'</b>'+at+' เป็น<div class="sgconf">'+sigWho(p.s)+'</div>'); }
+  else if(act.pa==='noimg') await apply(o=>{ o.r[role]=Object.assign({},o.r[role]||{},{img:null}); },
+      'ไม่ใช้รูปลายเซ็นในช่อง <b>'+R.label+'</b>'+at+' — รายงานจะเว้นเส้น “_____” ให้เซ็นด้วยมือ');
+  else if(act.pa==='reset') await apply(o=>{ delete o.r[role]; },
+      'กลับไปใช้ลายเซ็นช่อง <b>'+R.label+'</b> ตาม <b>'+hesc(sigTeamName(team))+'</b>'+at+'<div class="sgconf">'+sigWho((team||{})[role]||{})+'</div>');
+  else if(act.pa==='up') sigPickFile(async f=>{
+    if(!/^image\//.test(f.type)){ toast('ไฟล์นี้ไม่ใช่รูปภาพ'); return; }
+    let img; try{ img=await shrinkSig(f); }catch(e){ toast(e.message||'เปิดรูปไม่ได้'); return; }
+    await apply(o=>{ const ov=Object.assign({},o.r[role]||{}); if(ov.name==null) ov.name=now.name||''; delete ov.from; ov.img=img; o.r[role]=ov; },
+      'ใช้รูปนี้เป็นลายเซ็นช่อง <b>'+R.label+'</b>'+at+'<div class="sgconf"><span class="sgimg big">'+sigThumb(img)+'</span></div>'); });
+}
+/* หน้าลายเซ็น: เพิ่ม / ลบ / ตั้งทีมค่าเริ่มต้น */
+async function sigTeamAct(act,tid){
+  const redraw=()=>{ renderSignPage(); paintIcons($('#mainPane')); renderNav(); };
+  if(act==='addteam'){ const t=sigBlankTeam('ทีม '+(SIG.teams.length+1)); SIG.teams.push(t); dirtySig=true; schedule();
+    redraw(); const f=$('#tn_'+t.id); if(f){ f.focus(); f.select(); } return; }
+  const t=sigTeam(tid); if(!t) return;
+  if(act==='defteam'){ SIG.def=t.id; dirtySig=true; schedule(); redraw(); toast(sigTeamName(t)+' เป็นทีมค่าเริ่มต้นแล้ว'); return; }
+  if(act==='delteam'){ if(SIG.teams.length<2) return;
+    const n=sigAllPages().filter(p=>pageTeam(p.seq,p.sh)===t).length;
+    const rest=SIG.teams.filter(x=>x!==t), nd=t.id===SIG.def?rest[0]:sigDefTeam();
+    const y=await ask({title:'ลบ '+sigTeamName(t),body:'ลบทีมนี้พร้อมชื่อ/รูปลายเซ็นของทีม'+(n?('<br><b>'+n+' หน้า</b>ที่ใช้ทีมนี้อยู่จะเปลี่ยนไปใช้ <b>'+hesc(sigTeamName(nd))+'</b> (หรือทีมของลำดับนั้น)'):''),
+      buttons:[{v:1,label:'ลบทีม',kind:'dang'},{v:null,label:'ยกเลิก'}]});
+    if(!y) return;
+    SIG.teams=rest; if(SIG.def===t.id) SIG.def=rest[0].id; dirtySig=true;
+    /* หน้าที่อ้างทีมนี้ (ชุดแท็บที่เปิดอยู่) → ล้างให้ใช้ทีมของลำดับ / ค่าเริ่มต้น · ชุดอื่นใช้ค่าเริ่มต้นแทนให้เองตอนแสดง */
+    for(const q of SEQS){ let ch=false;
+      if(q.sigTeam===t.id){ delete q.sigTeam; ch=true; }
+      if(q.cover&&q.cover.sig&&q.cover.sig.team===t.id){ delete q.cover.sig.team; pgSigClean(q.cover.sig); if(!Object.keys(q.cover.sig).length) delete q.cover.sig; ch=true; }
+      if(ch) touchSeq(q.id,true); }
+    for(const s of SHEETS){ if(s.sig&&s.sig.team===t.id){ delete s.sig.team; pgSigClean(s.sig); if(!Object.keys(s.sig).length) delete s.sig;
+      if(s===cur) dirtySheet=true; else await dbPut('sheets',stripSheet(s)).catch(()=>{}); } }
+    schedule(); redraw(); toast('ลบทีมแล้ว');
+  }
+}
+/* รวมลายเซ็นจากไฟล์งานอื่น (เปิดแบบรวม) — เพิ่มเฉพาะทีมที่ยังไม่มี */
+function sigMerge(o){
+  if(!o) return; const src=sigNorm(o);
+  const key=t=>SIG_ROLES.map(r=>String((t[r.key]||{}).name||'').trim()+'|'+(((t[r.key]||{}).img||{}).dataUrl||'')).join('/');
+  const have=new Set(SIG.teams.map(key));
+  /* ไฟล์รูปแบบใหม่: หน้าในไฟล์อ้าง id ของทีม จึงเพิ่มทุกทีมที่ id ยังไม่มี · ไฟล์รูปแบบเดิม (ไม่มีทีม): ข้ามถ้าลายเซ็นเหมือนทีมที่มีอยู่ */
+  src.teams.forEach(t=>{ if(sigTeam(t.id)||(!Array.isArray(o.teams)&&have.has(key(t)))) return;
+    if(!SIG_ROLES.some(r=>(t[r.key]||{}).name||(t[r.key]||{}).img)) return;
+    SIG.teams.push(t); have.add(key(t)); });
 }
 
 /* ---------- หน้า Inspection Sheet ---------- */
@@ -5697,6 +5959,7 @@ async function renderSheetPage(){
       +(seq.phase==='post'?('<span class="ptag" id="pgPend"'+(F.blocks.some((r,b)=>isPend(sh.findings[b]))?'':' hidden')+'>รออัปเดตผลหลังซ่อม '
         +F.blocks.filter((r,b)=>isPend(sh.findings[b])).length+' จุดตรวจ</span>'):'')+'</span></div>'
     +'<div class="acts">'
+      +'<button type="button" class="btn sm" data-act="sigteam" title="เลือกทีมลายเซ็นเฉพาะหน้านี้ (เปลี่ยนทั้งลำดับที่หน้าปก)">'+ico('pen')+'ลายเซ็น: '+hesc(sigTeamName(pageTeam(seq,sh)))+'</button>'
       +'<button type="button" class="btn sm" data-act="fmt">'+ico('layers')+'เปลี่ยนรูปแบบ</button>'
       +'<button type="button" class="btn sm ghost" data-act="up"'+(ordCanMove(seq,sh.id,idx-1)?'':' disabled')+' title="เลื่อนหน้านี้ขึ้น (สลับได้เฉพาะหน้าที่เป็นหัวข้อเดียวกัน)">'+ico('arrowUp')+'</button>'
       +'<button type="button" class="btn sm ghost" data-act="dn"'+(ordCanMove(seq,sh.id,idx+1)?'':' disabled')+' title="เลื่อนหน้านี้ลง (สลับได้เฉพาะหน้าที่เป็นหัวข้อเดียวกัน)">'+ico('arrowDown')+'</button>'
@@ -5781,7 +6044,9 @@ async function renderCoverPage(reuse){
   if(!reuse||!$('#pageTop .pagebar')){
     $('#pageTop').innerHTML='<div class="pagebar"><div class="ptitle"><b>หน้าปก — ลำดับที่ '+seq.no+'</b>'
       +'<span>หน้า 1 จาก '+pageTotal(seq)+' · สรุปอัตโนมัติจาก '+nf+' จุดตรวจ ใน '+shs.length+' Inspection Sheet</span></div>'
-      +'<div class="acts"><button type="button" class="btn sm" data-act="coverreset" id="coverReset"'+(manual?'':' disabled')+'>'+ico('refresh')+'ดึงอัตโนมัติใหม่ทั้งหมด</button></div></div>'
+      +'<div class="acts"><button type="button" class="btn sm sgseqbtn" data-act="sigteam" title="เลือกทีมลายเซ็น — ใช้กับทุกหน้าในลำดับนี้ (แต่ละหน้ายังเปลี่ยนเองได้)">'+ico('pen')+'ทีมลายเซ็นทั้งลำดับ: '+hesc(sigTeamName(pageTeam(seq,null)))
+        +(()=>{ const n=sigPagesDiff(seq,pageTeam(seq,null)).filter(p=>p.sh).length; return n?'<span class="sgdiff">'+n+' หน้าต่างจากหน้าปก</span>':''; })()+'</button>'
+      +'<button type="button" class="btn sm" data-act="coverreset" id="coverReset"'+(manual?'':' disabled')+'>'+ico('refresh')+'ดึงอัตโนมัติใหม่ทั้งหมด</button></div></div>'
       +'<div class="infobar">'+ico('sparkle')+'<span>รูปและผล Checklist <b>ดึงมาจาก Inspection Sheet ให้อัตโนมัติ</b> (ทุกผลตรวจของหัวข้อเป็น Severity 1 = Acceptable · มีผลตรวจใดเป็น Severity '+DEFECT_MIN+' ขึ้นไป = Defect · Runway ข้อ 4-7 มาจากประเภทความเสียหายที่ติ๊ก) · '
       +'แก้ได้ทุกช่อง: <b>แตะช่อง Acceptable / Defect</b> เพื่อติ๊กเอง · <b>ช่อง Remark พิมพ์หมายเหตุเองได้</b> (ไม่ดึงอัตโนมัติ) · <b>แตะรูป</b> เพื่อเลือกรูปอื่น · '
       +'ช่องที่แก้เองจะมีปุ่ม ↺ ไว้กลับไปใช้ค่าอัตโนมัติ</span></div>'
@@ -6259,7 +6524,15 @@ function applyField(k,v,el){
     touchSeq(seq.id);
     const rb=$('#coverReset'); if(rb) rb.disabled=false; }
   else if(k==='sh:dateIssue'){ if(!cur.id) return; cur.dateIssue=v||''; queueMeta(); refreshPhotos(); }
-  else if(k.startsWith('sig:')){ const [,r,f]=k.split(':'); SIG[r]=SIG[r]||{}; SIG[r][f]=v; dirtySig=true; schedule(); navSoon(); }
+  else if(k.startsWith('sig:')){ const [,tid,r,f]=k.split(':'), t=sigTeam(tid); if(!t||f!=='name') return; t[r]=t[r]||{}; t[r].name=v; dirtySig=true; schedule(); navSoon(); }
+  else if(k.startsWith('tname:')){ const t=sigTeam(k.slice(6)); if(!t) return; t.name=v; dirtySig=true; schedule(); navSoon(); }
+  else if(k.startsWith('ps:')){      /* V.5.5 ชื่อผู้ลงนามที่พิมพ์บนกระดาษ = แก้เฉพาะหน้านี้ */
+    const c=pgSigCtx(), role=k.split(':')[1]; if(!c||!SIG_ROLES.some(r=>r.key===role)) return;
+    const o=pgSigObj(c,true); o.r=o.r||{}; const ov=o.r[role]=o.r[role]||{};
+    delete ov.name; const base=pageSig(c.seq,c.sh,role).name||'';
+    if(String(v)!==String(base)) ov.name=v;
+    pgSigDrop(c); pgSigTouch(c);
+    const td=el&&el.closest&&el.closest('td.sign'); if(td) td.classList.toggle('sgov',pageSig(c.seq,c.sh,role).ov); }
 }
 function wireForm(){
   const paper=$('#formPaper');
@@ -6305,6 +6578,7 @@ function wireForm(){
   });
   paper.addEventListener('click',e=>{
     const gs=e.target.closest('[data-gosign]'); if(gs){ e.preventDefault(); openPage({k:'sign'}); return; }
+    const sp=e.target.closest('[data-sigpick]'); if(sp){ e.preventDefault(); e.stopPropagation(); sigPickRole(sp.dataset.sigpick); return; }
     const rs=e.target.closest('[data-rst]'); if(rs){ e.stopPropagation(); resetCover(rs.dataset.rst); return; }
     const df=e.target.closest('.datefld'); if(df){ const inp=df.querySelector('input'); if(inp&&inp.showPicker){ try{ inp.showPicker(); }catch(err){} } return; }
     const kill=e.target.closest('[data-kill]');
@@ -6354,11 +6628,13 @@ function wireForm(){
     const sq=e.target.closest('[data-sevq]'); if(sq){ const [b,n]=sq.dataset.sevq.split(':'); setSev(+b,+n); return; }
     const sl=e.target.closest('[data-sigslot]');
     if(sl){ const k=e.target.closest('[data-sigkill]');
-      if(k){ e.stopPropagation(); if(SIG[k.dataset.sigkill]) delete SIG[k.dataset.sigkill].img; dirtySig=true; schedule(); renderSignPage(); renderNav(); return; }
+      if(k){ e.stopPropagation(); const [tid,r]=k.dataset.sigkill.split(':'), t=sigTeam(tid); if(t&&t[r]) delete t[r].img; dirtySig=true; schedule(); renderSignPage(); paintIcons($('#mainPane')); renderNav(); return; }
       pickSignature(sl.dataset.sigslot); return; }
     const a=e.target.closest('[data-act]'); if(!a) return;
     const act=a.dataset.act;
     if(act==='newseq') await newSeq();
+    else if(act==='sigteam') await sigChooseTeam();
+    else if(act==='addteam'||act==='delteam'||act==='defteam') await sigTeamAct(act,a.dataset.tid);
     else if(act==='delseq') await deleteSeq(PAGE.id||CUR_SEQ);
     else if(act==='fmt') await changeFormat();
     else if(act==='up') await moveSheet(-1);
@@ -6386,10 +6662,11 @@ function wireForm(){
   /* หน้าฟอร์มหัวกระดาษ / ลายเซ็น */
   $('#pageAlt').addEventListener('input',e=>{ const t=e.target;
     if(t.dataset.hk){ applyField(t.dataset.hk==='building'?'seq:building':'h:'+t.dataset.hk,t.value,t); }
-    else if(t.dataset.sig){ applyField('sig:'+t.dataset.sig+':'+t.dataset.sf,t.value,t); } });
+    else if(t.dataset.sig){ applyField('sig:'+t.dataset.sig+':'+t.dataset.sf,t.value,t); }
+    else if(t.dataset.tname){ applyField('tname:'+t.dataset.tname,t.value,t); } });
   $('#pageAlt').addEventListener('change',e=>{ const t=e.target;
     if(t.type==='date'&&t.dataset.hk) applyField('h:'+t.dataset.hk,t.value,t);
-    if(t.type==='date'&&t.dataset.sig) applyField('sig:'+t.dataset.sig+':date',t.value,t); });
+  });
   ['dragover','dragleave','drop'].forEach(ev=>$('#pageAlt').addEventListener(ev,async e=>{
     const sl=e.target.closest('[data-sigslot]'); if(!sl) return; e.preventDefault();
     if(ev==='dragover') sl.classList.add('drop'); else sl.classList.remove('drop');
@@ -6978,9 +7255,9 @@ async function applyProject(text,mode,opt){
     }
     await dbClear('seqs'); await dbClear('sheets'); await dbClear('photos'); selected.clear();
     SEQS=[]; SHEETS=[]; ALT={seqs:[],sheets:[]}; cur={photos:[]}; PH_UI={pre:null,post:null};
-    SIG=o.sig||{}; await dbPut('meta',clone(SIG),'signatures');
+    SIG=sigNorm(o.sig); await dbPut('meta',clone(SIG),'signatures');
   }else{
-    const s2=o.sig||{}; SIG_ROLES.forEach(r=>{ if(!SIG[r.key]&&s2[r.key]) SIG[r.key]=s2[r.key]; }); await dbPut('meta',clone(SIG),'signatures');
+    sigMerge(o.sig); await dbPut('meta',clone(SIG),'signatures');
   }
   preIdxCache.clear();
   const idmap={}, smap={}, added=[], newSheets=[];
@@ -7010,6 +7287,7 @@ async function applyProject(text,mode,opt){
     /* ลำดับหลังซ่อมชี้ไปยังลำดับก่อนซ่อมตาม id ใหม่ · รูปหน้าปกที่อ้างอิง Sheet ปรับ id ตามที่เปลี่ยน */
     for(const q of added){
       if(q.src&&idmap[q.src]) q.src=idmap[q.src];
+      { const h=q.head||{}, fx=EQ_CODE_FIX[eqNorm(h.plantUnit)+'|'+eqNameFix(h.eqName)+'|'+eqNorm(h.eqCode)]; if(fx) h.eqCode=fx; }      /* V.5.5 */
       const ph=q.cover&&q.cover.photos;
       if(ph) ph.forEach((v,k)=>{ if(v&&v.sid&&smap[v.sid]) ph[k]={sid:smap[v.sid],i:v.i}; });
       await dbPut('seqs',clone(q));
@@ -7391,7 +7669,7 @@ async function migrateData(){
    · รายการที่เพิ่ม/แก้เก็บในเครื่อง (IndexedDB) + ในไฟล์งาน + ไฟล์ EQ JSON ที่ผูกไว้
    ================================================================== */
 const EQ_APP='crane-eq-worklist';
-const EQ_DEFAULT={"app": "crane-eq-worklist", "v": 1, "source": "Work_List_for_HSA_Crane_Inspection.xlsx", "updatedAt": "2026-09-30T00:00:00.000Z", "plants": [{"unit": "HSA-T1", "items": [{"code": "HPC-T10SMB03AE081", "name": "U1 Hoist IDF Motor"}, {"code": "HPC-T10SMB03AE091", "name": "U1 Hoist IDF # A Impeller"}, {"code": "HPC-T10SMB03AE101", "name": "U1 Hoist IDF # B Impeller"}, {"code": "HPC-T10SMB03AE111", "name": "U1 Hoist CGF"}, {"code": "HPC-T10SMF03AE011", "name": "U1 Hoist BUF Motor"}, {"code": "HPC-T10SMF03AE021", "name": "U1 Hoist BUF Impeller"}, {"code": "HPC-T10SMF03AE061", "name": "U1 Crane Abs.Recir Pump # 1-3"}, {"code": "HPC-T10SMF03AE071", "name": "U1 Crane Abs.Recir Pump # 4-6"}, {"code": "HPC-T10SMF03AE031", "name": "U1 Crane OAB"}, {"code": "HPC-T10SMF03AE041", "name": "U1 GGH Lower Level Hoist Upgrade"}, {"code": "HPC-T10SMF03AE042", "name": "U1 GGH Upper Level Hoist"}, {"code": "HPC-T10SMB03AE261", "name": "U1 FDF A (Motor) Hoist"}, {"code": "HPC-T10SMB03AE271", "name": "U1 FDF B (Motor) Hoist"}, {"code": "HPC-T10SMB03AE262", "name": "U1 FDF A (Impeller) Hoist"}, {"code": "HPC-T10SMB03AE272", "name": "U1 FDF B (Impeller) Hoist"}, {"code": "HPC-T10SMB03AE351", "name": "U1 Boiler (Floor 8) Hoist"}, {"code": "HPC-T30SMB03AE351-W01", "name": "U1 Hoist of Boiler 8th Floor (Winch)"}, {"code": "HPC-T10SMB03AE341", "name": "U1 APH Hoist"}, {"code": "HPC-T10SMB03AE121", "name": "U1 Hoist Coal Fan Mill # 1 Motor"}, {"code": "HPC-T10SMB03AE131", "name": "U1 Hoist Coal Fan Mill # 2-3 Motor"}, {"code": "HPC-T10SMB03AE141", "name": "U1 Hoist Coal Fan Mill # 4 Motor"}, {"code": "HPC-T10SMB03AE151", "name": "U1 Hoist Coal Fan Mill # 5 Motor"}, {"code": "HPC-T10SMB03AE161", "name": "U1 Hoist Coal Fan Mill # 6-7 Motor"}, {"code": "HPC-T10SMB03AE171", "name": "U1 Hoist Coal Fan Mill # 8 Motor"}, {"code": "HPC-T10SMB03AE021", "name": "U1 Hoist BFBP # A"}, {"code": "HPC-T10SMB03AE031", "name": "U1 Hoist BFBP # B"}, {"code": "HPC-T10SMB03AE041", "name": "U1 Hoist BFBP # C"}, {"code": "HPC-T10SMB03AE011", "name": "U1 Hoist BFP-MD # C"}, {"code": "HPC-T10SMT03AE011", "name": "U1 Hoist CCCWP # A"}, {"code": "HPC-T10SMT03AE021", "name": "U1 Hoist CCCWP # B"}, {"code": "HPC-T10SMB03AE061", "name": "U1 Hoist Vacuum Pump # A"}, {"code": "HPC-T10SMB03AE071", "name": "U1 Hoist Vacuum Pump # B"}, {"code": "HPC-T10SMB03AE051", "name": "U1 Hoist Condensate Air Extraction"}]}, {"unit": "HSA-T2", "items": [{"code": "HPC-T20SMB03AE081", "name": "U2 Hoist IDF Motor"}, {"code": "HPC-T20SMB03AE091", "name": "U2 Hoist IDF # A Impeller"}, {"code": "HPC-T20SMB03AE101", "name": "U2 Hoist IDF # B Impeller"}, {"code": "HPC-T20SMB03AE111", "name": "U2 Hoist CGF"}, {"code": "HPC-T20SMF03AE011", "name": "U2 Hoist BUF Motor"}, {"code": "HPC-T20SMF03AE021", "name": "U2 Hoist BUF Impeller"}, {"code": "HPC-T20SMF03AE061", "name": "U2 Crane Abs.Recir Pump # 1-3"}, {"code": "HPC-T20SMF03AE071", "name": "U2 Crane Abs.Recir Pump # 4-6"}, {"code": "HPC-T20SMF03AE031", "name": "U2 Crane OAB"}, {"code": "HPC-T20SMF03AE041", "name": "U2 GGH Lower Level Hoist Upgrade"}, {"code": "HPC-T20SMF03AE042", "name": "U2 GGH Upper Level Hoist"}, {"code": "HPC-T30SMB03AE261", "name": "U2 FDF A (Motor) Hoist"}, {"code": "HPC-T30SMB03AE271", "name": "U2 FDF B (Motor) Hoist"}, {"code": "HPC-T30SMB03AE262", "name": "U2 FDF A (Impeller) Hoist"}, {"code": "HPC-T30SMB03AE272", "name": "U2 FDF B (Impeller) Hoist"}, {"code": "HPC-T30SMB03AE351", "name": "U2 Boiler (Floor 8) Hoist"}, {"code": "HPC-T30SMB03AE351-W01", "name": "U2 Hoist of Boiler 8th Floor (Winch)"}, {"code": "HPC-T30SMB03AE341", "name": "U2 APH Hoist"}, {"code": "HPC-T20SMB03AE121", "name": "U2 Hoist Coal Fan Mill # 1 Motor"}, {"code": "HPC-T20SMB03AE131", "name": "U2 Hoist Coal Fan Mill # 2-3 Motor"}, {"code": "HPC-T20SMB03AE141", "name": "U2 Hoist Coal Fan Mill # 4 Motor"}, {"code": "HPC-T20SMB03AE151", "name": "U2 Hoist Coal Fan Mill # 5 Motor"}, {"code": "HPC-T20SMB03AE161", "name": "U2 Hoist Coal Fan Mill # 6-7 Motor"}, {"code": "HPC-T20SMB03AE171", "name": "U2 Hoist Coal Fan Mill # 8 Motor"}, {"code": "HPC-T20SMB03AE021", "name": "U2 Hoist BFBP # A"}, {"code": "HPC-T20SMB03AE031", "name": "U2 Hoist BFBP # B"}, {"code": "HPC-T20SMB03AE041", "name": "U2 Hoist BFBP # C"}, {"code": "HPC-T20SMB03AE011", "name": "U2 Hoist BFP-MD # C"}, {"code": "HPC-T20SMT03AE011", "name": "U2 Hoist CCCWP # A"}, {"code": "HPC-T20SMT03AE021", "name": "U2 Hoist CCCWP # B"}, {"code": "HPC-T20SMB03AE061", "name": "U2 Hoist Vacuum Pump # A"}, {"code": "HPC-T20SMB03AE071", "name": "U2 Hoist Vacuum Pump # B"}, {"code": "HPC-T20SMB03AE051", "name": "U2 Hoist Condensate Air Extraction"}]}, {"unit": "HSA-T3", "items": [{"code": "HPC-T30SMB03AE031", "name": "U3 Hoist BFBP # B"}, {"code": "HPC-T30SMT03AE021", "name": "U3 Hoist CCCWP # B"}, {"code": "HPC-T30SMB03AE131", "name": "U3 Hoist Coal Fan Mill # 2-3 Motor"}, {"code": "HPC-T30SMB03AE161", "name": "U3 Hoist Coal Fan Mill # 6-7 Motor"}, {"code": "HPC-T30SMB03AE351", "name": "U3 Boiler (Floor 8) Hoist"}, {"code": "HPC-T30SMB03AE341", "name": "U3 APH Hoist"}, {"code": "HPC-T30SMB03AE261", "name": "U3 FDF A (Motor) Hoist"}, {"code": "HPC-T30SMB03AE271", "name": "U3 FDF B (Motor) Hoist"}, {"code": "HPC-T30SMB03AE262", "name": "U3 FDF A (Impeller) Hoist"}, {"code": "HPC-T30SMB03AE272", "name": "U3 FDF B (Impeller) Hoist"}, {"code": "HPC-T30SMB03AE081", "name": "U3 Hoist IDF Motor"}, {"code": "HPC-T30SMB03AE091", "name": "U3 Hoist IDF # A Impeller"}, {"code": "HPC-T30SMB03AE101", "name": "U3 Hoist IDF # B Impeller"}, {"code": "HPC-T30SMB03AE111", "name": "U3 Hoist CGF"}, {"code": "HPC-T30SMF03AE011", "name": "U3 Hoist BUF Motor"}, {"code": "HPC-T30SMF03AE021", "name": "U3 Hoist BUF Impeller"}, {"code": "HPC-T30SMF03AE031", "name": "U3 Crane OAB"}, {"code": "HPC-T30SMF03AE041", "name": "U3 GGH Lower Level Hoist Upgrade"}, {"code": "HPC-T30SMF03AE061", "name": "U3 Crane Abs.Recir Pump # 1-3"}, {"code": "HPC-T30SMF03AE071", "name": "U3 Crane Abs.Recir Pump # 4-6"}]}]};
+const EQ_DEFAULT={"app": "crane-eq-worklist", "v": 1, "source": "Work_List_for_HSA_Crane_Inspection.xlsx", "updatedAt": "2026-09-30T00:00:00.000Z", "plants": [{"unit": "HSA-T1", "items": [{"code": "HPC-T10SMB03AE081", "name": "U1 Hoist IDF Motor"}, {"code": "HPC-T10SMB03AE091", "name": "U1 Hoist IDF # A Impeller"}, {"code": "HPC-T10SMB03AE101", "name": "U1 Hoist IDF # B Impeller"}, {"code": "HPC-T10SMB03AE111", "name": "U1 Hoist CGF"}, {"code": "HPC-T10SMF03AE011", "name": "U1 Hoist BUF Motor"}, {"code": "HPC-T10SMF03AE021", "name": "U1 Hoist BUF Impeller"}, {"code": "HPC-T10SMF03AE061", "name": "U1 Crane Abs.Recir Pump # 1-3"}, {"code": "HPC-T10SMF03AE071", "name": "U1 Crane Abs.Recir Pump # 4-6"}, {"code": "HPC-T10SMF03AE031", "name": "U1 Crane OAB"}, {"code": "HPC-T10SMF03AE041", "name": "U1 GGH Lower Level Hoist Upgrade"}, {"code": "HPC-T10SMF03AE042", "name": "U1 GGH Upper Level Hoist"}, {"code": "HPC-T10SMB03AE261", "name": "U1 FDF A (Motor) Hoist"}, {"code": "HPC-T10SMB03AE271", "name": "U1 FDF B (Motor) Hoist"}, {"code": "HPC-T10SMB03AE262", "name": "U1 FDF A (Impeller) Hoist"}, {"code": "HPC-T10SMB03AE272", "name": "U1 FDF B (Impeller) Hoist"}, {"code": "HPC-T10SMB03AE351", "name": "U1 Boiler (Floor 8) Hoist"}, {"code": "HPC-T10SMB03AE351-W01", "name": "U1 Hoist of Boiler 8th Floor (Winch)"}, {"code": "HPC-T10SMB03AE341", "name": "U1 APH Hoist"}, {"code": "HPC-T10SMB03AE121", "name": "U1 Hoist Coal Fan Mill # 1 Motor"}, {"code": "HPC-T10SMB03AE131", "name": "U1 Hoist Coal Fan Mill # 2-3 Motor"}, {"code": "HPC-T10SMB03AE141", "name": "U1 Hoist Coal Fan Mill # 4 Motor"}, {"code": "HPC-T10SMB03AE151", "name": "U1 Hoist Coal Fan Mill # 5 Motor"}, {"code": "HPC-T10SMB03AE161", "name": "U1 Hoist Coal Fan Mill # 6-7 Motor"}, {"code": "HPC-T10SMB03AE171", "name": "U1 Hoist Coal Fan Mill # 8 Motor"}, {"code": "HPC-T10SMB03AE021", "name": "U1 Hoist BFBP # A"}, {"code": "HPC-T10SMB03AE031", "name": "U1 Hoist BFBP # B"}, {"code": "HPC-T10SMB03AE041", "name": "U1 Hoist BFBP # C"}, {"code": "HPC-T10SMB03AE011", "name": "U1 Hoist BFP-MD # C"}, {"code": "HPC-T10SMT03AE011", "name": "U1 Hoist CCCWP # A"}, {"code": "HPC-T10SMT03AE021", "name": "U1 Hoist CCCWP # B"}, {"code": "HPC-T10SMB03AE061", "name": "U1 Hoist Vacuum Pump # A"}, {"code": "HPC-T10SMB03AE071", "name": "U1 Hoist Vacuum Pump # B"}, {"code": "HPC-T10SMB03AE051", "name": "U1 Hoist Condensate Air Extraction"}]}, {"unit": "HSA-T2", "items": [{"code": "HPC-T20SMB03AE081", "name": "U2 Hoist IDF Motor"}, {"code": "HPC-T20SMB03AE091", "name": "U2 Hoist IDF # A Impeller"}, {"code": "HPC-T20SMB03AE101", "name": "U2 Hoist IDF # B Impeller"}, {"code": "HPC-T20SMB03AE111", "name": "U2 Hoist CGF"}, {"code": "HPC-T20SMF03AE011", "name": "U2 Hoist BUF Motor"}, {"code": "HPC-T20SMF03AE021", "name": "U2 Hoist BUF Impeller"}, {"code": "HPC-T20SMF03AE061", "name": "U2 Crane Abs.Recir Pump # 1-3"}, {"code": "HPC-T20SMF03AE071", "name": "U2 Crane Abs.Recir Pump # 4-6"}, {"code": "HPC-T20SMF03AE031", "name": "U2 Crane OAB"}, {"code": "HPC-T20SMF03AE041", "name": "U2 GGH Lower Level Hoist Upgrade"}, {"code": "HPC-T20SMF03AE042", "name": "U2 GGH Upper Level Hoist"}, {"code": "HPC-T20SMB03AE261", "name": "U2 FDF A (Motor) Hoist"}, {"code": "HPC-T20SMB03AE271", "name": "U2 FDF B (Motor) Hoist"}, {"code": "HPC-T20SMB03AE262", "name": "U2 FDF A (Impeller) Hoist"}, {"code": "HPC-T20SMB03AE272", "name": "U2 FDF B (Impeller) Hoist"}, {"code": "HPC-T20SMB03AE351", "name": "U2 Boiler (Floor 8) Hoist"}, {"code": "HPC-T20SMB03AE351-W01", "name": "U2 Hoist of Boiler 8th Floor (Winch)"}, {"code": "HPC-T20SMB03AE341", "name": "U2 APH Hoist"}, {"code": "HPC-T20SMB03AE121", "name": "U2 Hoist Coal Fan Mill # 1 Motor"}, {"code": "HPC-T20SMB03AE131", "name": "U2 Hoist Coal Fan Mill # 2-3 Motor"}, {"code": "HPC-T20SMB03AE141", "name": "U2 Hoist Coal Fan Mill # 4 Motor"}, {"code": "HPC-T20SMB03AE151", "name": "U2 Hoist Coal Fan Mill # 5 Motor"}, {"code": "HPC-T20SMB03AE161", "name": "U2 Hoist Coal Fan Mill # 6-7 Motor"}, {"code": "HPC-T20SMB03AE171", "name": "U2 Hoist Coal Fan Mill # 8 Motor"}, {"code": "HPC-T20SMB03AE021", "name": "U2 Hoist BFBP # A"}, {"code": "HPC-T20SMB03AE031", "name": "U2 Hoist BFBP # B"}, {"code": "HPC-T20SMB03AE041", "name": "U2 Hoist BFBP # C"}, {"code": "HPC-T20SMB03AE011", "name": "U2 Hoist BFP-MD # C"}, {"code": "HPC-T20SMT03AE011", "name": "U2 Hoist CCCWP # A"}, {"code": "HPC-T20SMT03AE021", "name": "U2 Hoist CCCWP # B"}, {"code": "HPC-T20SMB03AE061", "name": "U2 Hoist Vacuum Pump # A"}, {"code": "HPC-T20SMB03AE071", "name": "U2 Hoist Vacuum Pump # B"}, {"code": "HPC-T20SMB03AE051", "name": "U2 Hoist Condensate Air Extraction"}]}, {"unit": "HSA-T3", "items": [{"code": "HPC-T30SMB03AE031", "name": "U3 Hoist BFBP # B"}, {"code": "HPC-T30SMT03AE021", "name": "U3 Hoist CCCWP # B"}, {"code": "HPC-T30SMB03AE131", "name": "U3 Hoist Coal Fan Mill # 2-3 Motor"}, {"code": "HPC-T30SMB03AE161", "name": "U3 Hoist Coal Fan Mill # 6-7 Motor"}, {"code": "HPC-T30SMB03AE351", "name": "U3 Boiler (Floor 8) Hoist"}, {"code": "HPC-T30SMB03AE341", "name": "U3 APH Hoist"}, {"code": "HPC-T30SMB03AE261", "name": "U3 FDF A (Motor) Hoist"}, {"code": "HPC-T30SMB03AE271", "name": "U3 FDF B (Motor) Hoist"}, {"code": "HPC-T30SMB03AE262", "name": "U3 FDF A (Impeller) Hoist"}, {"code": "HPC-T30SMB03AE272", "name": "U3 FDF B (Impeller) Hoist"}, {"code": "HPC-T30SMB03AE081", "name": "U3 Hoist IDF Motor"}, {"code": "HPC-T30SMB03AE091", "name": "U3 Hoist IDF # A Impeller"}, {"code": "HPC-T30SMB03AE101", "name": "U3 Hoist IDF # B Impeller"}, {"code": "HPC-T30SMB03AE111", "name": "U3 Hoist CGF"}, {"code": "HPC-T30SMF03AE011", "name": "U3 Hoist BUF Motor"}, {"code": "HPC-T30SMF03AE021", "name": "U3 Hoist BUF Impeller"}, {"code": "HPC-T30SMF03AE031", "name": "U3 Crane OAB"}, {"code": "HPC-T30SMF03AE041", "name": "U3 GGH Lower Level Hoist Upgrade"}, {"code": "HPC-T30SMF03AE061", "name": "U3 Crane Abs.Recir Pump # 1-3"}, {"code": "HPC-T30SMF03AE071", "name": "U3 Crane Abs.Recir Pump # 4-6"}]}]};
 let EQM=null, EQFH=null, eqFileName='', eqDirty=false, eqBarT=null;
 const eqNorm=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
 const eqKey=s=>eqNorm(s).toUpperCase();
@@ -7402,9 +7680,28 @@ function eqNameFix(s){
   t=t.replace(/GGH Lower Level Hoist\s+Upgrade\b/i,'GGH Lower Level Hoist (Upgrade)');
   return t;
 }
+/* V.5.5 EQ.CODE ต้องเป็นของ Unit เดียวกับ PLANT UNIT — HSA-T1 → HPC-T10… · HSA-T2 → HPC-T20… · HSA-T3 → HPC-T30…
+   (ตัวเลขหลัง T ของ PLANT UNIT = ตัวเลขหลัง T ของ EQ.CODE ตามด้วย 0) ห้ามใช้รหัสของ Unit อื่น */
+function eqUnitNo(u){ const m=/T\s*0*([1-9])\s*$/i.exec(eqNorm(u)); return m?m[1]:''; }
+function eqCodeNo(c){ const m=/(?:^|[^A-Z0-9])T([1-9])0/i.exec(eqNorm(c)); return m?m[1]:''; }
+function eqUnitClash(unit,code){
+  const un=eqUnitNo(unit), c=eqNorm(code); if(!un||!c) return '';
+  const cn=eqCodeNo(c); if(cn===un) return '';
+  return 'PLANT UNIT '+eqNorm(unit)+' ต้องใช้ EQ.CODE ของ Unit '+un+' (ขึ้นต้น T'+un+'0 เช่น HPC-T'+un+'0…) — '
+    +(cn?('รหัส '+c+' เป็นของ Unit '+cn+' (T'+cn+'0)'):('รหัส '+c+' ไม่มี T'+un+'0'));
+}
+/* ลำดับที่เคยเลือก EQ.CODE ผิด Unit จาก Work List เดิม (T2 ใช้รหัส T30…) → แก้เป็นรหัสของ Unit ตัวเอง (ตอนเปิดแอป / เปิดไฟล์งาน) */
+async function eqFixSeqHeads(list){ let n=0;
+  try{ for(const q of list){ const h=q.head||{};
+    const fx=EQ_CODE_FIX[eqNorm(h.plantUnit)+'|'+eqNameFix(h.eqName)+'|'+eqNorm(h.eqCode)];
+    if(fx){ h.eqCode=fx; await dbPut('seqs',clone(q)); n++; } } }catch(e){ console.warn(e); }
+  if(n) markDirty(); return n; }
+function eqBlock(msg){ return ask({title:'EQ.CODE ไม่ตรงกับ PLANT UNIT',
+  body:hesc(msg)+'<br><br>ระบบไม่อนุญาตให้ใช้ EQ.CODE ของ Unit อื่น — เลือก EQ จาก Work List ของ Unit นี้ หรือแก้ PLANT UNIT ให้ถูกก่อน',
+  buttons:[{v:1,label:'ตกลง',kind:'pri'}]}); }
 function eqValid(o){ return !!(o&&Array.isArray(o.plants)&&o.plants.every(p=>p&&p.unit!=null&&Array.isArray(p.items))); }
 /* V.4.2 แก้ EQ.CODE ตาม Work List (.xlsx) — ปรับรายการที่เคยเก็บไว้ในเครื่อง/ไฟล์ EQ JSON เดิมให้ตรง (เฉพาะรายการจาก Work List ที่ชื่อตรงกัน) */
-const EQ_CODE_FIX={"HSA-T2|Hoist IDF Motor|HPC-T10SMB03AE081": "HPC-T20SMB03AE081", "HSA-T2|Hoist IDF # A Impeller|HPC-T10SMB03AE091": "HPC-T20SMB03AE091", "HSA-T2|Hoist IDF # B Impeller|HPC-T10SMB03AE101": "HPC-T20SMB03AE101", "HSA-T2|Hoist CGF|HPC-T10SMB03AE111": "HPC-T20SMB03AE111", "HSA-T2|Hoist BUF Motor|HPC-T10SMF03AE011": "HPC-T20SMF03AE011", "HSA-T2|Hoist BUF Impeller|HPC-T10SMF03AE021": "HPC-T20SMF03AE021", "HSA-T2|Crane Abs.Recir Pump # 1-3|HPC-T10SMF03AE061": "HPC-T20SMF03AE061", "HSA-T2|Crane Abs.Recir Pump # 4-6|HPC-T10SMF03AE071": "HPC-T20SMF03AE071", "HSA-T2|Crane OAB|HPC-T10SMF03AE031": "HPC-T20SMF03AE031", "HSA-T2|GGH Lower Level Hoist (Upgrade)|HPC-T10SMF03AE041": "HPC-T20SMF03AE041", "HSA-T2|GGH Upper Level Hoist|HPC-T10SMF03AE042": "HPC-T20SMF03AE042", "HSA-T2|Hoist Coal Fan Mill # 1 Motor|HPC-T10SMB03AE121": "HPC-T20SMB03AE121", "HSA-T2|Hoist Coal Fan Mill # 2-3 Motor|HPC-T10SMB03AE131": "HPC-T20SMB03AE131", "HSA-T2|Hoist Coal Fan Mill # 4 Motor|HPC-T10SMB03AE141": "HPC-T20SMB03AE141", "HSA-T2|Hoist Coal Fan Mill # 5 Motor|HPC-T10SMB03AE151": "HPC-T20SMB03AE151", "HSA-T2|Hoist Coal Fan Mill # 6-7 Motor|HPC-T10SMB03AE161": "HPC-T20SMB03AE161", "HSA-T2|Hoist Coal Fan Mill # 8 Motor|HPC-T10SMB03AE171": "HPC-T20SMB03AE171", "HSA-T2|Hoist BFBP # A|HPC-T10SMB03AE021": "HPC-T20SMB03AE021", "HSA-T2|Hoist BFBP # B|HPC-T10SMB03AE031": "HPC-T20SMB03AE031", "HSA-T2|Hoist BFBP # C|HPC-T10SMB03AE041": "HPC-T20SMB03AE041", "HSA-T2|Hoist BFP-MD # C|HPC-T10SMB03AE011": "HPC-T20SMB03AE011", "HSA-T2|Hoist CCCWP # A|HPC-T10SMT03AE011": "HPC-T20SMT03AE011", "HSA-T2|Hoist CCCWP # B|HPC-T10SMT03AE021": "HPC-T20SMT03AE021", "HSA-T2|Hoist Vacuum Pump # A|HPC-T10SMB03AE061": "HPC-T20SMB03AE061", "HSA-T2|Hoist Vacuum Pump # B|HPC-T10SMB03AE071": "HPC-T20SMB03AE071", "HSA-T2|Hoist Condensate Air Extraction|HPC-T10SMB03AE051": "HPC-T20SMB03AE051"};
+const EQ_CODE_FIX={"HSA-T2|Hoist IDF Motor|HPC-T10SMB03AE081": "HPC-T20SMB03AE081", "HSA-T2|Hoist IDF # A Impeller|HPC-T10SMB03AE091": "HPC-T20SMB03AE091", "HSA-T2|Hoist IDF # B Impeller|HPC-T10SMB03AE101": "HPC-T20SMB03AE101", "HSA-T2|Hoist CGF|HPC-T10SMB03AE111": "HPC-T20SMB03AE111", "HSA-T2|Hoist BUF Motor|HPC-T10SMF03AE011": "HPC-T20SMF03AE011", "HSA-T2|Hoist BUF Impeller|HPC-T10SMF03AE021": "HPC-T20SMF03AE021", "HSA-T2|Crane Abs.Recir Pump # 1-3|HPC-T10SMF03AE061": "HPC-T20SMF03AE061", "HSA-T2|Crane Abs.Recir Pump # 4-6|HPC-T10SMF03AE071": "HPC-T20SMF03AE071", "HSA-T2|Crane OAB|HPC-T10SMF03AE031": "HPC-T20SMF03AE031", "HSA-T2|GGH Lower Level Hoist (Upgrade)|HPC-T10SMF03AE041": "HPC-T20SMF03AE041", "HSA-T2|GGH Upper Level Hoist|HPC-T10SMF03AE042": "HPC-T20SMF03AE042", "HSA-T2|Hoist Coal Fan Mill # 1 Motor|HPC-T10SMB03AE121": "HPC-T20SMB03AE121", "HSA-T2|Hoist Coal Fan Mill # 2-3 Motor|HPC-T10SMB03AE131": "HPC-T20SMB03AE131", "HSA-T2|Hoist Coal Fan Mill # 4 Motor|HPC-T10SMB03AE141": "HPC-T20SMB03AE141", "HSA-T2|Hoist Coal Fan Mill # 5 Motor|HPC-T10SMB03AE151": "HPC-T20SMB03AE151", "HSA-T2|Hoist Coal Fan Mill # 6-7 Motor|HPC-T10SMB03AE161": "HPC-T20SMB03AE161", "HSA-T2|Hoist Coal Fan Mill # 8 Motor|HPC-T10SMB03AE171": "HPC-T20SMB03AE171", "HSA-T2|Hoist BFBP # A|HPC-T10SMB03AE021": "HPC-T20SMB03AE021", "HSA-T2|Hoist BFBP # B|HPC-T10SMB03AE031": "HPC-T20SMB03AE031", "HSA-T2|Hoist BFBP # C|HPC-T10SMB03AE041": "HPC-T20SMB03AE041", "HSA-T2|Hoist BFP-MD # C|HPC-T10SMB03AE011": "HPC-T20SMB03AE011", "HSA-T2|Hoist CCCWP # A|HPC-T10SMT03AE011": "HPC-T20SMT03AE011", "HSA-T2|Hoist CCCWP # B|HPC-T10SMT03AE021": "HPC-T20SMT03AE021", "HSA-T2|Hoist Vacuum Pump # A|HPC-T10SMB03AE061": "HPC-T20SMB03AE061", "HSA-T2|Hoist Vacuum Pump # B|HPC-T10SMB03AE071": "HPC-T20SMB03AE071", "HSA-T2|Hoist Condensate Air Extraction|HPC-T10SMB03AE051": "HPC-T20SMB03AE051", "HSA-T1|Hoist of Boiler 8th Floor (Winch)|HPC-T30SMB03AE351-W01": "HPC-T10SMB03AE351-W01", "HSA-T2|FDF A (Motor) Hoist|HPC-T30SMB03AE261": "HPC-T20SMB03AE261", "HSA-T2|FDF B (Motor) Hoist|HPC-T30SMB03AE271": "HPC-T20SMB03AE271", "HSA-T2|FDF A (Impeller) Hoist|HPC-T30SMB03AE262": "HPC-T20SMB03AE262", "HSA-T2|FDF B (Impeller) Hoist|HPC-T30SMB03AE272": "HPC-T20SMB03AE272", "HSA-T2|Boiler (Floor 8) Hoist|HPC-T30SMB03AE351": "HPC-T20SMB03AE351", "HSA-T2|Hoist of Boiler 8th Floor (Winch)|HPC-T30SMB03AE351-W01": "HPC-T20SMB03AE351-W01", "HSA-T2|APH Hoist|HPC-T30SMB03AE341": "HPC-T20SMB03AE341"};
 function eqClean(o){
   return {app:EQ_APP,v:1,source:o.source||'',updatedAt:o.updatedAt||new Date().toISOString(),
     plants:o.plants.map(p=>({unit:eqNorm(p.unit),items:(p.items||[]).map(i=>{
@@ -7516,6 +7813,7 @@ async function eqMergeFrom(o){
 /* ---------- เลือก EQ ให้ลำดับ ---------- */
 async function eqAssign(seq,p,i){
   const it=p.items[i]; if(!it) return;
+  { const cl=eqUnitClash(p.unit,it.code); if(cl){ closeSug(); await eqBlock(cl); return; } }      /* V.5.5 */
   const h=seq.head=seq.head||{}; const old=eqNorm(h.eqName);
   h.plantUnit=p.unit; h.eqCode=it.code; h.eqName=it.name;
   const b=eqNorm(seq.building);
@@ -7584,7 +7882,7 @@ function eqOpenPick(el,field,all){
       pp.items.forEach((it,k)=>{
         if(filt&&!(eqKey(it.code).includes(q)||eqKey(it.name).includes(q))) return;
         rows.push({i:(p?'':pp.unit+' · ')+(k+1),b:kind==='code'?it.code:it.name,s:kind==='code'?it.name:it.code,
-          used:used[k],custom:it.custom,sel:pp===p&&k===ci,pick:()=>eqAssign(seq,pp,k)}); }); });
+          used:used[k],custom:it.custom,sel:pp===p&&k===ci,bad:!!eqUnitClash(pp.unit,it.code),pick:()=>eqAssign(seq,pp,k)}); }); });
     hdr=p?(hesc(p.unit)+' · เลือก '+(kind==='code'?'EQ.Code':'EQ.Name')+' — อีกช่องเติมให้เอง')
          :'ยังไม่ได้เลือก PLANT UNIT — แสดงทุก Plant Unit';
   }
@@ -7597,7 +7895,7 @@ function eqOpenPick(el,field,all){
   sugBox.innerHTML='<div class="hdr">'+hdr+'</div>'
     +(rows.length?rows.map((r,i)=>'<button type="button" data-si="'+i+'" class="'+(r.sel?'cur':'')+'">'
         +(r.i!==''?'<i>'+hesc(r.i)+'</i>':'')+'<span class="eqtx"><b>'+hesc(r.b)+(r.custom?' ＊':'')+'</b><small>'+hesc(r.s)+'</small></span>'
-        +(r.used?'<em>✓ ลำดับ '+r.used.join(',')+'</em>':'')+'</button>').join('')
+        +(r.bad?'<em class="eqbad">✕ คนละ Unit</em>':'')+(r.used?'<em>✓ ลำดับ '+r.used.join(',')+'</em>':'')+'</button>').join('')
       :'<div class="eqnone">ไม่พบใน Work List — พิมพ์ต่อได้เลย หรือเพิ่มเป็น EQ ใหม่</div>')
     +'<div class="eqfoot">'
       +'<span role="button" data-eqpa="add">＋ เพิ่ม EQ ใหม่</span>'
@@ -7612,8 +7910,11 @@ function eqOpenPick(el,field,all){
   return true;
 }
 async function eqPickPlant(seq,p){
-  const h=seq.head=seq.head||{}; const keep=eqIndexOf(p,h)>=0, oldName=eqNorm(h.eqName);
+  const h=seq.head=seq.head||{}, ki=eqIndexOf(p,h), oldName=eqNorm(h.eqName);
+  /* V.5.5 EQ เดิมมีใน Plant Unit ใหม่ (ชื่อเดียวกัน) → ใช้รหัสของ Unit ใหม่ · รหัสที่ไม่ตรง Unit ใหม่ → ล้าง */
+  const keep=ki>=0&&!eqUnitClash(p.unit,p.items[ki].code);
   h.plantUnit=p.unit;
+  if(keep&&eqKey(h.eqCode)!==eqKey(p.items[ki].code)){ h.eqCode=p.items[ki].code; h.eqName=p.items[ki].name; toast('ใช้ EQ.CODE ของ '+p.unit+': '+h.eqCode); }
   if(!keep){ h.eqCode=''; h.eqName=''; if(oldName&&eqNorm(seq.building)===oldName) seq.building=''; }
   touchSeq(seq.id); closeSug(); renderNav(); await renderPage();
   if(!keep) setTimeout(()=>{ const f=$('#formPaper [data-k="h:eqName"]'); if(!f) return;
@@ -7656,6 +7957,7 @@ async function eqAddDialog(pre){
         const u=eqNorm(U.value), c=eqNorm(C.value), n=eqNameFix(N.value);
         if(!u) return err('กรุณาระบุ Plant Unit');
         if(!c||!n){ (c?N:C).focus(); return err('ต้องกรอกทั้ง EQ.Code และ EQ.Name'); }
+        { const cl=eqUnitClash(u,c); if(cl){ C.focus(); return err(cl); } }      /* V.5.5 */
         const p=eqPlant(u);
         if(p){ const dc=p.items.findIndex(x=>eqKey(x.code)===eqKey(c)&&eqKey(x.name)===eqKey(n));
           if(dc>=0) return err('มี EQ นี้อยู่แล้วในข้อ '+(dc+1)+' ของ '+p.unit); }
@@ -7710,6 +8012,7 @@ async function eqManageDialog(){
         const f=t.dataset.mc!=null?'code':'name', v=f==='name'?eqNameFix(t.value):eqNorm(t.value);
         if(v&&t.value!==v) t.value=v;
         if(!v){ t.value=p.items[k][f]; toast('ต้องมีทั้ง EQ.Code และ EQ.Name — ถ้าไม่ใช้ข้อนี้ ให้กดลบ'); return; }
+        if(f==='code'){ const cl=eqUnitClash(p.unit,v); if(cl){ t.value=p.items[k].code; toast(cl,6000); return; } }      /* V.5.5 */
         const old=Object.assign({},p.items[k]); p.items[k][f]=v;
         /* ลำดับที่ใช้ EQ นี้อยู่ — อัปเดตหัวกระดาษตาม */
         SEQS.forEach(s=>{ const h=s.head||{}; if(eqKey(h.plantUnit)===eqKey(p.unit)&&eqKey(h.eqCode)===eqKey(old.code)&&eqKey(h.eqName)===eqKey(old.name)){
@@ -7744,6 +8047,18 @@ function wireEq(){
     if(eqWas){ eqWas=false; closeSug(); return; }
     if(!dxCoarse()) f.focus();
     eqOpenPick(f,c.dataset.eqdd,true); });
+  /* V.5.5 พิมพ์ EQ.CODE / PLANT UNIT เอง แล้วออกจากช่อง → ถ้าเป็นคนละ Unit กัน ย้อนช่องที่เพิ่งแก้กลับเป็นค่าเดิม */
+  paper.addEventListener('focusin',e=>{ const t=e.target, k=t.dataset&&t.dataset.k; if(k!=='h:eqCode'&&k!=='h:plantUnit') return;
+    const seq=seqById(CUR_SEQ); if(!seq) return; const h=seq.head||{}; t._eqPrev={id:seq.id,plantUnit:h.plantUnit||'',eqCode:h.eqCode||''}; });
+  paper.addEventListener('focusout',e=>{ const t=e.target, k=t.dataset&&t.dataset.k; if(k!=='h:eqCode'&&k!=='h:plantUnit') return;
+    const prev=t._eqPrev; t._eqPrev=null;
+    setTimeout(async()=>{
+      const seq=seqById(CUR_SEQ); if(!seq||(prev&&prev.id!==seq.id)) return; const h=seq.head=seq.head||{};
+      const cl=eqUnitClash(h.plantUnit,h.eqCode); if(!cl) return;
+      const f=k.slice(2), back=prev?prev[f]:'';
+      h[f]=(back!==h[f]&&!eqUnitClash(f==='plantUnit'?back:h.plantUnit,f==='eqCode'?back:h.eqCode))?back:'';
+      touchSeq(seq.id); closeSug(); await eqBlock(cl); renderNav(); await renderPage();
+    },30); });
   /* พิมพ์รหัสหรือชื่อที่ตรงกับ Work List พอดี แล้วออกจากช่อง → เติมอีกช่องให้ */
   paper.addEventListener('focusout',e=>{ const t=e.target, k=t.dataset&&t.dataset.k, kind=EQ_FIELDS[k];
     if(kind&&sugFor===t&&sugBox&&sugBox._eq) closeSug();
@@ -8396,6 +8711,7 @@ async function splitFinding(b,rows,stay){
   const s=blockStart(sh.fmt,b), ph=(sh.photos||[]).slice(s,s+bl[b]*2);
   const ns=blankSheet(seq.id,sh.part,fmtKeyOf([nr])); ns.findings=[sh.findings[b]||blankFinding(sh.part)]; ns.order=-1;
   if(sh.dateIssue) ns.dateIssue=sh.dateIssue;
+  if(sh.sig) ns.sig=clone(sh.sig);      /* V.5.5 หน้าใหม่ที่แยกออกมาใช้ลายเซ็นเดียวกับหน้าเดิม */
   try{
     let bytes=0; ns.ph=[];
     for(let i=0;i<nr*2;i++){ const p=ph[i]||null; ns.ph[i]=!!p; if(!p) continue;
@@ -8689,7 +9005,7 @@ async function ordApply(seq,pages,opts){
     for(const p of changed){
       const key=fmtKeyOf(p.units.map(u=>u.rows)); if(!key) throw new Error('ordApply: layout');
       let sh=p.sh;
-      if(!sh){ sh=blankSheet(seq.id,p.part,key); sh.order=-1; if(p.src&&p.src.dateIssue) sh.dateIssue=p.src.dateIssue; SHEETS.push(sh); p.sh=sh; made++; }
+      if(!sh){ sh=blankSheet(seq.id,p.part,key); sh.order=-1; if(p.src&&p.src.dateIssue) sh.dateIssue=p.src.dateIssue; if(p.src&&p.src.sig) sh.sig=clone(p.src.sig); SHEETS.push(sh); p.sh=sh; made++; }
       const recs=[]; p.units.forEach(u=>u.ph.forEach(x=>recs.push(x)));
       let bytes=0; const ph=[];
       for(let i=0;i<6;i++){
@@ -11627,12 +11943,14 @@ function xlCategorySheets(seqList){
     SEQS=await dbAll('seqs').catch(()=>[]);
     SHEETS=await dbAll('sheets').catch(()=>[]);
     phaseSplit();      /* V.2.5 แยกข้อมูลเป็น 2 ชุดแท็บ: ก่อนซ่อม (SEQS / SHEETS) · หลังซ่อม (ALT) */
-    SIG=(await dbGet('meta','signatures').catch(()=>null))||{};
+    { const raw=(await dbGet('meta','signatures').catch(()=>null))||{}; SIG=sigNorm(raw);      /* V.5.5 แปลงลายเซ็นแบบเดิมเป็น "ทีม 1" */
+      if(JSON.stringify(raw)!==JSON.stringify(SIG)) await dbPut('meta',clone(SIG),'signatures').catch(()=>{}); }
     await restoreHandle();
     $('#fileHint').textContent=(typeof window.showSaveFilePicker==='function')?'เลือกที่เก็บได้เอง':'ดาวน์โหลด / เลือกไฟล์';
   }
   if(DB){ await phaseHealNo(); await migrateData(); await phaseRun('post',migrateData); await phaseFids(); }
   if(!EQM) await eqLoad().catch(()=>{ EQM=eqClean(EQ_DEFAULT); });
+  if(DB) await eqFixSeqHeads(SEQS.concat(ALT.seqs));
   wireEq();
   await phrLoad().catch(()=>{}); wireDx(); wireFlow(); wireOrd(); wireDash(); wirePhase();
   try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
@@ -12521,8 +12839,8 @@ function summary(tb){
       if(!bn){ t='ยังไม่ได้กรอกชื่ออาคาร / อุปกรณ์'; warn=true; }
       else{ var d=fmtDate(pageDate(seq,PAGE.k==='sheet'?cur:null)); t=[bn,h.eqCode,d].filter(Boolean).join(' · '); }
     }else{
-      var ns=SIG_ROLES.map(function(r){ return String((SIG[r.key]||{}).name||'').trim(); }).filter(Boolean);
-      t=ns.length?ns.join(' · '):'ยังไม่ได้ใส่ชื่อ — แตะเพื่อกรอก';
+      var psh=PAGE.k==='sheet'?cur:null, ns=SIG_ROLES.map(function(r){ return String(pageSig(seq,psh,r.key).name||'').trim(); }).filter(Boolean);
+      t=sigTeamName(pageTeam(seq,psh))+' · '+(ns.length?ns.join(' · '):'ยังไม่ได้ใส่ชื่อ — แตะเพื่อกรอก');
     }
   }catch(e){}
   el.textContent=t; el.classList.toggle('warn',warn);
